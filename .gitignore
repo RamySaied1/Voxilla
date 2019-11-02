@@ -1,0 +1,4 @@
+Experiments/
+LibriSpeech/
+voco-venv/
+*.pyc
