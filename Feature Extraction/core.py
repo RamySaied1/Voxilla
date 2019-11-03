@@ -51,7 +51,6 @@ class FeatureExtractor:
 
         numBins = self.fftSize//2 + 1
         self.melFilterbank = np.zeros([self.numMelFilters,numBins])
-        #print("mul size,",self.melFilterbank.shape)
         for i in range(self.numMelFilters):
             leftBin = int(bins[i])
             centerBin = int(bins[i+1])
@@ -69,11 +68,15 @@ class FeatureExtractor:
         for i in range(self.numMelFilters):
             plt.plot(self.melFilterbank[i,:])
 
+    ## ditehring : add random noise to the signal to solve some mahtematics issues (log (0))
+    ## input : wave form (vector)
+    ##output : modified wave (vector)
     def dither(self, wav):
         n = 2*np.random.rand(wav.shape[0])-1
         n *= 1/(2**15)
         return wav + n
 
+    # pre emphizez : because important information is at high frequency so we want to boost it .  
     def preEmphasize(self, wav):
         # apply pre-emphasis filtering on waveform
         preemph_wav = []
@@ -128,9 +131,11 @@ class FeatureExtractor:
         return self.totalMean, 1.0 / np.sqrt(self.totalVariance)
 
     def extract(self, speechSignal):
+        # preprocessing
         wav = self.dither(speechSignal)
         wav = self.preEmphasize(wav)
         frames = self.cutToFrames(wav)
+        # feature calculation
         magspec = self.getMagnitudeSpectrum(frames)
         fbank = self.calcFilterbank(magspec)
         if (self.meanNormalize):
