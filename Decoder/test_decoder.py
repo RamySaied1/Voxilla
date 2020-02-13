@@ -1,14 +1,16 @@
+import sys
+sys.path.append("../FeatureExtraction/")
+sys.path.append("../Classifier/")
+sys.path.append("./python/")
 import os.path
 import argparse
 import collections
 import re
-import sys; 
 from time import time
 from fst import FST
 from classifier import Classifier
 from beam_search import *
 from htk_featio import read_htk_user_feat
-sys.path.append("../FeatureExtraction/"); 
 
 
 def parse_script_line(script_line: str, script_path: str):
@@ -28,6 +30,7 @@ def parse_script_line(script_line: str, script_path: str):
         audio_features_filepath = os.path.join(script_path, m.group(1))
     return audio_features_filename, audio_features_filepath, frame_start, frame_end
 
+
 def get_features(script_line: str, script_path: str):
     """
     This function extracts an utterance's string identifier and features from an archive.
@@ -42,7 +45,8 @@ def get_features(script_line: str, script_path: str):
     assert(frame_end + 1 - frame_start == len(feature_vectors))
     return feature_vectors, audio_features_filename
 
-# python testDecoder.py -model ../Experiments/DNN/DNN_CE -decoding_graph DecodingGraph.txt -input_labels ../Experiments/am/labels.ciphones -scr ../Experiments/lists/feat_dev.rscp -outfile out2
+# python test_decoder.py -model ../Experiments/DNN/DNN_CE -decoding_graph DecodingGraph.txt -input_labels ../Experiments/am/labels.ciphones -scr ../Experiments/lists/feat_dev.rscp -outfile out2
+
 def main():
     parser = argparse.ArgumentParser( description="Decode speech from parameter files.")
     parser.add_argument('-model', '--model', help='classifier file', required=True, default=None)
