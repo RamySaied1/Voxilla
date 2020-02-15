@@ -49,6 +49,8 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
                 if (useSelfLoops) {
                     arc = tokenPtr->arc;
                     lmScore = 1.0;
+                } else {
+                    continue;
                 }
                 if (!arc)
                     continue;
