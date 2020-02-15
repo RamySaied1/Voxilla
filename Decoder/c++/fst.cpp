@@ -1,0 +1,185 @@
+#include "fst.hpp"
+#include <exception>
+
+Fst::Fst(BeamSearch decoder, string fstFileName, string labelsFileName, SpecialSymbols espSyms) : espSyms(espSyms), decoder(decoder) {
+    inpLabelToIndx = unordered_map<string, uint>();
+    parseInputLabels(labelsFileName);
+
+    graph = vector<vector<const Arc*>>();
+    finalStates = unordered_map<uint, double>();
+    parseFst(fstFileName);
+    preprocessFst();
+}
+
+void Fst::parseInputLabels(const string& filename) {
+    ifstream in;
+    in.open(filename, ifstream::in);
+
+    try {
+        string line;
+        int i = 0;
+        while (in >> line) {
+            if (isSpecialSym(line)) {
+                throw Exception("special symbol exists in labels file which is not expected");
+            } else {
+                inpLabelToIndx[line] = i++;
+            }
+        }
+    } catch (const exception& e) {
+        cerr << e.what() << '\n';
+        inpLabelToIndx.clear();
+    }
+    in.close();
+}
+
+void Fst::parseFst(const string& filename) {
+    ifstream in;
+    in.open(filename, ifstream::in);
+    try {
+        string line;
+        while (getline(in, line)) {
+            vector<string> fields;
+            split(line, fields);
+
+            if (fields.size() <= 2) {
+                processFinalState(fields);
+            } else {
+                processArc(fields);
+            }
+        }
+    } catch (const exception& e) {
+        cerr << e.what() << '\n';
+        graph.clear();
+    }
+    in.close();
+}
+
+void Fst::processFinalState(const vector<string>& fields) {
+    int finalState = stoi(fields[0]);
+    double cost = (fields.size() == 2) ? -stod(fields.back()) : 0.;
+    finalStates[finalState] = cost;
+    if (finalState == graph.size()) {
+        graph.push_back(vector<const Arc*>());
+    }
+}
+
+void Fst::processArc(const vector<string>& fields) {
+    const Arc* arc = new Arc{stoi(fields[1]), fields[2], fields[3], (fields.size() == 5) ? -stod(fields.back()) : 0.};
+
+    int srcState = stoi(fields[0]);
+    if (srcState < graph.size()) {
+        graph[srcState].push_back(arc);
+    } else {
+        graph.push_back(vector<const Arc*>({arc}));
+    }
+}
+
+void Fst::preprocessFst() {
+    graph.reserve(graph.size());
+    int i = 0;
+    for (auto& Arcs : graph) {
+        moveRelevantFisrt<const Arc*>(Arcs, [&](auto arc) {  // put speical symbols at end
+            return isSpecialSym(arc->inpLabel);
+        });
+        Arcs.push_back(NULL);       // this dummy arc will help in adding self loops
+        Arcs.reserve(Arcs.size());  // reclaim useless space
+        ++i;
+    }
+}
+
+void Fst::expandEpsStates() {
+    const vector<shared_ptr<Token>>& expandedTokens = decoder.getExpandedTokens();
+    int i = 0;
+    int originalSize = expandedTokens.size();
+    while (i < expandedTokens.size()) {
+        vector<shared_ptr<Token>> epsTokens;
+        for (; i < expandedTokens.size(); ++i) {
+            const auto& token = expandedTokens[i];
+            if (hasEpsArc(token->arc->dstState)) {
+                epsTokens.push_back(token);
+            }
+        }
+        decoder.setActiveTokens(epsTokens);
+        decoder.doForward(graph, {{espSyms.epsSymbol, 0}}, vector<double>(1, 0.), false);
+    }
+
+    decoder.keepOnlyBestExpantedTokens(originalSize);
+}
+
+vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWeight) {
+    preprocessActivations(activations, lmWeight);  // normalize activations and apply lm relative weight
+    unique_ptr<Arc> intialArc(new Arc{0, espSyms.epsSymbol, espSyms.epsSymbol, 0.});
+    decoder.setRootToken(intialArc.get(), 0., 0.);
+
+    int i = 0;
+    for (const auto& row : activations) {
+        // vector<shared_ptr<Token>> debug = decoder.getActiveTokens();
+        // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
+        //     return (a->lmScore + a->modelScore) > (b->lmScore + b->modelScore);
+        // });
+        // vector<vector<double>> debugNums = vector<vector<double>>();
+        // for (auto token : debug) {
+        //     debugNums.push_back({token->modelScore, token->lmScore, token->lmScore + token->modelScore});
+        // }
+        // ofstream out;
+        // out.open("debug.txt");
+        // print2d(out, debugNums);
+
+        decoder.doForward(graph, inpLabelToIndx, row, true);
+
+        // debug = decoder.getExpandedTokens();
+        // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
+        //     return (a->lmScore + a->modelScore) > (b->lmScore + b->modelScore);
+        // });
+        // debugNums = vector<vector<double>>();
+        // for (auto token : debug) {
+        //     debugNums.push_back({token->modelScore, token->lmScore, token->lmScore + token->modelScore});
+        // }
+
+        decoder.beamPrune();
+        expandEpsStates();
+        decoder.moveExpandedToActive();
+
+        // debug = decoder.getExpandedTokens();
+        // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
+        //     return (a->lmScore + a->modelScore) > (b->lmScore + b->modelScore);
+        // });
+        // debugNums = vector<vector<double>>();
+        // for (auto token : debug) {
+        //     debugNums.push_back({token->modelScore, token->lmScore, token->lmScore + token->modelScore});
+        // }
+    }
+
+    decoder.applyFinalState(finalStates);
+    Token finalToken = Token();
+    auto path = decoder.getBestPath(graph, finalToken);
+    finalToken.print(cout);
+    return move(path);
+}
+
+void Fst::preprocessActivations(vector<vector<double>>& activations, double relativeWeight) {
+    for (auto& exLogProbas : activations) {
+        double maxVal = *max_element(begin(exLogProbas), end(exLogProbas));
+        transform(begin(exLogProbas), end(exLogProbas), begin(exLogProbas), [&](double elem) {
+            return (elem - maxVal) / relativeWeight;
+        });
+    }
+}
+
+pair<int, double> Fst::skipStartNodes() {
+    double cost = 0;
+    int rootNode = 0;
+    while (graph[rootNode].size() == 1 && graph[rootNode].front()->inpLabel == espSyms.startSymbol) {
+        cost += graph[rootNode].front()->cost;
+        rootNode = graph[rootNode].front()->dstState;
+    }
+    return {rootNode, cost};
+}
+
+Fst::~Fst() {
+    for (auto& arcs : graph) {
+        for (auto& arc : arcs) {
+            delete arc;
+        }
+    }
+}
