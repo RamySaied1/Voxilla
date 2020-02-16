@@ -18,7 +18,7 @@ class Fst {
     Fst(BeamSearch decoder, string fstFileName, string labelsFileName, SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
     ~Fst();
 
-    bool hasEpsArc(uint state) { return graph[state].size() > 0 && graph[state].front() && graph[state].front()->inpLabel == espSyms.epsSymbol; }
+    bool hasEpsArc(uint state) { return graph[state].size() > 0 && graph[state].front()->inpLabel == espSyms.epsSymbol; }
     bool isSpecialSym(string sym) { return sym == espSyms.epsSymbol || sym == espSyms.startSymbol || sym == espSyms.endSymbol; }
     vector<const Arc*> decode(vector<vector<double>>& activations, double lmWeight);
 

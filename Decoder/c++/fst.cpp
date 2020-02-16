@@ -76,14 +76,11 @@ void Fst::processArc(const vector<string>& fields) {
 
 void Fst::preprocessFst() {
     graph.reserve(graph.size());
-    int i = 0;
     for (auto& Arcs : graph) {
-        moveRelevantFisrt<const Arc*>(Arcs, [&](auto arc) {  // put speical symbols at end
-            return isSpecialSym(arc->inpLabel);
+        moveRelevantFisrt<const Arc*>(Arcs, [&](auto arc) {  // put speical symbols at first
+            return arc->inpLabel == espSyms.epsSymbol;
         });
-        Arcs.push_back(NULL);       // this dummy arc will help in adding self loops
         Arcs.reserve(Arcs.size());  // reclaim useless space
-        ++i;
     }
 }
 
@@ -103,7 +100,7 @@ void Fst::expandEpsStates() {
         decoder.doForward(graph, {{espSyms.epsSymbol, 0}}, vector<double>(1, 0.), false);
     }
 
-    decoder.keepOnlyBestExpantedTokens(originalSize);
+    decoder.keepOnlyBestExpandedTokens(0);
 }
 
 vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWeight) {
@@ -111,7 +108,6 @@ vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWei
     unique_ptr<Arc> intialArc(new Arc{0, espSyms.epsSymbol, espSyms.epsSymbol, 0.});
     decoder.setRootToken(intialArc.get(), 0., 0.);
 
-    int i = 0;
     for (const auto& row : activations) {
         // vector<shared_ptr<Token>> debug = decoder.getActiveTokens();
         // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
@@ -160,9 +156,9 @@ vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWei
 void Fst::preprocessActivations(vector<vector<double>>& activations, double relativeWeight) {
     for (auto& exLogProbas : activations) {
         double maxVal = *max_element(begin(exLogProbas), end(exLogProbas));
-        transform(begin(exLogProbas), end(exLogProbas), begin(exLogProbas), [&](double elem) {
-            return (elem - maxVal) / relativeWeight;
-        });
+        for (auto& elem : exLogProbas) {
+            elem = (elem - maxVal) / relativeWeight;
+        }
     }
 }
 
