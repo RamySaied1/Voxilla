@@ -27,7 +27,7 @@ class BeamSearch {
     void beamPrune();
     void applyFinalState(const unordered_map<uint, double>& finalStates);
     vector<const Arc*> getBestPath(const vector<vector<const Arc*>>& graph, Token& bestToken);
-    void keepOnlyBestExpantedTokens(int start = 0);
+    void keepOnlyBestExpandedTokens(int start = 0);
     void doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops);
 
    private:
@@ -35,7 +35,7 @@ class BeamSearch {
         uint parentTokenIndx;
         double lmScore, modelScore;
         Expantion(uint parentTokenIndx, double lmScore, double modelScore) : parentTokenIndx(parentTokenIndx), lmScore(lmScore), modelScore(modelScore) {}
-        Expantion() : parentTokenIndx(0), lmScore(0.), modelScore(0.) {}
+        Expantion() : parentTokenIndx(-1), lmScore(0.), modelScore(0.) {}
     };
 
     int beamWidth;
