@@ -8,8 +8,9 @@ BeamSearch::BeamSearch(uint beamWidth) : beamWidth(beamWidth), activeTokens(vect
 void BeamSearch::setRootToken(const Arc* arc, double lmScore, double modelScore) {
     expandedTokens.clear();
     activeTokens.clear();
+    predeccessor.clear();
     expandNewToken(arc, lmScore, modelScore);
-    predeccessor[expandedTokens.front()] = shared_ptr<Token>(nullptr);
+    predeccessor[expandedTokens.front()] = shared_ptr<Token>(NULL);
     moveExpandedToActive();
 }
 
@@ -35,23 +36,20 @@ void BeamSearch::keepOnlyBestExpandedTokens(int start) {
 
 void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops) {
     unordered_map<const Arc*, Expantion> expantions;  // map expanded node to parent node and expantion cost
-    vector<double> probas = getNormalizeTokensProba(activeTokens);
+    // vector<double> probas = getNormalizeTokensProba(activeTokens);
 
-    int tokIndx = 0;
     if (useSelfLoops) {
         for (const auto& tokenPtr : activeTokens) {
             auto iter = inpLabelsToIndx.find(tokenPtr->arc->inpLabel);
             if (iter == inpLabelsToIndx.end()) continue;
             double modelScore = activations[iter->second];
-            expantions[tokenPtr->arc] = Expantion(tokIndx, 0., modelScore);
-            tokIndx++;
+            expantions[tokenPtr->arc] = Expantion(tokenPtr, 0., modelScore);
         }
     }
 
-    tokIndx = 0;
     for (const auto& tokenPtr : activeTokens) {
         for (const Arc* arc : graph[tokenPtr->arc->dstState]) {
-            double lmScore = exp(arc->cost);
+            double lmScore = arc->cost;
             double modelScore = 0;
 
             auto iter = inpLabelsToIndx.find(arc->inpLabel);
@@ -59,22 +57,19 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
             modelScore = activations[iter->second];
 
             //Expand the frontier and add predecessors
-            double relativeExpantionScore = probas[tokIndx] * lmScore;
-
-            if (relativeExpantionScore > 0) {
+            double expantionScore = tokenPtr->lmScore + tokenPtr->modelScore + lmScore + modelScore;
+            if (exp(expantionScore) > 0) {
                 bool isNewArc = expantions.find(arc) == expantions.end();
-
                 if (isNewArc) {
-                    expantions[arc] = Expantion(tokIndx, log(lmScore), modelScore);
+                    expantions[arc] = Expantion(tokenPtr, lmScore, modelScore);
                 } else {
-                    double oldScore = probas[expantions[arc].parentTokenIndx] * lmScore;
-                    if (relativeExpantionScore > oldScore) {
-                        expantions[arc] = Expantion(tokIndx, log(lmScore), modelScore);
+                    double oldScore = expantions[arc].parentToken->lmScore + expantions[arc].parentToken->modelScore + lmScore + modelScore;
+                    if (expantionScore > oldScore) {
+                        expantions[arc] = Expantion(tokenPtr, lmScore, modelScore);
                     }
                 }
             }
         }
-        ++tokIndx;
     }
 
     // create new tokens
@@ -86,11 +81,11 @@ void BeamSearch::createExpandedTokens(const unordered_map<const Arc*, Expantion>
         const auto& expantion = keyVal.second;
         const Arc* arc = keyVal.first;
 
-        auto parentToken = activeTokens[expantion.parentTokenIndx];
-        double modelScore = parentToken->modelScore + expantion.modelScore, lmScore = parentToken->lmScore + expantion.lmScore;
+        double modelScore = expantion.parentToken->modelScore + expantion.modelScore;
+        double lmScore = expantion.parentToken->lmScore + expantion.lmScore;
 
         expandNewToken(arc, lmScore, modelScore);
-        predeccessor[expandedTokens.back()] = parentToken;
+        predeccessor[expandedTokens.back()] = expantion.parentToken;
     }
 }
 
@@ -158,8 +153,8 @@ vector<double> BeamSearch::getNormalizeTokensProba(const vector<shared_ptr<Token
         return t1->modelScore + t1->lmScore < t2->modelScore + t2->lmScore;
     });
     double bestScore = bestToken->modelScore + bestToken->lmScore;
-    vector<double> probas(tokens.size(), 0);
 
+    vector<double> probas(tokens.size(), 0);
     for (int i = 0; i < tokens.size(); ++i) {
         probas[i] = exp(tokens[i]->lmScore + tokens[i]->modelScore - bestScore);
     }

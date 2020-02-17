@@ -149,7 +149,7 @@ vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWei
     decoder.applyFinalState(finalStates);
     Token finalToken = Token();
     auto path = decoder.getBestPath(graph, finalToken);
-    finalToken.print(cout);
+    // finalToken.print(cout);
     return move(path);
 }
 

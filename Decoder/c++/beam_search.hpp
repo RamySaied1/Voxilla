@@ -1,6 +1,6 @@
 #pragma once
 #include "helpers.hpp"
-class Arc;
+struct Arc;
 
 struct Token {
     uint tokId;
@@ -32,10 +32,10 @@ class BeamSearch {
 
    private:
     struct Expantion {
-        uint parentTokenIndx;
+        shared_ptr<Token> parentToken;
         double lmScore, modelScore;
-        Expantion(uint parentTokenIndx, double lmScore, double modelScore) : parentTokenIndx(parentTokenIndx), lmScore(lmScore), modelScore(modelScore) {}
-        Expantion() : parentTokenIndx(-1), lmScore(0.), modelScore(0.) {}
+        Expantion(shared_ptr<Token> parentToken, double lmScore, double modelScore) : parentToken(parentToken), lmScore(lmScore), modelScore(modelScore) {}
+        Expantion() : parentToken(NULL), lmScore(0.), modelScore(0.) {}
     };
 
     int beamWidth;
