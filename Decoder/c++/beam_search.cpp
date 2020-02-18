@@ -14,9 +14,9 @@ void BeamSearch::setRootToken(const Arc* arc, double lmScore, double modelScore)
     moveExpandedToActive();
 }
 
-void BeamSearch::keepOnlyBestExpandedTokens(int start) {
+void BeamSearch::keepOnlyBestExpandedTokens() {
     unordered_map<const Arc*, shared_ptr<Token>> arcToBestToken;
-    for (int i = start; i < expandedTokens.size(); ++i) {
+    for (int i = 0; i < expandedTokens.size(); ++i) {
         const auto& token = expandedTokens[i];
         double tokenScore = token->modelScore + token->lmScore;
         auto iter = arcToBestToken.find(token->arc);
@@ -29,9 +29,8 @@ void BeamSearch::keepOnlyBestExpandedTokens(int start) {
         }
     }
 
-    int count = moveRelevantFisrt<shared_ptr<Token>>(expandedTokens,
-                                                     [&](const auto& t) { return arcToBestToken[t->arc] == t; }, start);
-    expandedTokens.resize(count);
+    expandedTokens.erase(remove_if(begin(expandedTokens), end(expandedTokens), [&](const auto& t) { return arcToBestToken[t->arc] != t; }),
+                         end(expandedTokens));
 }
 
 void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops) {
@@ -40,10 +39,12 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
 
     if (useSelfLoops) {
         for (const auto& tokenPtr : activeTokens) {
+            if (tokenPtr->arc->srcState == tokenPtr->arc->dstState) continue;
             auto iter = inpLabelsToIndx.find(tokenPtr->arc->inpLabel);
             if (iter == inpLabelsToIndx.end()) continue;
             double modelScore = activations[iter->second];
-            expantions[tokenPtr->arc] = Expantion(tokenPtr, 0., modelScore);
+            double lmScore = 0.;
+            expantions[tokenPtr->arc] = Expantion(tokenPtr, lmScore, modelScore);
         }
     }
 
@@ -57,13 +58,13 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
             modelScore = activations[iter->second];
 
             //Expand the frontier and add predecessors
-            double expantionScore = tokenPtr->lmScore + tokenPtr->modelScore + lmScore + modelScore;
+            double expantionScore = tokenPtr->lmScore + tokenPtr->modelScore + lmScore;
             if (exp(expantionScore) > 0) {
                 bool isNewArc = expantions.find(arc) == expantions.end();
                 if (isNewArc) {
                     expantions[arc] = Expantion(tokenPtr, lmScore, modelScore);
                 } else {
-                    double oldScore = expantions[arc].parentToken->lmScore + expantions[arc].parentToken->modelScore + lmScore + modelScore;
+                    double oldScore = expantions[arc].parentToken->lmScore + expantions[arc].parentToken->modelScore + expantions[arc].lmScore;
                     if (expantionScore > oldScore) {
                         expantions[arc] = Expantion(tokenPtr, lmScore, modelScore);
                     }
@@ -136,15 +137,15 @@ vector<const Arc*> BeamSearch::getBestPath(const vector<vector<const Arc*>>& gra
 }
 
 void BeamSearch::applyFinalState(const unordered_map<uint, double>& finalStates) {
-    int relevantCount = moveRelevantFisrt<shared_ptr<Token>>(activeTokens, [&](const auto& t) {
-        return finalStates.find(t->arc->dstState) != finalStates.end();  // it's a final state
+    auto iend = remove_if(begin(activeTokens), end(activeTokens), [&](const auto& t) {
+        return finalStates.find(t->arc->dstState) == finalStates.end();  // remove if it's not a final state
     });
 
-    for (int i = 0; i < relevantCount; ++i) {
-        activeTokens[i]->lmScore += finalStates.find(activeTokens[i]->arc->dstState)->second;  // add final state cost
+    for (auto i = begin(activeTokens); i != iend; ++i) {
+        (*i)->lmScore += finalStates.find((*i)->arc->dstState)->second;  // add final state cost
     }
 
-    activeTokens.resize(relevantCount);  // remove non final states
+    activeTokens.erase(iend, end(activeTokens));  // remove non final states
 }
 
 vector<double> BeamSearch::getNormalizeTokensProba(const vector<shared_ptr<Token>>& tokens) {
