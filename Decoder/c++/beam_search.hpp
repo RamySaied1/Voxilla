@@ -10,7 +10,7 @@ struct Token {
     Token(uint tokId, const Arc* arc, double lmScore, double modelScore) : tokId(tokId), arc(arc), lmScore(lmScore), modelScore(modelScore) {}
     Token() : tokId(0), arc(0), lmScore(0), modelScore(0) {}
 
-    void print(ostream& out) const;
+    void print(ostream& out) const { out << "Token id: " << tokId << " lmScore: " << lmScore << " modelScore: " << modelScore << " Joint score:" << modelScore + lmScore << endl; }
     // bool operator==(const Token& other) const { return tokId == other.tokId && node == other.node; }
 };
 

@@ -164,7 +164,3 @@ vector<double> BeamSearch::getNormalizeTokensProba(const vector<shared_ptr<Token
 
 BeamSearch::~BeamSearch() {
 }
-
-void Token::print(ostream& out) const {
-    out << "Token id: " << tokId << " inputlabel: " << (arc->inpLabel) << "outputlabel: " << (arc->outLabel) << " lmScore: " << lmScore << " modelScore: " << modelScore << " Joint score:" << modelScore + lmScore << endl;
-}
