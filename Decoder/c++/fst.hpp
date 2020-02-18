@@ -3,7 +3,7 @@
 #include "beam_search.hpp"
 #include "helpers.hpp"
 struct Arc {
-    int dstState;
+    int srcState, dstState;
     string inpLabel;
     string outLabel;
     double cost;

@@ -64,9 +64,9 @@ void Fst::processFinalState(const vector<string>& fields) {
 }
 
 void Fst::processArc(const vector<string>& fields) {
-    const Arc* arc = new Arc{stoi(fields[1]), fields[2], fields[3], (fields.size() == 5) ? -stod(fields.back()) : 0.};
-
     int srcState = stoi(fields[0]);
+    const Arc* arc = new Arc{srcState, stoi(fields[1]), fields[2], fields[3], (fields.size() == 5) ? -stod(fields.back()) : 0.};
+
     if (srcState < graph.size()) {
         graph[srcState].push_back(arc);
     } else {
@@ -100,14 +100,14 @@ void Fst::expandEpsStates() {
         decoder.doForward(graph, {{espSyms.epsSymbol, 0}}, vector<double>(1, 0.), false);
     }
 
-    decoder.keepOnlyBestExpandedTokens(0);
+    decoder.keepOnlyBestExpandedTokens();
 }
 
 vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWeight) {
     preprocessActivations(activations, lmWeight);  // normalize activations and apply lm relative weight
-    unique_ptr<Arc> intialArc(new Arc{0, espSyms.epsSymbol, espSyms.epsSymbol, 0.});
+    unique_ptr<Arc> intialArc(new Arc{-1, 0, espSyms.epsSymbol, espSyms.epsSymbol, 0.});
     decoder.setRootToken(intialArc.get(), 0., 0.);
-
+    int i = 0;
     for (const auto& row : activations) {
         // vector<shared_ptr<Token>> debug = decoder.getActiveTokens();
         // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
@@ -120,7 +120,7 @@ vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWei
         // ofstream out;
         // out.open("debug.txt");
         // print2d(out, debugNums);
-
+        // cout << i++ << endl;
         decoder.doForward(graph, inpLabelToIndx, row, true);
 
         // debug = decoder.getExpandedTokens();
@@ -149,7 +149,7 @@ vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWei
     decoder.applyFinalState(finalStates);
     Token finalToken = Token();
     auto path = decoder.getBestPath(graph, finalToken);
-    // finalToken.print(cout);
+    finalToken.print(cout);
     return move(path);
 }
 
