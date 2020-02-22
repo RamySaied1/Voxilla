@@ -16,7 +16,7 @@ struct Token {
 
 class BeamSearch {
    public:
-    BeamSearch(uint beamWidth);
+    BeamSearch(uint beamWidth, double pathAcceptingThreshold = 0.);
     ~BeamSearch();
 
     const vector<shared_ptr<Token>>& getExpandedTokens() const;
@@ -33,16 +33,17 @@ class BeamSearch {
    private:
     struct Expantion {
         shared_ptr<Token> parentToken;
-        double lmScore, modelScore;
-        Expantion(shared_ptr<Token> parentToken, double lmScore, double modelScore) : parentToken(parentToken), lmScore(lmScore), modelScore(modelScore) {}
-        Expantion() : parentToken(NULL), lmScore(0.), modelScore(0.) {}
+        double lmScore, modelScore, expantionScore;
+        Expantion(shared_ptr<Token> parentToken, double lmScore, double modelScore, double expantionScore) : parentToken(parentToken), lmScore(lmScore), modelScore(modelScore), expantionScore(expantionScore) {}
+        Expantion() : parentToken(NULL), lmScore(0.), modelScore(0.), expantionScore(0.) {}
     };
 
     int beamWidth;
+    double pathAcceptingThreshold;
     unordered_map<shared_ptr<Token>, shared_ptr<Token>> predeccessor;
     vector<shared_ptr<Token>> activeTokens, expandedTokens;
 
-    vector<double> getNormalizeTokensProba(const vector<shared_ptr<Token>>& tokens);
+    vector<double> getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens);
     void createExpandedTokens(const unordered_map<const Arc*, Expantion>& expantions);
     void expandNewToken(const Arc* arc, double lmScore, double modelScore) {
         static uint tokenId = 1;

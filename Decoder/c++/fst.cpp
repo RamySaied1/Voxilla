@@ -87,7 +87,6 @@ void Fst::preprocessFst() {
 void Fst::expandEpsStates() {
     const vector<shared_ptr<Token>>& expandedTokens = decoder.getExpandedTokens();
     int i = 0;
-    int originalSize = expandedTokens.size();
     while (i < expandedTokens.size()) {
         vector<shared_ptr<Token>> epsTokens;
         for (; i < expandedTokens.size(); ++i) {
@@ -107,43 +106,12 @@ vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWei
     preprocessActivations(activations, lmWeight);  // normalize activations and apply lm relative weight
     unique_ptr<Arc> intialArc(new Arc{-1, 0, espSyms.epsSymbol, espSyms.epsSymbol, 0.});
     decoder.setRootToken(intialArc.get(), 0., 0.);
-    int i = 0;
+
     for (const auto& row : activations) {
-        // vector<shared_ptr<Token>> debug = decoder.getActiveTokens();
-        // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
-        //     return (a->lmScore + a->modelScore) > (b->lmScore + b->modelScore);
-        // });
-        // vector<vector<double>> debugNums = vector<vector<double>>();
-        // for (auto token : debug) {
-        //     debugNums.push_back({token->modelScore, token->lmScore, token->lmScore + token->modelScore});
-        // }
-        // ofstream out;
-        // out.open("debug.txt");
-        // print2d(out, debugNums);
-        // cout << i++ << endl;
         decoder.doForward(graph, inpLabelToIndx, row, true);
-
-        // debug = decoder.getExpandedTokens();
-        // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
-        //     return (a->lmScore + a->modelScore) > (b->lmScore + b->modelScore);
-        // });
-        // debugNums = vector<vector<double>>();
-        // for (auto token : debug) {
-        //     debugNums.push_back({token->modelScore, token->lmScore, token->lmScore + token->modelScore});
-        // }
-
         decoder.beamPrune();
         expandEpsStates();
         decoder.moveExpandedToActive();
-
-        // debug = decoder.getExpandedTokens();
-        // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
-        //     return (a->lmScore + a->modelScore) > (b->lmScore + b->modelScore);
-        // });
-        // debugNums = vector<vector<double>>();
-        // for (auto token : debug) {
-        //     debugNums.push_back({token->modelScore, token->lmScore, token->lmScore + token->modelScore});
-        // }
     }
 
     decoder.applyFinalState(finalStates);
