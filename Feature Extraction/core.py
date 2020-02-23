@@ -22,11 +22,22 @@ class FeatureExtractor:
 
         self.createMelFilterbank()
         self.meanNormalize = shouldNormFeature
+
         self.zeroMeanSignal = shouldNormSignal
+
         self.totalMean = np.zeros([numMelFilters])
+
         self.totalVariance = np.zeros([numMelFilters])
+
         self.totalFrames = 0
         self.calcTotalStats = calcStats
+
+    def plotMelFilterbank2(self, plt):
+        for i in range(self.numMelFilters):
+
+            plt.plot(self.melFilterbank[i,:])
+
+
     # linear-scale frequency (Hz) to mel-scale frequency
     def lin2mel(self,freq):
         return 2595*np.log10(1+freq/700)
@@ -68,6 +79,8 @@ class FeatureExtractor:
         for i in range(self.numMelFilters):
             plt.plot(self.melFilterbank[i,:])
 
+
+
     ## ditehring : add random noise to the signal to solve some mahtematics issues (log (0))
     ## input : wave form (vector)
     ##output : modified wave (vector)
@@ -108,36 +121,77 @@ class FeatureExtractor:
     def calcFilterbank(self, magspec):
         fbank=self.melFilterbank.dot(magspec)
         fbank=np.log(fbank)
+
         return fbank
 
     # compute the mean vector of fbank coefficients in the utterance and subtract it from all frames of fbank coefficients
     def normalizeFilterbank(self, fbank):
         mean=np.mean(fbank,axis=1)
         fbank=fbank-mean[:,None]
+
         return fbank
 
     # accumulates sufficient statistics for corpus mean and variance
     def appendStats(self, fbank):
         self.totalMean += np.sum(fbank,axis=1)
+
         self.totalVariance += np.sum(fbank**2,axis=1)
         self.totalFrames += fbank.shape[1]
 
     # compute corpus mean and variance based on sufficient statistics
     def calcStats(self):
         self.totalMean /= self.totalFrames
+
         self.totalVariance /= self.totalFrames
         self.totalVariance -= self.totalMean**2
 
         return self.totalMean, 1.0 / np.sqrt(self.totalVariance)
 
+    def cutToFrames2(self, wav):
+        # only process whole frames
+        numFrames = int(
+            np.floor((wav.shape[0] - self.windowSize) / self.windowShift) + 1)
+        frames = np.zeros([self.windowSize, numFrames])
+        for t in range(numFrames):
+            frame = wav[t * self.windowShift:t *
+                        self.windowShift + self.windowSize]
+            if (self.zeroMeanSignal):
+                frame = frame - np.mean(frame)
+            frames[:, t] = self.hammingWindow * frame
+        return frames
+
+
+    def plotMelFilterbank3(self, plt):
+        for i in range(self.numMelFilters):
+            plt.plot(self.melFilterbank[i,:])
+
+
+
+    ## ditehring : add random noise to the signal to solve some mahtematics issues (log (0))
+    ## input : wave form (vector)
+    ##output : modified wave (vector)
+    def dither2(self, wav):
+        n = 2*np.random.rand(wav.shape[0])-1
+        n *= 1/(2**15)
+        return wav + n
+
+        # mel-scale frequency to linear-scale frequency
+    def mel2lin2(self, mel):
+        return (10**(mel/2595)-1)*700
+
+
+
     def extract(self, speechSignal):
         # preprocessing
         wav = self.dither(speechSignal)
         wav = self.preEmphasize(wav)
+        ###########################################
+
         frames = self.cutToFrames(wav)
         # feature calculation
         magspec = self.getMagnitudeSpectrum(frames)
         fbank = self.calcFilterbank(magspec)
+
         if (self.meanNormalize):
             fbank = self.normalizeFilterbank(fbank)
 
