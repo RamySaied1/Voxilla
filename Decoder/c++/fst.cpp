@@ -55,7 +55,7 @@ void Fst::parseFst(const string& filename) {
 }
 
 void Fst::processFinalState(const vector<string>& fields) {
-    uint finalState = stoi(fields[0]);
+    uint finalState = (uint)stoi(fields[0]);
     double cost = (fields.size() == 2) ? -stod(fields.back()) : 0.;
     finalStates[finalState] = cost;
     if (finalState == graph.size()) {
@@ -64,8 +64,8 @@ void Fst::processFinalState(const vector<string>& fields) {
 }
 
 void Fst::processArc(const vector<string>& fields) {
-    uint srcState = stoi(fields[0]);
-    const Arc* arc = new Arc{srcState, stoi(fields[1]), fields[2], fields[3], (fields.size() == 5) ? -stod(fields.back()) : 0.};
+    uint srcState = (uint)stoi(fields[0]);
+    const Arc* arc = new Arc{srcState, (uint)stoi(fields[1]), fields[2], fields[3], (fields.size() == 5) ? -stod(fields.back()) : 0.};
 
     if (srcState < graph.size()) {
         graph[srcState].push_back(arc);

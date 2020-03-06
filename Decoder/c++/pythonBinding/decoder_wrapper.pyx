@@ -26,11 +26,10 @@ cdef class PyDecoder:
 
     def decode(self,pyMat,lmWeight):
         #prepare input
-        cdef vector[vector[double]] cMat = vector[vector[double]]()
-        for row in pyMat:
-            cMat.push_back(vector[double]())
-            for col in row:
-                cMat.back().push_back(col)
+        cdef vector[vector[double]] cMat = vector[vector[double]](len(pyMat),vector[double](len(pyMat[0])))
+        for r in range(len(pyMat)):
+            for c in range(len(pyMat[0])):
+                cMat[r][c] = pyMat[r][c]
 
         # call function
         cdef vector[vector[string]] cVec = self.thisptr.decode(cMat,lmWeight)

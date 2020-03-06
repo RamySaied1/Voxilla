@@ -52,7 +52,7 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
             double modelScore = activations[iter->second];
             double lmScore = 0.;
             double specialScore = (token->arc->srcState == token->arc->dstState) ? log(2.) : 0;
-            double expantionScore = logProbas[i] + lmScore;
+            double expantionScore = logProbas[i] + lmScore + specialScore;
             expantions[token->arc] = Expantion(token, lmScore, modelScore, expantionScore);
         }
     }

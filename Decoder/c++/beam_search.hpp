@@ -39,8 +39,8 @@ class BeamSearch {
 
     uint beamWidth;
     double pathAcceptingThreshold;
-    unordered_map<shared_ptr<Token>, shared_ptr<Token>> predeccessor;
     vector<shared_ptr<Token>> activeTokens, expandedTokens;
+    unordered_map<shared_ptr<Token>, shared_ptr<Token>> predeccessor;
 
     vector<double> getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens);
     void createExpandedTokens(const unordered_map<const Arc*, Expantion>& expantions);
