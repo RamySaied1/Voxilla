@@ -2,33 +2,23 @@
 #include "fst.hpp"
 
 int main(int argc, char const* argv[]) {
-    time_t t1, t2;
-
-    time(&t1);
-    Fst fst(BeamSearch(500), "../DecodingGraph.txt", "labels.ciphones");
-    time(&t2);
-    // cout << "Parsing Done in: " << t2 - t1 << " seconds \n";
+    Fst fst(BeamSearch((uint)stoi(argv[1]), stod(argv[2])), "../DecodingGraph-large.txt", "../labels.ciphones");
 
     ifstream in;
-    in.open("./files.txt");
-
+    in.open("./activations_test/files.txt");
+    time_t t1, t2;
+    time(&t1);
     string fileName;
     while (in >> fileName) {
         string shape;
         ifstream activationsFile;
-        activationsFile.open(fileName);
+        activationsFile.open("./activations_test/" + fileName);
         getline(activationsFile, shape);
         vector<string> dims;
         split(shape, dims);
-        vector<vector<double>> activations(stoi(dims[0]), vector<double>(stoi(dims[1])));
+        vector<vector<double>> activations((uint)stoi(dims[0]), vector<double>((uint)stoi(dims[1])));
         read2d(activationsFile, activations);
-
-        // cout << "Reading Activations Done\n";
-        // time(&t1);
         vector<const Arc*> path = fst.decode(activations, 30.);
-        // time(&t2);
-        // cout << "Decoding is Done in: " << t2 - t1 << " seconds \n";
-
         for (const auto& arc : path) {
             if (!fst.isSpecialSym(arc->outLabel)) {
                 cout << arc->outLabel << " ";
@@ -36,6 +26,7 @@ int main(int argc, char const* argv[]) {
         }
         cout << endl;
     }
-
+    time(&t2);
+    cout << "Decoding is Done in: " << t2 - t1 << " seconds \n";
     return 0;
 }

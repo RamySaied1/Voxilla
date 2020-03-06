@@ -16,7 +16,7 @@ struct Token {
 
 class BeamSearch {
    public:
-    BeamSearch(uint beamWidth);
+    BeamSearch(uint beamWidth, double pathAcceptingThreshold = 0.);
     ~BeamSearch();
 
     const vector<shared_ptr<Token>>& getExpandedTokens() const;
@@ -25,24 +25,24 @@ class BeamSearch {
     void setActiveTokens(const vector<shared_ptr<Token>>& tokens);
     void moveExpandedToActive();
     void beamPrune();
-    void applyFinalState(const unordered_map<uint, double>& finalStates);
-    vector<const Arc*> getBestPath(const vector<vector<const Arc*>>& graph, Token& bestToken);
     void keepOnlyBestExpandedTokens();
     void doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops);
+    vector<const Arc*> getBestPath(const vector<vector<const Arc*>>& graph, Token& bestToken);
 
    private:
     struct Expantion {
         shared_ptr<Token> parentToken;
-        double lmScore, modelScore;
-        Expantion(shared_ptr<Token> parentToken, double lmScore, double modelScore) : parentToken(parentToken), lmScore(lmScore), modelScore(modelScore) {}
-        Expantion() : parentToken(NULL), lmScore(0.), modelScore(0.) {}
+        double lmScore, modelScore, expantionScore;
+        Expantion(shared_ptr<Token> parentToken, double lmScore, double modelScore, double expantionScore) : parentToken(parentToken), lmScore(lmScore), modelScore(modelScore), expantionScore(expantionScore) {}
+        Expantion() : parentToken(NULL), lmScore(0.), modelScore(0.), expantionScore(0.) {}
     };
 
-    int beamWidth;
-    unordered_map<shared_ptr<Token>, shared_ptr<Token>> predeccessor;
+    uint beamWidth;
+    double pathAcceptingThreshold;
     vector<shared_ptr<Token>> activeTokens, expandedTokens;
+    unordered_map<shared_ptr<Token>, shared_ptr<Token>> predeccessor;
 
-    vector<double> getNormalizeTokensProba(const vector<shared_ptr<Token>>& tokens);
+    vector<double> getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens);
     void createExpandedTokens(const unordered_map<const Arc*, Expantion>& expantions);
     void expandNewToken(const Arc* arc, double lmScore, double modelScore) {
         static uint tokenId = 1;

@@ -17,7 +17,7 @@ void Fst::parseInputLabels(const string& filename) {
 
     try {
         string line;
-        int i = 0;
+        uint i = 0;
         while (in >> line) {
             if (isSpecialSym(line)) {
                 throw Exception("special symbol exists in labels file which is not expected");
@@ -55,7 +55,7 @@ void Fst::parseFst(const string& filename) {
 }
 
 void Fst::processFinalState(const vector<string>& fields) {
-    int finalState = stoi(fields[0]);
+    uint finalState = (uint)stoi(fields[0]);
     double cost = (fields.size() == 2) ? -stod(fields.back()) : 0.;
     finalStates[finalState] = cost;
     if (finalState == graph.size()) {
@@ -64,8 +64,8 @@ void Fst::processFinalState(const vector<string>& fields) {
 }
 
 void Fst::processArc(const vector<string>& fields) {
-    int srcState = stoi(fields[0]);
-    const Arc* arc = new Arc{srcState, stoi(fields[1]), fields[2], fields[3], (fields.size() == 5) ? -stod(fields.back()) : 0.};
+    uint srcState = (uint)stoi(fields[0]);
+    const Arc* arc = new Arc{srcState, (uint)stoi(fields[1]), fields[2], fields[3], (fields.size() == 5) ? -stod(fields.back()) : 0.};
 
     if (srcState < graph.size()) {
         graph[srcState].push_back(arc);
@@ -86,8 +86,7 @@ void Fst::preprocessFst() {
 
 void Fst::expandEpsStates() {
     const vector<shared_ptr<Token>>& expandedTokens = decoder.getExpandedTokens();
-    int i = 0;
-    int originalSize = expandedTokens.size();
+    uint i = 0;
     while (i < expandedTokens.size()) {
         vector<shared_ptr<Token>> epsTokens;
         for (; i < expandedTokens.size(); ++i) {
@@ -105,48 +104,17 @@ void Fst::expandEpsStates() {
 
 vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWeight) {
     preprocessActivations(activations, lmWeight);  // normalize activations and apply lm relative weight
-    unique_ptr<Arc> intialArc(new Arc{-1, 0, espSyms.epsSymbol, espSyms.epsSymbol, 0.});
+    unique_ptr<Arc> intialArc(new Arc{0, 0, espSyms.epsSymbol, espSyms.epsSymbol, 0.});
     decoder.setRootToken(intialArc.get(), 0., 0.);
-    int i = 0;
+
     for (const auto& row : activations) {
-        // vector<shared_ptr<Token>> debug = decoder.getActiveTokens();
-        // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
-        //     return (a->lmScore + a->modelScore) > (b->lmScore + b->modelScore);
-        // });
-        // vector<vector<double>> debugNums = vector<vector<double>>();
-        // for (auto token : debug) {
-        //     debugNums.push_back({token->modelScore, token->lmScore, token->lmScore + token->modelScore});
-        // }
-        // ofstream out;
-        // out.open("debug.txt");
-        // print2d(out, debugNums);
-        // cout << i++ << endl;
         decoder.doForward(graph, inpLabelToIndx, row, true);
-
-        // debug = decoder.getExpandedTokens();
-        // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
-        //     return (a->lmScore + a->modelScore) > (b->lmScore + b->modelScore);
-        // });
-        // debugNums = vector<vector<double>>();
-        // for (auto token : debug) {
-        //     debugNums.push_back({token->modelScore, token->lmScore, token->lmScore + token->modelScore});
-        // }
-
         decoder.beamPrune();
         expandEpsStates();
         decoder.moveExpandedToActive();
-
-        // debug = decoder.getExpandedTokens();
-        // sort(begin(debug), end(debug), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
-        //     return (a->lmScore + a->modelScore) > (b->lmScore + b->modelScore);
-        // });
-        // debugNums = vector<vector<double>>();
-        // for (auto token : debug) {
-        //     debugNums.push_back({token->modelScore, token->lmScore, token->lmScore + token->modelScore});
-        // }
     }
 
-    decoder.applyFinalState(finalStates);
+    applyFinalState();
     Token finalToken = Token();
     auto path = decoder.getBestPath(graph, finalToken);
     finalToken.print(cout);
@@ -162,14 +130,17 @@ void Fst::preprocessActivations(vector<vector<double>>& activations, double rela
     }
 }
 
-pair<int, double> Fst::skipStartNodes() {
-    double cost = 0;
-    int rootNode = 0;
-    while (graph[rootNode].size() == 1 && graph[rootNode].front()->inpLabel == espSyms.startSymbol) {
-        cost += graph[rootNode].front()->cost;
-        rootNode = graph[rootNode].front()->dstState;
+void Fst::applyFinalState() {
+    auto activeTokens = decoder.getActiveTokens();
+    auto iend = remove_if(begin(activeTokens), end(activeTokens), [&](const auto& t) {
+        return finalStates.find(t->arc->dstState) == finalStates.end();  // remove if it's not a final state
+    });
+
+    for (auto i = begin(activeTokens); i != iend; ++i) {
+        (*i)->lmScore += finalStates.find((*i)->arc->dstState)->second;  // add final state cost
     }
-    return {rootNode, cost};
+
+    activeTokens.erase(iend, end(activeTokens));  // remove non final states
 }
 
 Fst::~Fst() {
