@@ -36,11 +36,16 @@ void BeamSearch::keepOnlyBestExpandedTokens() {
 void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops) {
     unordered_map<const Arc*, Expantion> expantions;  // map expanded node to parent node and expantion cost
     vector<double> logProbas = getNormalizeTokensLogProba(activeTokens);
+    // vector<int> activationsRank(activations.size());
+    // iota(begin(activationsRank), end(activationsRank), 0);
+    // sort(begin(activationsRank), end(activationsRank), [&](auto a, auto b) {
+    //     return activations[a] > activations[b];
+    // });
 
     // clock_t begin_time = clock();
     // cout << "Time: " << float(clock() - begin_time) / CLOCKS_PER_SEC << endl;
     if (useSelfLoops) {
-        for (int i = 0; i < activeTokens.size(); ++i) {
+        for (uint i = 0; i < activeTokens.size(); ++i) {
             const auto& token = activeTokens[i];
             auto iter = inpLabelsToIndx.find(token->arc->inpLabel);
             if (iter == inpLabelsToIndx.end()) continue;
@@ -52,7 +57,7 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
         }
     }
 
-    for (int i = 0; i < activeTokens.size(); ++i) {
+    for (uint i = 0; i < activeTokens.size(); ++i) {
         const auto& token = activeTokens[i];
         for (const Arc* arc : graph[token->arc->dstState]) {
             double lmScore = arc->cost;
@@ -141,18 +146,6 @@ vector<const Arc*> BeamSearch::getBestPath(const vector<vector<const Arc*>>& gra
     return arcs;
 }
 
-void BeamSearch::applyFinalState(const unordered_map<uint, double>& finalStates) {
-    auto iend = remove_if(begin(activeTokens), end(activeTokens), [&](const auto& t) {
-        return finalStates.find(t->arc->dstState) == finalStates.end();  // remove if it's not a final state
-    });
-
-    for (auto i = begin(activeTokens); i != iend; ++i) {
-        (*i)->lmScore += finalStates.find((*i)->arc->dstState)->second;  // add final state cost
-    }
-
-    activeTokens.erase(iend, end(activeTokens));  // remove non final states
-}
-
 vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens) {
     if (tokens.size() <= 0) return vector<double>();
     const auto& bestToken = *max_element(begin(tokens), end(tokens), [](const auto& t1, const auto& t2) {
@@ -161,7 +154,7 @@ vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<To
     double bestScore = bestToken->modelScore + bestToken->lmScore;
 
     vector<double> logProbas(tokens.size(), 0);
-    for (int i = 0; i < tokens.size(); ++i) {
+    for (uint i = 0; i < tokens.size(); ++i) {
         logProbas[i] = tokens[i]->lmScore + tokens[i]->modelScore - bestScore;
     }
     return move(logProbas);

@@ -3,7 +3,7 @@
 #include "beam_search.hpp"
 #include "helpers.hpp"
 struct Arc {
-    int srcState, dstState;
+    uint srcState, dstState;
     string inpLabel;
     string outLabel;
     double cost;
@@ -35,6 +35,6 @@ class Fst {
     void processFinalState(const vector<string>& fields);
     void preprocessActivations(vector<vector<double>>& activations, double relativeWeight);
     void preprocessFst();
-    pair<int, double> skipStartNodes();
     void expandEpsStates();
+    void applyFinalState();
 };

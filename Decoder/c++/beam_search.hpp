@@ -25,10 +25,9 @@ class BeamSearch {
     void setActiveTokens(const vector<shared_ptr<Token>>& tokens);
     void moveExpandedToActive();
     void beamPrune();
-    void applyFinalState(const unordered_map<uint, double>& finalStates);
-    vector<const Arc*> getBestPath(const vector<vector<const Arc*>>& graph, Token& bestToken);
     void keepOnlyBestExpandedTokens();
     void doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops);
+    vector<const Arc*> getBestPath(const vector<vector<const Arc*>>& graph, Token& bestToken);
 
    private:
     struct Expantion {
@@ -38,7 +37,7 @@ class BeamSearch {
         Expantion() : parentToken(NULL), lmScore(0.), modelScore(0.), expantionScore(0.) {}
     };
 
-    int beamWidth;
+    uint beamWidth;
     double pathAcceptingThreshold;
     unordered_map<shared_ptr<Token>, shared_ptr<Token>> predeccessor;
     vector<shared_ptr<Token>> activeTokens, expandedTokens;
