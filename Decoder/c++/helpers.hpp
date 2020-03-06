@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iterator>
 #include <memory>
+#include <numeric>
 #include <sstream>
 #include <unordered_map>
 #include <vector>
@@ -22,9 +23,9 @@ inline void split(string str, vector<string>& fields) {
 }
 
 template <class T>
-int moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred, int start = 0) {
-    int isOk = start;
-    for (int i = start; i < items.size(); ++i) {
+uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred, uint start = 0) {
+    uint isOk = start;
+    for (uint i = start; i < items.size(); ++i) {
         if (isRelevantPred(items[i])) {
             if (isOk != i) {
                 swap(items[isOk], items[i]);

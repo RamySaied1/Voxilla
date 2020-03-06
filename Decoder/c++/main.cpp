@@ -5,14 +5,14 @@ int main(int argc, char const* argv[]) {
     Fst fst(BeamSearch(stoi(argv[1]), stod(argv[2])), "../DecodingGraph-large.txt", "../labels.ciphones");
 
     ifstream in;
-    in.open("./files.txt");
+    in.open("./activations_test/files.txt");
     time_t t1, t2;
     time(&t1);
     string fileName;
     while (in >> fileName) {
         string shape;
         ifstream activationsFile;
-        activationsFile.open("./activations/" + fileName);
+        activationsFile.open("./activations_test/" + fileName);
         getline(activationsFile, shape);
         vector<string> dims;
         split(shape, dims);
