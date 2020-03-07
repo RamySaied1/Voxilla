@@ -9,7 +9,6 @@ def loadData(dataDir):
 def loadVocab(vocabDir):
     with open(vocabDir,'r') as f:
         vocab=[l.split()[0] for l in f.readlines()]
-    vocab.append("<UNK>")
     return vocab
 def writeOutput(outputDict,num):
     outputFile=open("out.txt",'a')
@@ -18,7 +17,10 @@ def writeOutput(outputDict,num):
         #print(f"writing {key} : {value}")
         if value==0:
             print(key)
-        outputFile.write(f"{log10(value)}  {key}\n")
+        count=log10(value["count"])
+        backOff=log10(value["backoff"])
+        outputFile.write(f"{count}  {key} {backOff} \n")
+        
     outputFile.close()    
 
 class LanguageModel:
@@ -26,9 +28,8 @@ class LanguageModel:
         self.n=n
         self.vocab=loadVocab(vocabDir)
         self.tokens=preprocess(loadData(dataDir),self.vocab,self.n)
-        self.countDict=countWords(self.tokens,self.vocab)
+        self.countDict,self.wordsCount=countWords(self.tokens,self.vocab)
         self.laplace=laplace
-
     
     def getNGrams(self,num):
         nGrams=[]
@@ -42,36 +43,72 @@ class LanguageModel:
     
     #apply laplacian smoothing
     def smooth(self,num):
-        vocab_size=len(self.countDict)
         nGrams=self.getNGrams(num)
         nGramsTokens=list(itertools.permutations(self.vocab,num))
-        nGramsStatisitcs=countWords(nGrams,nGramsTokens)
+        nGramsStatisitcs,_=countWords(nGrams,nGramsTokens)
+        nGramsStatisitcs={nGram:val for nGram,val in nGramsStatisitcs.items() if val>100}
+        print("a")
         
         mGrams = self.getNGrams(num-1)
         mGramsTokens=list(itertools.permutations(self.vocab,num-1))
-        mGramsStatisitcs = countWords(mGrams,mGramsTokens)
-
+        mGramsStatisitcs,_ = countWords(mGrams,mGramsTokens)
+        mGramsStatisitcs={mGram:val for mGram,val in mGramsStatisitcs.items() if val>100}
+        print("b")
+        
         def smoothed_count(nGram, nCount):
             mGram = nGram[:-1]
             mCount = mGramsStatisitcs[mGram]
-            return (nCount + self.laplace) / (mCount + self.laplace * vocab_size)
+            
+            return (nCount) / (mCount + self.laplace * self.countEvents(mGram,nGramsStatisitcs.keys()))
 
-        return { nGram: smoothed_count(nGram, count) for nGram, count in nGramsStatisitcs.items() }
+        return { nGram: {"count":smoothed_count(nGram, count),"backoff":None} for nGram, count in nGramsStatisitcs.items() }
+    
+    def countEvents(self,token,vocab):
+        count=0
+        tokenLen=len(token)
+        for v in vocab:
+            if token == v[0:tokenLen]:
+                count+=1
+        return count
+
     def createModel(self):
         
         #unigrams are a special case 
         num_tokens=len(self.tokens)
-        unigram={(unigram,): count / (len(self.vocab)+ num_tokens) for unigram, count in self.countDict.items()}
-        #print(unigram)
-        writeOutput(unigram,1)
-        for i in range(2,self.n+1):
-            print(f"counting {i} grams")
-            #every iteration we will make a gram i.e:unigram,bigram.....n_gram
-            writeOutput(self.smooth(i),i)
+        print("Counting Unigrams")
+        unigrams={(unigrams,): {"count":count/ (num_tokens+ self.wordsCount),"backoff":None}  for unigrams, count in self.countDict.items()}
+        print("Unigrams is Done,Counting bigrams")
+        
+        bigrams=self.smooth(2)
+        print("bigrams is Done,counting trigrams")
+        
+        trigrams=self.smooth(3)
+        print("trigrams is Done")
+        
+        
+        #calculating backoff weights 
+        for key,val in unigrams.items():
+            numEvents=self.countEvents(key,bigrams)
+            if numEvents==0:
+               val["backoff"]=""
+            else:
+                val["backoff"]=numEvents/(numEvents+val["count"])
+        
+        for key,val in bigrams.items():
+            numEvents=self.countEvents(key,trigrams)
+            if numEvents==0:
+               val["backoff"]=""
+            else:
+                val["backoff"]=numEvents/(numEvents+val["count"])
+        
+        #print(unigrams)
+        writeOutput(unigrams,1)
+        writeOutput(bigrams,2)
+        writeOutput(trigrams,3)
 
         
 
 
 if __name__=="__main__":
-    lm=LanguageModel("ami-train.txt","librispeech.top10k.1grams",3,1)
+    lm=LanguageModel("test.txt","librispeech.top10k.1grams",3,1)
     lm.createModel()

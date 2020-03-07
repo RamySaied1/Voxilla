@@ -9,11 +9,13 @@ def addSentenceTokens(sentences,n):
     #sos = SOS * (n-1) if n > 1 else SOS
     return ['{}{} {}'.format(SOS, s, EOS) for s in sentences]
 def countWords(sentences,vocab):
+    wordsCount=0
     countDict={token:0 for token in sentences }
     for word in sentences:
         if word in vocab:
             countDict[word]+=1
-    return countDict
+            wordsCount+=1
+    return countDict,wordsCount
 
 
 
@@ -26,7 +28,7 @@ def replace_singletons(tokens,refVocab):
         The same list of tokens with each singleton replaced by <UNK>.
     
     """
-    vocab = countWords(tokens,refVocab)
+    vocab,_ = countWords(tokens,refVocab)
     return [token if vocab[token] > 1 else UNK for token in tokens]
 
 def preprocess(sentences,vocab,n):
