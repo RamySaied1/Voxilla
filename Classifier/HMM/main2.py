@@ -27,7 +27,7 @@ class HMM(object):
 			features = self._getFeatures(samples)
 			self._saveFeaturesForLabel(features, os.path.basename(p).replace(self.ext_alignment, ""), limit)
 
-	def train(self, rootDir="data/data-generated", limit=1000, loadFeat=False, verbose=False):
+	def train(self, rootDir="data/data-generated", outDir="models/", limit=1000, loadFeat=False, verbose=False):
 		self.verbose = verbose
 		self.trainDir = rootDir
 		trainSetGenerator = self._loadFeatures(modelsSet=limit) if loadFeat else self._readTrainSet(limit=limit)
@@ -36,14 +36,14 @@ class HMM(object):
 			self._verbose("train model", phoneLabel)
 			trainer = HMMTrainer()
 			trainer.train(features[0], lens=features[1])
-			loc = f"models/{limit}"
+			loc = os.path.join(outDir, str(limit))
 			os.makedirs(loc, exist_ok=True)
 			loc = os.path.join(loc, phoneLabel) + ".pkl"
 			with open(loc, 'wb') as saveFile: 
 				pickle.dump(trainer.model, saveFile)
 				self._verbose(f"model of {phoneLabel} saved in {os.path.abspath(loc)}")
 
-	def train_phones(self, *phonesNames, rootDir="data/data-generated", limit=1000, loadFeat=False, verbose=False):
+	def train_phones(self, *phonesNames, rootDir="data/data-generated", outDir="models/", limit=1000, loadFeat=False, verbose=False):
 		self.verbose = verbose
 		self.trainDir = rootDir
 		trainSetGenerator = self._loadFeatures(*phonesNames, modelsSet=limit) if loadFeat else self._readTrainSet(limit=limit, customPhones=[os.path.basename(phoneName) + self.ext_alignment for phoneName in phonesNames] )
@@ -52,7 +52,7 @@ class HMM(object):
 			self._verbose("train model", phoneLabel)
 			trainer = HMMTrainer()
 			trainer.train(features[0], lens=features[1])
-			loc = f"models/{limit}"
+			loc = os.path.join(outDir, str(limit))
 			os.makedirs(loc, exist_ok=True)
 			loc = os.path.join(loc, phoneLabel) + ".pkl"
 			with open(loc, 'wb') as saveFile: 
