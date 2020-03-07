@@ -12,24 +12,26 @@ class HMM(object):
 	def __init__(self):
 		self.verbose = False
 		self.ext_features = ".feat.pkl"
-		self.featuresDir = "models_features"
+		self.featuresDir = "models_features" # deprecated
 		self.ext_alignment = ".txt"
 
-	def saveFeatures(self, *targetPhones, rootDir="data/data-generated", limit=1000, verbose=False):
+	def saveFeatures(self, *targetPhones, rootDir="data/data-generated", outDir="models-features", limit=1000, verbose=False):
 		'''
 			save features for *targetPhones located in rootDir. don't pass any targetPhones for saving features for all phones
 			limit: pos for reading first limit lines, neg for reading last |limit| lines, 0 for reading the whole lines
 		'''
 		self.verbose = verbose
+		self.featuresDir = outDir
 		phonesPaths = [os.path.join(rootDir, x) for x in os.listdir(rootDir) if x.endswith(self.ext_alignment) and (len(targetPhones) == 0 or x.replace(self.ext_alignment, "") in targetPhones)]
 		for p in phonesPaths:
 			samples = self._readAlignmentFile(p, limit=limit)
 			features = self._getFeatures(samples)
 			self._saveFeaturesForLabel(features, os.path.basename(p).replace(self.ext_alignment, ""), limit)
 
-	def train(self, rootDir="data/data-generated", outDir="models/", limit=1000, loadFeat=False, verbose=False):
+	def train(self, rootDir="data/data-generated", outDir="models/", featuresDir="models_features", limit=1000, loadFeat=False, verbose=False):
 		self.verbose = verbose
 		self.trainDir = rootDir
+		self.featuresDir = featuresDir
 		trainSetGenerator = self._loadFeatures(modelsSet=limit) if loadFeat else self._readTrainSet(limit=limit)
 		for phoneLabel, features in trainSetGenerator:
 			# input(features[0].shape, features[1])
