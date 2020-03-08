@@ -9,11 +9,12 @@ from HMMTrainer import HMMTrainer
 from align_40_phones import main as runAlign
 
 class HMM(object):
-	def __init__(self):
+	def __init__(self, librispeechDir="data\\train-clean-100"):
 		self.verbose = False
 		self.ext_features = ".feat.pkl"
 		self.featuresDir = "models_features" # deprecated
 		self.ext_alignment = ".txt"
+		self.librispeechDir = librispeechDir
 
 	def saveFeatures(self, *targetPhones, rootDir="data/data-generated", outDir="models-features", limit=1000, verbose=False):
 		'''
@@ -135,7 +136,7 @@ class HMM(object):
 			tgFPath, xmin, xmax = sample
 			tgFPath, xmin, xmax = tgFPath.replace("\\\\", '\\').replace("'", ""), float(xmin.replace("'", "")), float(xmax.replace("'", ""))
 
-			audioPath = os.path.join("data\\train-clean-100", tgFPath.replace(".TextGrid", ".flac") )
+			audioPath = os.path.join(self.librispeechDir, tgFPath.replace(".TextGrid", ".flac") )
 
 			# audio, freq = self._readAudioData(audioPath, xmin=xmin, xmax=xmax)
 			# features = mfcc(audio, samplerate=freq)
