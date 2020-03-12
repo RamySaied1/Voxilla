@@ -31,7 +31,14 @@ def mfcc(audioPath, start_ms, stop_ms):
     features = extractor.process_utterance(audio)
     return np.transpose(features)
 
-
+# 103\1240\103-1240-0028.TextGrid 11.67 11.7
 if __name__ == "__main__":
     # sfread(fpath='data\\train-clean-100\\4441\\76263\\4441-76263-0036.flac', start_ms=14900.0, stop_ms=14940.0)
-    sfread(fpath='data\\train-clean-100\\4441\\76263\\4441-76263-0036.flac', start_ms=14900.0, stop_ms=14940.0)
+    # sfread(fpath='data\\train-clean-100\\4441\\76263\\4441-76263-0036.flac', start_ms=14900.0, stop_ms=14940.0)
+
+    # zeros features !
+    p = 'data\\train-clean-100\\103\\1240\\103-1240-0028.flac'
+    s, e = 11.67*1000, 11.7*1000
+    audio, sampleRate = sfread(fpath=p, start_ms=11.67*1000, stop_ms=11.7*1000)
+    print(mfcc(p, s, e))
+    sf.write("zerosFeatures.flac", audio, sampleRate)
