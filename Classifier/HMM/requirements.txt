@@ -1,0 +1,13 @@
+cffi==1.14.0
+fire==0.2.1
+hmmlearn==0.2.3
+joblib==0.14.1
+numpy==1.18.1
+pycparser==2.20
+pydub==0.23.1
+python-speech-features==0.6
+scikit-learn==0.22.2.post1
+scipy==1.4.1
+six==1.14.0
+termcolor==1.1.0
+tgre==1.0
