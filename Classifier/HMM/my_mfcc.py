@@ -18,7 +18,7 @@ def sfread(fpath, start_ms, stop_ms):
         return sf.read(fpath, start=int(startFrameIndex), stop=int(stopFrameIndex))
     except RuntimeError as error:
         print("Warning:", error, "startFrameIndex", startFrameIndex, "stopFrameIndex", stopFrameIndex)
-        print(f"sfread({fpath=}, {start_ms=}, {stop_ms=})") #! python 3.8 only
+        print(f"sfread({fpath}, {start_ms}, {stop_ms})") #! python 3.8 only
         res = sf.read(fpath)[0][int(startFrameIndex):int(stopFrameIndex)], sample_rate
         print("succeeded reading the whole file and access the required data only")
         return res
