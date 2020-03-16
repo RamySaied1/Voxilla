@@ -27,7 +27,7 @@ def sfread(fpath, start_ms, stop_ms):
 # startFrameIndex 238400.0 stopFrameIndex 239040.0
 def mfcc(audioPath, start_ms, stop_ms):
     audio, freq = sfread(audioPath, start_ms, stop_ms)
-    extractor = MFCCExtractor(samp_rate=freq)
+    extractor = MFCCExtractor(samp_rate=freq, mean_norm_feat=False)
     features = extractor.process_utterance(audio)
     return np.transpose(features)
 
@@ -37,8 +37,11 @@ if __name__ == "__main__":
     # sfread(fpath='data\\train-clean-100\\4441\\76263\\4441-76263-0036.flac', start_ms=14900.0, stop_ms=14940.0)
 
     # zeros features !
-    p = 'data\\train-clean-100\\103\\1240\\103-1240-0028.flac'
-    s, e = 11.67*1000, 11.7*1000
-    audio, sampleRate = sfread(fpath=p, start_ms=11.67*1000, stop_ms=11.7*1000)
+    # p = 'data\\train-clean-100\\103\\1240\\103-1240-0028.flac'
+    # s, e = 11.67*1000, 11.7*1000
+    p = 'data\\train-clean-100\\1081\\125237\\1081-125237-0024.flac'
+    s, e = 11.47*1000, 11.5*1000
+    audio, sampleRate = sfread(fpath=p, start_ms=s, stop_ms=e)
+    print(audio.shape)
     print(mfcc(p, s, e))
     sf.write("zerosFeatures.flac", audio, sampleRate)
