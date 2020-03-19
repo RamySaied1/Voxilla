@@ -9,13 +9,14 @@ from math import floor, ceil
 def sfread(fpath, start_ms, stop_ms):
     # TODO: This is danger assumption if file is used for other dataset than librispeech
     sample_rate = 16000
+    if(start_ms == None): start_ms = 0
 
     startFrameIndex = np.round( (start_ms / 1000) * sample_rate )
-    nframes = ( (stop_ms - start_ms) / 1000) * sample_rate # (stop_ms / 1000 * sampleRate) - startFrameIndex
-    stopFrameIndex = np.round(startFrameIndex + nframes)
+    nframes = ( (stop_ms - start_ms) / 1000) * sample_rate if stop_ms else None # (stop_ms / 1000 * sampleRate) - startFrameIndex
+    stopFrameIndex = int(np.round(startFrameIndex + nframes)) if stop_ms else None
     # stopFrameIndex = ceil(startFrameIndex + nframes) #? should we use this instead
     try:
-        return sf.read(fpath, start=int(startFrameIndex), stop=int(stopFrameIndex))
+        return sf.read(fpath, start=int(startFrameIndex), stop=stopFrameIndex)
     except RuntimeError as error:
         print("Warning:", error, "startFrameIndex", startFrameIndex, "stopFrameIndex", stopFrameIndex)
         print(f"sfread({fpath}, {start_ms}, {stop_ms})") #! python 3.8 only

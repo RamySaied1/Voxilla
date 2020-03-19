@@ -24,7 +24,7 @@ class HMM_HMML(HMMBase):
 			normalizationDir = "data/normalization",
 			featuresDir = "data/models-features",
 			modelsDir = "data/models",
-			verbose=False, normalize=True, inc1d=False
+			verbose=False, normalize=True, n_skip=0
 		):
 		super().__init__(
 			librispeechDir = librispeechDir,
@@ -35,15 +35,27 @@ class HMM_HMML(HMMBase):
 			featuresDir = featuresDir,
 			modelsDir = modelsDir,
 			ext_model=".model.pkl",
-			inc1d = inc1d, verbose = verbose, normalize = normalize
+			n_skip = n_skip, verbose = verbose, normalize = normalize
 		)
 		self.GMM = GMM
 
-	def modelsMonitor(self, modelsPath="models/", modelsSet=200):
-		models = self._loadModels(self._getModelsPath(modelsPath, modelsSet))
+	def modelsMonitor(self, *phones, modelsSet=200):
+		models = self._loadModels(*phones, path=self._getModelsPath(self.modelsDir, modelsSet))
 		for model in models:
 			print(model.name, ":", model.monitor_, "converged" if model.monitor_.converged else "not converged")
 
+	def generateSample(self, *phones, numSamples=1, modelsSet=200):
+		models = self._loadModels(*phones, path=self._getModelsPath(self.modelsDir, modelsSet))
+		for model in models:
+			print(f"for model {model.name}, generating {numSamples} samples")
+			samples = model.sample(n_samples=numSamples)
+			# print("shape of the samples:", samples.shape)
+			print(type(samples), len(samples))
+			self._verbose(samples)
+			firstSample = samples[0]
+			logprob = model.score(firstSample)
+			print(logprob)
+			
 	#!
 	def _loadModel(self, loc):
 		'''

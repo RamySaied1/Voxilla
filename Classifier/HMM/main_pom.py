@@ -22,7 +22,8 @@ class HMM_POM(HMMBase):
 			normalizationDir = "data/normalization",
 			featuresDir = "data/models-features",
 			modelsDir = "data/models",
-			verbose=False, normalize=True, inc1d=False,
+			ext_model = ".model.json",
+			verbose=False, normalize=True, n_skip=0,
 			gpu=False, threads=1, GMM=False
 		):
 		super().__init__(
@@ -33,13 +34,12 @@ class HMM_POM(HMMBase):
 			normalizationDir = normalizationDir,
 			featuresDir = featuresDir,
 			modelsDir = modelsDir,
-			ext_model = ".model.json",
-			inc1d = inc1d, verbose = verbose, normalize = normalize
+			ext_model = ext_model,
+			n_skip = n_skip, verbose = verbose, normalize = normalize
 		)
 		self.gpu = gpu
 		self.threads = threads
 		self.GMM = GMM
-
 
 	#!
 	def _loadModel(self, loc):
@@ -89,6 +89,17 @@ class HMM_POM(HMMBase):
 		# print((sum(features) / len(features)))
 		return sum(features)
 
+	def _generateSamples(self, numSamples, model):
+		sample, path = model.sample(path=True)
+		path = list( map(lambda state:state.name, path) )
+		print("path is", path)
+		# print(type(samples), "shape of the samples:", samples.shape)
+		self._verbose("sample is", sample)
+		print("taking this sample and compute the prob of it on the model")
+		logprob = model.log_probability(sample)
+		prob = model.probability(sample)
+		print(logprob, prob)
+		return sample
 
 if __name__ == "__main__":
 	from fire import Fire

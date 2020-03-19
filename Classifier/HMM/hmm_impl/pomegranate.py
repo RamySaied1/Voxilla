@@ -2,6 +2,7 @@ from pomegranate import HiddenMarkovModel, GeneralMixtureModel, MultivariateGaus
 from pomegranate.utils import is_gpu_enabled, disable_gpu, enable_gpu
 from pomegranate.callbacks import LambdaCallback, ModelCheckpoint
 from pomegranate.io import BaseGenerator, SequenceGenerator
+# from pomegranate.base import State
 import numpy as np
 from ticktock import tick, tock
 
@@ -18,7 +19,7 @@ def randMVG(n=40):
     # print(covs)
     return MultivariateGaussianDistribution(means, covs)
 
-def randGMM(n=40, nmix=5):
+def randMVGMM(n=40, nmix=5, dist=MultivariateGaussianDistribution):
     '''
     generate random gaussian mixture model of multivariate distribution
     '''
@@ -59,15 +60,28 @@ class PomegranateTrainer(HMMTrainerBase):
             data: observed data.
         '''
         self._buildModel(data)
+        print("model builded")
         data = self._reshapeFeatures(data, lens)
         # print(data.shape, data)
+        # for i, seq in enumerate(data):
+        #     print("iteration number", i)
+        #     input(seq.shape)
+        #     self.model.fit(seq, 
+        #         callbacks=[LambdaCallback(on_epoch_end=lambda info: info)],
+        #         # n_jobs=threads,
+        #         # algorithm="viterbi",
+        #         min_iterations=2,
+        #         # lr_decay=-0.5, # default is 0
+        #         verbose=True
+        #     )
         self.model.fit(data, 
             callbacks=[LambdaCallback(on_epoch_end=lambda info: info)],
-            n_jobs=threads,
+            # n_jobs=threads,
             # algorithm="viterbi",
-            min_iterations=10,
-            lr_decay=-0.5, # default is 0
-            verbose=True
+            min_iterations=2,
+            # lr_decay=-0.5, # default is 0
+            verbose=True,
+            debug=False
         )
         return self # same here, we return the self(HMMTrainer) for chaining
 
@@ -109,7 +123,6 @@ class PomegranateTrainer(HMMTrainerBase):
         tm[indices[:, 0], indices[:, 1]] = 0.5
         tm[self.statesNumber-1, self.statesNumber-1] = 0.5 # this is the end state prob, i write it alone as we may change it specificity
 
-
         dists = self._initDists(data)
 
         starts = np.zeros((self.statesNumber,))
@@ -119,32 +132,39 @@ class PomegranateTrainer(HMMTrainerBase):
         ends[-1] = 0.5
 
         self.model = HiddenMarkovModel.from_matrix(tm, dists, starts, ends, name=self.mname)
+        
         return self.model
     
-    # def _reshapeFeatures(self, origData, lens):
-    #     # TODO: consider improving
-    #     # input("reshaping the data")
-    #     lens = np.cumsum(lens)
-    #     lens = np.insert(lens, 0, 1, axis=0)
-    #     res = np.array([origData[int(v - 1):int(lens[i+1] - 1)] for i,v  in enumerate(lens[:-1])])
-    #     # print("res shape:", res.shape, "lens shape", len(lens), "lengths", len(lengths))
-    #     # print("first x:", res[0])
-    #     # for x in res:
-    #     #     input(x.shape)
-    #     return res
-
     def _initDists(self, X, distribution=MultivariateGaussianDistribution):
-        # mvgd = MultivariateGaussianDistribution.from_samples(data)
-        # print(mvgd)
-        # gmm = GeneralMixtureModel([mvgd.copy() for _ in range(self.nmix)]) # one state dist
-        # dists = [mvgd.copy() for _ in range(self.statesNumber)] #! for GHMM
-        # dists = [gmm.copy() for _ in range(self.statesNumber)] #! for GMMHMM
-        # dists = [randGMM(nmix=self.nmix, n=40) for _ in range(self.statesNumber)] #! for random GMMHMM
-        dists = [randMVG(n=40) for _ in range(self.statesNumber)] #! for random GHMM
+        technique = "MV-GMM" # mixture of multivariate gaussain distribution
+        if (technique == "GMM"):
+            # gaussian mixture model
+            #// uvgd = NormalDistribution.from_samples(X)
+            #// gmm = GeneralMixtureModel([uvgd.copy() for _ in range(self.nmix)])
+            gmm = GeneralMixtureModel.from_samples(distributions=[NormalDistribution for _ in range(self.nmix)], X=X)
+            dists = [gmm.copy() for _ in range(self.statesNumber)]
+        elif(technique == "MV-GMM"):
+            # multivariate gaussian mixture model
+            #// mvgd = MultivariateGaussianDistribution.from_samples(X)
+            #// gmm = GeneralMixtureModel([mvgd.copy() for _ in range(self.nmix)])
+            gmm = GeneralMixtureModel.from_samples(distributions=[MultivariateGaussianDistribution for _ in range(self.nmix)], X=X, n_components=3)
+            dists = [gmm.copy() for _ in range(self.statesNumber)]
+        elif(technique == "MVG"):
+            self._initkmeans(X=X, numClasses=self.statesNumber)
+            dists = [MultivariateGaussianDistribution.from_samples(X=X[y==i]) for i in range(self.statesNumber)]
+        elif(technique == "R_GMM"):
+            # random gaussian mixture model
+            randNormal = lambda: NormalDistribution(np.random.randint(1, 10), 1)
+            randGMM = lambda: GeneralMixtureModel([randNormal() for _ in range(self.nmix)])
+            dists = [randGMM() for _ in range(self.statesNumber)]
+        elif(technique == "R_MV-GMM"):
+            # random multivariate gaussian mixture model
+            randGMM = lambda: GeneralMixtureModel([randMVG() for _ in range(self.nmix)])
+            dists = [randGMM() for _ in range(self.statesNumber)]
         return dists
 
-
-        #! GMM-HMM using kmeans inits
+        #* not completed:
+        #! GMM-HMM-k
         y = self._initkmeans(X, self.statesNumber)
         # list(map(print, y))
         return [GeneralMixtureModel.from_samples(distribution, X=X[y==i], n_components=self.nmix) for i in range(self.statesNumber)]
@@ -189,7 +209,17 @@ class PomegranateTrainer(HMMTrainerBase):
         # return GeneralMixtureModel([MultivariateGaussianDistribution.from_samples(X[y == i]) for i in range(self.nmix)])
         return y
     def _reshapeFeatures(self, origData, lens):
+        # TODO: consider memory enhancements at copying
         lens = np.cumsum(lens)
         lens = np.insert(lens, 0, 0, axis=0)
         return np.array([origData[int(v):int(lens[i+1])] for i,v  in enumerate(lens[:-1])])
+
+
+
+def test(data, normalize=False):
+    features, lengths = data
+
+
+if __name__ == "__main__":
+    test()
 

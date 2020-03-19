@@ -17,11 +17,17 @@ class HMMBase(object):
 			normalizationDir = "data/normalization",
 			featuresDir = "data/models-features",
 			modelsDir = "data/models",
-			inc1d=False, ext_model=".model", verbose=False, normalize=True):
-
+			ext_model=".model",
+			n_skip=0,
+			verbose=False,
+			normalize=True
+			):
+		'''
+			n_skip: any sequence with number of observations less than or equal n_skip will be skipped(ignored). By default this is 0 so no ignoring. if this is 2 then any seq with 2, 1 will be ignored 
+		'''
 		# options
 		self.verbose = verbose
-		self.skip1d = not inc1d
+		self.n_skip = n_skip
 		self.normalize = normalize
 		# extensions
 		self.ext_features = ".feat.pkl"
@@ -133,14 +139,56 @@ class HMMBase(object):
 		print("errors:", errors, "corrects", corrects, "with total distance =", totalDistance)
 
 			
+	def test(self, *phones, fpath=None, modelsSet=200):
+		'''
+			phones: restrict the phones that will be loaded. if length is 0, all available phones will be loaded
+		'''
+		if(fpath == None):
+			raise TypeError("fpath can't be None")
+		# audioFeatures = mfcc(fpath, start_ms=0, stop_ms=None) # TODO: this is the required line (real test)
+		models = self._loadModels(*phones, path=self._getModelsPath(self.modelsDir, modelsSet))
+
+		# TODO: remove these lines
+		fpath = 'data\\train-clean-100\\103\\1240\\103-1240-0006.flac'
+		audioFeatures = mfcc(fpath, start_ms=2.68*1000, stop_ms=2.81*1000) # test of OY phone
+		# audioFeatures = mfcc(fpath, start_ms=0.3*1000, stop_ms=0.37*1000) # test of phone Z
+		# audioFeatures = mfcc(fpath, start_ms=0.59*1000, stop_ms=0.62*1000) # test of phone N (1, 40)
+
+		model = models[0]
+		self._verbose("audioFeatures.shape", audioFeatures.shape)
+		self._verbose("this is model", model.name)
+		self._verbose("type of dist is", type(model.states[0].distribution).__name__)
+		self._verbose("all feats together", model.states[0].distribution.log_probability(audioFeatures))
+		self._verbose("all feats together", model.states[0].distribution.log_probability(np.array([audioFeatures[0],])))
+		avg = 0
+		res = []
+		for frameFeatures in audioFeatures:
+			probs = [s.distribution.log_probability(frameFeatures) for m in models for s in m.states[:3] ]
+			probs = np.reshape(probs, (len(models), 3))
+			input(probs)
+			res.append(probs)
+		res = np.array(res)
+		print(res)
+		# 	res = list(map(lambda state: state.distribution.log_probability(frameFeatures), model.states[:3]))
+		# 	avg += sum(res) / 3
+		# 	input(res)
+		# self._verbose(avg)
+
+
 	def modelsInfo(self, *phones, modelsSet=200):
 		self._verbose(f"getting information about models who trained over {modelsSet} examples")
 		models = self._loadModels(*phones, path=self._getModelsPath(self.modelsDir, modelsSet))
-		print(models)
 		for model in models:
 			info = self._modelInfo(model)
-			print(info.name, ":", info.transmat)
-		
+			print(info.name, ":\n", info.transmat)
+
+	def generateSample(self, *phones, numSamples=1, modelsSet=200):
+		models = self._loadModels(*phones, path=self._getModelsPath(self.modelsDir, modelsSet))
+		for model in models:
+			print(f"for model {model.name}, generating {numSamples} samples")
+			data = self._generateSamples(numSamples, model)
+			print(data)
+
 	def _verbose(self, *args, **kwargs):
 		if (self.verbose):
 			print(*args, **kwargs)
@@ -154,13 +202,13 @@ class HMMBase(object):
 			audioPath = os.path.join(self.librispeechDir, tgFPath.replace(".TextGrid", ".flac") )
 			features = mfcc(audioPath, start_ms=xmin*1000, stop_ms=xmax*1000)
 
-			if (self.skip1d and len(features) == 1):
+			if (len(features) <= self.n_skip):
 				ignored += 1
 				continue
 
 			currentTrainFeatures.append(features)
 			lengths.append(len(features))
-		if(self.skip1d):
+		if(self.n_skip > 0):
 			self._verbose("_getFeatures:", "ignored", ignored, "added:", len(lengths), "ignoring%:", 100 * ignored / (ignored + len(lengths)), "%")
 		if(self.normalize):
 			# TODO option concatenate=False is not working when normalizing
@@ -244,7 +292,22 @@ class HMMBase(object):
 		with open(loc, "rb") as file:
 			self._verbose("loading features for", label)
 			features = pickle.load(file)
-		return features if ref == None or ref == 0 else features[0:ref]
+		features, lens = features
+		features = features if ref == None or ref == 0 else features[0:ref] # filter out of limit features
+		lens = lens if ref == None or ref == 0 else lens[0:ref] # filter out of limit features
+		if(self.n_skip > 0): # this is added so that if there is no skip, there is no need of this operation and no need of copying
+			def skipLowLens(origData, lens):
+				lens = np.cumsum(lens)
+				lens = np.insert(lens, 0, 0, axis=0)
+				sequences = np.array([origData[int(v):int(lens[i+1])] for i,v  in enumerate(lens[:-1]) if lens[i+1] - v > self.n_skip])
+				lens = list(map(len, sequences))
+				return np.concatenate(sequences), lens
+			features, lens = skipLowLens(features, lens)
+		if (self.normalize):
+			self.scalerSet = modelsSet
+			self._verbose("scaling the saved features with the scaler")
+			features = self._loadScaler().transform(features)
+		return features, lens
 
 	def _readAlignmentFile(self, path, limit=0):
 		'''
@@ -310,7 +373,9 @@ class HMMBase(object):
 		'''
 		raise NotImplementedError("modelInfo can't be implemented in base class. you have not to directly deal with base class")		
 
-
+	def _generateSamples(self, numSamples, model):
+		raise NotImplementedError("_generateSamples can't be implemented in base class. you have not to directly deal with base class")		
+		
 
 
 class Selector(object):
