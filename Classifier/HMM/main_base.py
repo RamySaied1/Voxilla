@@ -4,13 +4,14 @@ import numpy as np
 import pickle
 from align_40_phones import main as runAlign
 from ticktock import tick, tock
+from concurrent.futures import ProcessPoolExecutor
 
 #scaling
 from sklearn.preprocessing import StandardScaler
 
 class HMMBase(object):
 	def __init__(self, 
-			librispeechDir="data\\train-clean-100", 
+			librispeechDir="data/train-clean-100", 
 			alignmentsDir = "data/alignments",
 			trainDir = "data/alignments",
 			testDir = "data/alignments",
@@ -20,7 +21,8 @@ class HMMBase(object):
 			ext_model=".model",
 			n_skip=0,
 			verbose=False,
-			normalize=True
+			normalize=True,
+			flog=False
 			):
 		'''
 			n_skip: any sequence with number of observations less than or equal n_skip will be skipped(ignored). By default this is 0 so no ignoring. if this is 2 then any seq with 2, 1 will be ignored 
@@ -29,6 +31,7 @@ class HMMBase(object):
 		self.verbose = verbose
 		self.n_skip = n_skip
 		self.normalize = normalize
+		self.flog = flog # change the stdout to a file of timestamp
 		# extensions
 		self.ext_features = ".feat.pkl"
 		self.ext_alignment = ".aligned"
@@ -86,6 +89,30 @@ class HMMBase(object):
 			self._saveModel(loc, trainedModel)
 			# userMessage = f"model of {phoneLabel} saved in {os.path.abspath(loc)}" if isSaved else f"model can't be saved to {loc}"
 			# self._verbose(userMessage)
+	def _train(self, phoneLabel, limit, loadFeat):
+		self._verbose(f"{phoneLabel}: train model", phoneLabel)
+		trainSetGenerator = self._loadFeatures(phoneLabel, modelsSet=limit) if loadFeat else self._readTrainSet(limit=limit, customPhones=[phoneLabel])
+		label, features = next(trainSetGenerator)
+		if(label != phoneLabel):
+			raise RuntimeError(f"{phoneLabel}: invalid state, trainSetGenerator returns features of {label} but {phoneLabel} expected")
+		tick(f"timing total train time of {phoneLabel}")
+		trainedModel = self._trainModel(phoneLabel, features)
+		tock(f"{phoneLabel}: train end")
+		loc = os.path.join(self.modelsDir, str(limit))
+		os.makedirs(loc, exist_ok=True)
+		loc = os.path.join(loc, phoneLabel) + self.ext_model
+		self._saveModel(loc, trainedModel)	
+	def train_cores(self, *phonesNames, limit=1000, loadFeat=False):
+		#from multiprocessing import cpu_count
+		#from sys import __stdout__ as console
+		#print(cpu_count(), file=console)
+		self.scalerSet = limit
+		executor = ProcessPoolExecutor(max_workers=len(phonesNames))
+		for phoneLabel in phonesNames:
+			print(f"scheduling {phoneLabel}")
+			future = executor.submit(self.f, phoneLabel, limit, loadFeat)
+			#future.result()
+		executor.shutdown(True)
 	
 	def align(self):
 		# TODO give interface for change the target phones and phonesMapper
@@ -197,7 +224,7 @@ class HMMBase(object):
 		currentTrainFeatures, lengths, ignored = [], [], 0
 		for sample in lines:
 			tgFPath, xmin, xmax = sample
-			tgFPath, xmin, xmax = tgFPath.replace("\\\\", '\\').replace("'", ""), float(xmin.replace("'", "")), float(xmax.replace("'", ""))
+			tgFPath, xmin, xmax = tgFPath.replace("\\\\", '/').replace("'", ""), float(xmin.replace("'", "")), float(xmax.replace("'", ""))
 
 			audioPath = os.path.join(self.librispeechDir, tgFPath.replace(".TextGrid", ".flac") )
 			features = mfcc(audioPath, start_ms=xmin*1000, stop_ms=xmax*1000)

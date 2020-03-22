@@ -14,7 +14,7 @@ from sklearn.datasets.samples_generator import make_blobs
 from main_base import HMMBase
 
 class Inspection(HMMBase):
-	def __init__(self, librispeechDir="data\\train-clean-100", inc1d=False, verbose=True, normalize=False):
+	def __init__(self, librispeechDir="data/train-clean-100", inc1d=False, verbose=True, normalize=False):
 		super().__init__(librispeechDir=librispeechDir, inc1d=inc1d, normalize=normalize)
 		self.verbose = verbose
 

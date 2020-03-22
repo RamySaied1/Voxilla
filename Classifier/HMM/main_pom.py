@@ -15,7 +15,7 @@ class HMM_POM(HMMBase):
 		An interface for training A hmm of phones using pomegranate implementation
 	'''
 	def __init__(self,
-			librispeechDir="data\\train-clean-100",
+			librispeechDir="data/train-clean-100",
 			alignmentsDir = "data/alignments",
 			trainDir = "data/alignments",
 			testDir = "data/alignments",

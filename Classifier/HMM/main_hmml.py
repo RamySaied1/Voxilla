@@ -17,7 +17,7 @@ class HMM_HMML(HMMBase):
 		An interface for training A hmm of phones using hmmlearn implementation
 	'''
 	def __init__(self, GMM=False,
-			librispeechDir="data\\train-clean-100",
+			librispeechDir="data/train-clean-100",
 			alignmentsDir = "data/alignments",
 			trainDir = "data/alignments",
 			testDir = "data/alignments",
