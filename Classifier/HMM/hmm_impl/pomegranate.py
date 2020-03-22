@@ -1,6 +1,6 @@
 from pomegranate import HiddenMarkovModel, GeneralMixtureModel, MultivariateGaussianDistribution, NormalDistribution, Kmeans
 from pomegranate.utils import is_gpu_enabled, disable_gpu, enable_gpu
-from pomegranate.callbacks import LambdaCallback, ModelCheckpoint
+from pomegranate.callbacks import LambdaCallback, Callback
 from pomegranate.io import BaseGenerator, SequenceGenerator
 # from pomegranate.base import State
 import numpy as np
@@ -8,6 +8,40 @@ from ticktock import tick, tock
 
 from hmm_train_base import HMMTrainerBase, HMMInfo
 
+class ModelCheckpoint(Callback):
+    """This will save the model to disk after each epoch."""
+
+    def __init__(self, name=None, verbose=True, n=1):
+        self.model = None
+        self.params = None
+        self.name = None
+        self.verbose = verbose
+        self.n = n
+        self.endsCounter = 0
+
+    def on_epoch_end(self, logs):
+        """Save the model to disk at the end of each n epoch."""
+
+        self.endsCounter += 1
+        if(self.endsCounter % self.n == 0):
+            self._save(logs)
+            self.endsCounter = 0
+
+    def _save(self, logs):
+        """Save the model to disk at the end of each epoch."""
+
+        model = self.model.to_json()
+        epoch = logs['epoch']
+        name = self.name if self.name is not None else self.model.name
+
+        if self.verbose:
+            print("[{}] Saving checkpoint to {}.{}.json".format(epoch, name, epoch))
+
+        with open('{}.{}.json'.format(name, epoch), 'w') as outfile:
+            outfile.write(model)
+
+    def on_training_end(self, logs):
+        self._save(logs)
 
 def randMVG(n=40):
     '''
@@ -62,26 +96,15 @@ class PomegranateTrainer(HMMTrainerBase):
         self._buildModel(data)
         print("model builded")
         data = self._reshapeFeatures(data, lens)
-        # print(data.shape, data)
-        # for i, seq in enumerate(data):
-        #     print("iteration number", i)
-        #     input(seq.shape)
-        #     self.model.fit(seq, 
-        #         callbacks=[LambdaCallback(on_epoch_end=lambda info: info)],
-        #         # n_jobs=threads,
-        #         # algorithm="viterbi",
-        #         min_iterations=2,
-        #         # lr_decay=-0.5, # default is 0
-        #         verbose=True
-        #     )
+        epochEndMessage = "{}: [{}] improvement {}"
         self.model.fit(data, 
-            callbacks=[LambdaCallback(on_epoch_end=lambda info: info)],
+            callbacks=[ModelCheckpoint(n=5), LambdaCallback(on_epoch_end=lambda info: print(epochEndMessage.format(self.model.name, info['epoch'], info['improvement'])))],
             # n_jobs=threads,
             # algorithm="viterbi",
             min_iterations=2,
             # lr_decay=-0.5, # default is 0
             verbose=True,
-            debug=False
+            # debug=False
         )
         return self # same here, we return the self(HMMTrainer) for chaining
 
@@ -136,7 +159,7 @@ class PomegranateTrainer(HMMTrainerBase):
         return self.model
     
     def _initDists(self, X, distribution=MultivariateGaussianDistribution):
-        technique = "MV-GMM" # mixture of multivariate gaussain distribution
+        technique = "R_MV-GMM" # mixture of multivariate gaussain distribution
         if (technique == "GMM"):
             # gaussian mixture model
             #// uvgd = NormalDistribution.from_samples(X)

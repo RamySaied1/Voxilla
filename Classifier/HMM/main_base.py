@@ -110,7 +110,7 @@ class HMMBase(object):
 		executor = ProcessPoolExecutor(max_workers=len(phonesNames))
 		for phoneLabel in phonesNames:
 			print(f"scheduling {phoneLabel}")
-			future = executor.submit(self.f, phoneLabel, limit, loadFeat)
+			future = executor.submit(self._train, phoneLabel, limit, loadFeat)
 			#future.result()
 		executor.shutdown(True)
 	
