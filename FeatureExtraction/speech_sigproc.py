@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 class FrontEnd:
 
     def __init__(self, samp_rate=16000, frame_duration=0.025, frame_shift=0.010, preemphasis=0.97,
@@ -85,7 +85,7 @@ class FrontEnd:
 
     def wav_to_frames(self, wav):
         # only process whole frames
-        num_frames = int(np.floor((wav.shape[0] - self.win_size) / self.win_shift) + 1)
+        num_frames = self.num_frames
         frames = np.zeros([self.win_size, num_frames])
         for t in range(0, num_frames):
             frame = wav[t * self.win_shift:t * self.win_shift + self.win_size]
@@ -133,22 +133,15 @@ class FrontEnd:
 
     def process_utterance(self, utterance):
         wav     = self.dither(utterance)
+        self.num_frames = int(np.floor((wav.shape[0] - self.win_size) / self.win_shift) + 1)
         wav     = self.pre_emphasize(wav)
         frames  = self.wav_to_frames(wav)
         magspec = self.frames_to_magspec(frames)
         fbank   = self.magspec_to_fbank(magspec)
-        if (self.mean_normalize):
+        if (self.mean_normalize and self.num_frames > 1):
             fbank = self.mean_norm_fbank(fbank)
 
         if (self.compute_global_stats):
             self.accumulate_stats(fbank)
 
         return fbank
-
-
-
-
-
-
-
-

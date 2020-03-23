@@ -93,6 +93,7 @@ class PomegranateTrainer(HMMTrainerBase):
         '''
             data: observed data.
         '''
+        if(threads != 1): raise RuntimeError("threads option is disabled due to low perf.")
         self._buildModel(data)
         print("model builded")
         data = self._reshapeFeatures(data, lens)
@@ -104,6 +105,7 @@ class PomegranateTrainer(HMMTrainerBase):
             min_iterations=2,
             # lr_decay=-0.5, # default is 0
             verbose=True,
+            stop_threshold=5e-7
             # debug=False
         )
         return self # same here, we return the self(HMMTrainer) for chaining
