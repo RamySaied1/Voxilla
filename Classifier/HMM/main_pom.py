@@ -54,7 +54,7 @@ class HMM_POM(HMMBase):
 		if(os.path.isdir(path)):
 			self._verbose(f"extracting emissions of dir {os.path.abspath(path)}")
 			join = lambda f: os.path.join(path, f)
-			exist = lambda f: os.path.exists(join(f.replace(self.ext_feat, self.ext_emissionsProb)))
+			exist = lambda f: os.path.exists(join(f.replace(self.ext_feat, self.ext_emissions)))
 			paths = [join(file) for file in os.listdir(path) if file.endswith(self.ext_feat) and not exist(file)]
 		for featFile in paths:
 			tick()
@@ -73,7 +73,7 @@ class HMM_POM(HMMBase):
 		
 		allprobs = np.transpose([s.distribution.log_probability(audioFeatures) for m in self.models for s in m.states[:3] ])
 		self._verbose("emissions shape", allprobs.shape)
-		savLoc = featPath.replace(self.ext_feat, self.ext_emissionsProb)
+		savLoc = featPath.replace(self.ext_feat, self.ext_emissions)
 		if(self.ext_emissions.endswith(".txt")):
 			np.savetxt(savLoc, allprobs)
 		elif(self.ext_emissions.endswith(".npy")):
