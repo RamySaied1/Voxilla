@@ -40,12 +40,57 @@ class HMM_POM(HMMBase):
 		self.gpu = gpu
 		self.threads = threads
 		self.GMM = GMM
+		self.ext_feat = ".feat"
+		self.ext_emissionsProb = ".emis.logprob.h5"
 
+	def emissions(self, *phones, path=None, modelsSet=200):
+		'''
+			extract emissions probabilities of a file or all files in the dir of path is a dir
+		'''
+		if(not os.path.exists(path)):
+			raise FileNotFoundError("The path can't be found")
+		paths = [path]
+		if(os.path.isdir(path)):
+			self._verbose(f"extracting emissions of dir {os.path.abspath(path)}")
+			join = lambda f: os.path.join(path, f)
+			exist = lambda f: os.path.exists(join(f.replace(self.ext_feat, self.ext_emissionsProb)))
+			paths = [join(file) for file in os.listdir(path) if file.endswith(self.ext_feat) and not exist(file)]
+		for featFile in paths:
+			tick()
+			self._fileEmissions(*phones, featPath=featFile, modelsSet=modelsSet)
+			tock()
+
+	def _fileEmissions(self, *phones, featPath=None, modelsSet=200):
+		if(featPath == None):
+			raise TypeError("fpath can't be None")
+		from FeatureExtraction.htk_featio import read_htk_user_feat as loadFeats
+		self._loadModels(*phones, path=self._getModelsPath(self.modelsDir, modelsSet))
+		audioFeatures = loadFeats(featPath) # (numFrames, 40)
+		self.scalerSet = modelsSet
+		print("audioFeatures.shape", audioFeatures.shape)
+		audioFeatures = self._loadScaler().transform(audioFeatures)
+		
+		allprobs = np.transpose([s.distribution.log_probability(audioFeatures) for m in self.models for s in m.states[:3] ])
+		self._verbose("emissions shape", allprobs.shape)
+		savLoc = featPath.replace(self.ext_feat, self.ext_emissionsProb)
+		# np.savetxt(savLoc, allprobs)
+		# np.save(savLoc, allprobs)
+		# with open(savLoc, "wb") as saveFile:
+		# 	pickle.dump(allprobs, saveFile)
+		from h5py import File as CompressedFile
+		with CompressedFile(savLoc, 'w') as hf:
+			hf.create_dataset("name-of-dataset",  data=allprobs)
+		self._verbose(f"emissions probabilities of file {featPath} saved in {os.path.abspath(savLoc)}")
+
+	def _loadModels(self, *args, **kwargs):
+		if(not hasattr(self, "models")):
+			self.models = super()._loadModels(*args, **kwargs)
 	#!
 	def _loadModel(self, loc):
 		'''
 			load the model from io in loc
 		'''
+		self._verbose(f"loading model from {loc}")
 		return PomegranateTrainer.load(loc)
 
 	def _saveModel(self, loc, model):
@@ -78,7 +123,20 @@ class HMM_POM(HMMBase):
 		lengths = np.cumsum(lengths)
 		lengths = np.insert(lengths, 0, 0, axis=0)
 		# print(features.shape)
+
+		# tick("reshaping and computing")
 		features = np.array( [model.log_probability(features[int(v):int(lengths[i+1])]) for i,v  in enumerate(lengths[:-1])] )
+		# tick("reshaping")
+		# features = [ features[int(v):int(lengths[i+1])] for i,v  in enumerate(lengths[:-1]) ]
+		# tock("done reshaping")
+		# tick("compute probs")
+		# tick("timing one sample")
+		# model.log_probability(features[0])
+		# tock("one sample")
+		# features = np.array( [model.log_probability(s, check_input=False) for s in features] )
+		# tock("compute probs done")
+		# tock("reshaping and computing")
+
 		# print(len(features), "==>", end=" ")
 		features = [f for f in features if f != -np.inf]
 		# print(len(features))
@@ -92,15 +150,15 @@ class HMM_POM(HMMBase):
 	def _generateSamples(self, numSamples, model):
 		sample, path = model.sample(path=True)
 		path = list( map(lambda state:state.name, path) )
-		print("path is", path)
 		# print(type(samples), "shape of the samples:", samples.shape)
-		self._verbose("sample is", sample)
-		print("taking this sample and compute the prob of it on the model")
+		self._verbose("taking this sample and compute the prob of it on the model")
 		logprob = model.log_probability(sample)
-		prob = model.probability(sample)
-		print(logprob, prob)
-		return sample
+		print(logprob, model.probability(sample))
+		return sample, path, logprob
 
+from pomegranate.utils import is_gpu_enabled, disable_gpu
+disable_gpu()
+print("gpu:", is_gpu_enabled())
 if __name__ == "__main__":
 	from fire import Fire
 	tick("timing the whole run")

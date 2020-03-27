@@ -118,10 +118,10 @@ class HMMBase(object):
 		# TODO give interface for change the target phones and phonesMapper
 		runAlign(self.librispeechDir, self.alignmentsDir)
 
-	def testScores(self, k=5, modelsSet=200, testlimit=1):
+	def testScores(self, *phoens, k=5, modelsSet=200, testlimit=1):
 		self.scalerSet = modelsSet
 		modelsPath = os.path.join(self.modelsDir, str(modelsSet))
-		models = self._loadModels(path=modelsPath)
+		models = self._loadModels(*phoens, path=modelsPath)
 		errors , corrects, dists = 0, 0, 0
 		for trueLabel, features in self._readTestSet(limit=testlimit, rand=False):
 			scores = [self._computeScore(trainedModel, features) for trainedModel in models]
@@ -166,40 +166,24 @@ class HMMBase(object):
 		print("errors:", errors, "corrects", corrects, "with total distance =", totalDistance)
 
 			
-	def test(self, *phones, fpath=None, modelsSet=200):
+	def test(self, *phones, featPath=None, modelsSet=200):
 		'''
 			phones: restrict the phones that will be loaded. if length is 0, all available phones will be loaded
 		'''
-		if(fpath == None):
+		if(featPath == None):
 			raise TypeError("fpath can't be None")
+		from FeatureExtraction.htk_featio import read_htk_user_feat as loadFeats
 		# audioFeatures = mfcc(fpath, start_ms=0, stop_ms=None) # TODO: this is the required line (real test)
 		models = self._loadModels(*phones, path=self._getModelsPath(self.modelsDir, modelsSet))
-
-		# TODO: remove these lines
-		fpath = 'data\\train-clean-100\\103\\1240\\103-1240-0006.flac'
-		audioFeatures = mfcc(fpath, start_ms=2.68*1000, stop_ms=2.81*1000) # test of OY phone
-		# audioFeatures = mfcc(fpath, start_ms=0.3*1000, stop_ms=0.37*1000) # test of phone Z
-		# audioFeatures = mfcc(fpath, start_ms=0.59*1000, stop_ms=0.62*1000) # test of phone N (1, 40)
-
-		model = models[0]
-		self._verbose("audioFeatures.shape", audioFeatures.shape)
-		self._verbose("this is model", model.name)
-		self._verbose("type of dist is", type(model.states[0].distribution).__name__)
-		self._verbose("all feats together", model.states[0].distribution.log_probability(audioFeatures))
-		self._verbose("all feats together", model.states[0].distribution.log_probability(np.array([audioFeatures[0],])))
-		avg = 0
-		res = []
-		for frameFeatures in audioFeatures:
-			probs = [s.distribution.log_probability(frameFeatures) for m in models for s in m.states[:3] ]
-			probs = np.reshape(probs, (len(models), 3))
-			input(probs)
-			res.append(probs)
-		res = np.array(res)
-		print(res)
-		# 	res = list(map(lambda state: state.distribution.log_probability(frameFeatures), model.states[:3]))
-		# 	avg += sum(res) / 3
-		# 	input(res)
-		# self._verbose(avg)
+		# list(map(lambda model: input(model.name), models)) # check sorting of models
+		audioFeatures = loadFeats(featPath) # (numFrames, 40)
+		self.scalerSet = modelsSet
+		audioFeatures = self._loadScaler().transform(audioFeatures)
+		
+		allprobs = np.transpose([s.distribution.log_probability(audioFeatures) for m in models for s in m.states[:3] ])
+		allprobs = np.append(allprobs, allprobs[len(allprobs-3):,], axis=0)
+		print("allprobs.shape", allprobs.shape)
+		np.savetxt(featPath.replace(".feat", ".emis.logprob"), allprobs)
 
 
 	def modelsInfo(self, *phones, modelsSet=200):
@@ -213,8 +197,10 @@ class HMMBase(object):
 		models = self._loadModels(*phones, path=self._getModelsPath(self.modelsDir, modelsSet))
 		for model in models:
 			print(f"for model {model.name}, generating {numSamples} samples")
-			data = self._generateSamples(numSamples, model)
-			print(data)
+			sample, path, logprob = self._generateSamples(numSamples, model)
+			self._verbose("samples is:", sample)
+			print("paths is:", path)
+			print("logprob of sample is:", logprob)
 
 	def _verbose(self, *args, **kwargs):
 		if (self.verbose):
