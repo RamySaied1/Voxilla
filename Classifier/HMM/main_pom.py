@@ -23,6 +23,7 @@ class HMM_POM(HMMBase):
 			featuresDir = "data/models-features",
 			modelsDir = "data/models",
 			ext_model = ".model.json",
+			ext_emissions = ".emis.logprob.txt",
 			verbose=False, normalize=True, n_skip=0,
 			gpu=False, threads=1, GMM=False
 		):
@@ -41,7 +42,7 @@ class HMM_POM(HMMBase):
 		self.threads = threads
 		self.GMM = GMM
 		self.ext_feat = ".feat"
-		self.ext_emissionsProb = ".emis.logprob.h5"
+		self.ext_emissions = ext_emissions
 
 	def emissions(self, *phones, path=None, modelsSet=200):
 		'''
@@ -73,13 +74,13 @@ class HMM_POM(HMMBase):
 		allprobs = np.transpose([s.distribution.log_probability(audioFeatures) for m in self.models for s in m.states[:3] ])
 		self._verbose("emissions shape", allprobs.shape)
 		savLoc = featPath.replace(self.ext_feat, self.ext_emissionsProb)
-		# np.savetxt(savLoc, allprobs)
-		# np.save(savLoc, allprobs)
-		# with open(savLoc, "wb") as saveFile:
-		# 	pickle.dump(allprobs, saveFile)
-		from h5py import File as CompressedFile
-		with CompressedFile(savLoc, 'w') as hf:
-			hf.create_dataset("name-of-dataset",  data=allprobs)
+		if(self.ext_emissions.endswith(".txt")):
+			np.savetxt(savLoc, allprobs)
+		elif(self.ext_emissions.endswith(".npy")):
+			np.save(savLoc, allprobs)
+		else:
+			with open(savLoc, "wb") as saveFile:
+				pickle.dump(allprobs, saveFile)
 		self._verbose(f"emissions probabilities of file {featPath} saved in {os.path.abspath(savLoc)}")
 
 	def _loadModels(self, *args, **kwargs):
