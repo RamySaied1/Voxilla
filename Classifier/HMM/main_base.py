@@ -68,7 +68,7 @@ class HMMBase(object):
 			save features for *targetPhones located in self.alignmentsDir. don't pass any targetPhones for saving features for all phones
 			limit: pos for reading first limit lines, neg for reading last |limit| lines, 0 for reading the whole lines
 		'''
-		phonesPaths = [os.path.join(self.alignmentsDir, x) for x in os.listdir(self.alignmentsDir) if x.endswith(self.ext_alignment) and (len(targetPhones) == 0 or x.replace(self.ext_alignment, "") in targetPhones)]
+		phonesPaths = [os.path.join(self.alignmentsDir, x) for x in sorted(os.listdir(self.alignmentsDir)) if x.endswith(self.ext_alignment) and (len(targetPhones) == 0 or x.replace(self.ext_alignment, "") in targetPhones)]
 		for p in phonesPaths:
 			samples = self._readAlignmentFile(p, limit=limit)
 			features = self._getFeatures(samples)
@@ -231,7 +231,7 @@ class HMMBase(object):
 		return np.concatenate(currentTrainFeatures), lengths if concatenate else currentTrainFeatures
 
 	def _readTrainSet(self, limit, customPhones=None):
-		for basePhone in [x for x in os.listdir(self.trainDir) if (customPhones == None or len(customPhones) == 0 or x.endswith(self.ext_alignment) and x.replace(self.ext_alignment, "") in customPhones)]:
+		for basePhone in [x for x in sorted(os.listdir(self.trainDir)) if (customPhones == None or len(customPhones) == 0 or x.endswith(self.ext_alignment) and x.replace(self.ext_alignment, "") in customPhones)]:
 			self._verbose("reading features of phone", basePhone.replace(self.ext_alignment, ""))
 			basePhoneFPath = os.path.join(self.trainDir, basePhone)
 			currentTrainFeatures = None
@@ -255,7 +255,7 @@ class HMMBase(object):
 			yield label, self._loadFeaturesForLabel(label, modelsSet)
 
 	def _readTestSet(self, limit=1000, rand=False):
-		for basePhone in os.listdir(self.testDir):
+		for basePhone in sorted(os.listdir(self.testDir)):
 			basePhoneFPath = os.path.join(self.testDir, basePhone)
 			currentTestFeatures = None
 			with open(basePhoneFPath, 'r') as basePhoneFile:
@@ -270,14 +270,14 @@ class HMMBase(object):
 			yield basePhone.replace(self.ext_alignment, ""), currentTestFeatures
 
 	def _readDataSet(self, rootDir, limit=1000):
-		for basePhone in os.listdir(rootDir):
+		for basePhone in sorted(os.listdir(rootDir)):
 			basePhoneFPath = os.path.join(rootDir, basePhone)
 			currentFeatures = None
 			currentFeatures = self._getFeatures(self._readAlignmentFile(basePhoneFPath, limit=limit))
 			yield basePhone.replace(self.ext_alignment, ""), currentFeatures
 
 	def _loadModels(self, *phones, path="models/200"):
-		return [self._loadModel(os.path.join(path, mPath)) for mPath in os.listdir(path) if mPath.endswith(self.ext_model) and (len(phones) == 0 or mPath.replace(self.ext_model, "") in phones)]
+		return [self._loadModel(os.path.join(path, mPath)) for mPath in sorted(os.listdir(path)) if mPath.endswith(self.ext_model) and (len(phones) == 0 or mPath.replace(self.ext_model, "") in phones)]
 
 	def _getModelsPath(self, modelsDir, modelsSet):
 		return os.path.join(modelsDir, str(modelsSet))
@@ -294,7 +294,7 @@ class HMMBase(object):
 	def _loadFeaturesForLabel(self, label, modelsSet, ref=None):
 		loc = os.path.join(self.featuresDir, str(modelsSet), label + self.ext_features)
 		if (not os.path.exists(loc)):
-			dirs = list(map(int, os.listdir(self.featuresDir)))
+			dirs = list(map(int, sorted(os.listdir(self.featuresDir))))
 			dirs.sort()
 			for d in dirs:
 				if(d >= int(modelsSet) or d == 0):

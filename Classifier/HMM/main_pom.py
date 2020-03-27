@@ -55,7 +55,7 @@ class HMM_POM(HMMBase):
 			self._verbose(f"extracting emissions of dir {os.path.abspath(path)}")
 			join = lambda f: os.path.join(path, f)
 			exist = lambda f: os.path.exists(join(f.replace(self.ext_feat, self.ext_emissions)))
-			paths = [join(file) for file in os.listdir(path) if file.endswith(self.ext_feat) and not exist(file)]
+			paths = [join(file) for file in sorted(os.listdir(path)) if file.endswith(self.ext_feat) and not exist(file)]
 		for featFile in paths:
 			tick()
 			self._fileEmissions(*phones, featPath=featFile, modelsSet=modelsSet)
