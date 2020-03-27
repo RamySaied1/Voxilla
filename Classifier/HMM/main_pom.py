@@ -24,6 +24,7 @@ class HMM_POM(HMMBase):
 			modelsDir = "data/models",
 			ext_model = ".model.json",
 			ext_emissions = ".emis.logprob.txt",
+			emissionsDir = None, # None means the same as .feat file
 			verbose=False, normalize=True, n_skip=0,
 			gpu=False, threads=1, GMM=False
 		):
@@ -43,6 +44,7 @@ class HMM_POM(HMMBase):
 		self.GMM = GMM
 		self.ext_feat = ".feat"
 		self.ext_emissions = ext_emissions
+		self.emissionsDir = emissionsDir
 
 	def emissions(self, *phones, path=None, modelsSet=200):
 		'''
@@ -73,7 +75,9 @@ class HMM_POM(HMMBase):
 		
 		allprobs = np.transpose([s.distribution.log_probability(audioFeatures) for m in self.models for s in m.states[:3] ])
 		self._verbose("emissions shape", allprobs.shape)
-		savLoc = featPath.replace(self.ext_feat, self.ext_emissions)
+		basename = os.path.basename(featPath).replace(self.ext_feat, self.ext_emissions)
+		basedir = self.emissionsDir or os.path.dirname(featPath)
+		savLoc = os.path.join(basedir, basename)
 		if(self.ext_emissions.endswith(".txt")):
 			np.savetxt(savLoc, allprobs)
 		elif(self.ext_emissions.endswith(".npy")):
