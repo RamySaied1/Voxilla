@@ -33,7 +33,7 @@ void BeamSearch::keepOnlyBestExpandedTokens() {
                          end(expandedTokens));
 }
 
-void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops) {
+void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool addSelfLoops) {
     unordered_map<const Arc*, Expantion> expantions;  // map expanded node to parent node and expantion cost
     vector<double> logProbas = getNormalizeTokensLogProba(activeTokens);
     // vector<int> activationsRank(activations.size());
@@ -44,7 +44,7 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
 
     // clock_t begin_time = clock();
     // cout << "Time: " << float(clock() - begin_time) / CLOCKS_PER_SEC << endl;
-    if (useSelfLoops) {
+    if (addSelfLoops) {
         for (uint i = 0; i < activeTokens.size(); ++i) {
             const auto& token = activeTokens[i];
             auto iter = inpLabelsToIndx.find(token->arc->inpLabel);
@@ -60,7 +60,7 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
     for (uint i = 0; i < activeTokens.size(); ++i) {
         const auto& token = activeTokens[i];
         for (const Arc* arc : graph[token->arc->dstState]) {
-            double lmScore = arc->cost;
+            double lmScore = arc->lmCost;
             double modelScore = 0;
 
             auto iter = inpLabelsToIndx.find(arc->inpLabel);
@@ -134,11 +134,11 @@ vector<const Arc*> BeamSearch::getBestPath(const vector<vector<const Arc*>>& gra
     });
 
     finalToken = *(bestToken);
-    shared_ptr<Token> currToken = bestToken, parentToken = predeccessor[bestToken];
-    while (parentToken) {
+    shared_ptr<Token> currToken = bestToken, parentToken;
+    while (currToken) {
         arcs.push_back(currToken->arc);
-        do {
-            currToken = parentToken;
+        parentToken = predeccessor[currToken];
+        currToken = parentToken;
             parentToken = predeccessor[currToken];
         } while (parentToken && currToken->arc == parentToken->arc);  // ignoring self loop
     }

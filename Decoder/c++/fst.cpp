@@ -14,22 +14,18 @@ Fst::Fst(BeamSearch decoder, string fstFileName, string labelsFileName, SpecialS
 void Fst::parseInputLabels(const string& filename) {
     ifstream in;
     in.open(filename, ifstream::in);
-
-    try {
-        string line;
-        uint i = 0;
-        while (in >> line) {
-            if (isSpecialSym(line)) {
-                throw Exception("special symbol exists in labels file which is not expected");
-            } else {
-                inpLabelToIndx[line] = i++;
-            }
-        }
-    } catch (const exception& e) {
-        cerr << e.what() << '\n';
-        inpLabelToIndx.clear();
+    if (!in.is_open()) {
+        throw Exception("Can't open input labels file: " + filename);
     }
-    in.close();
+    string line;
+    uint i = 0;
+    while (in >> line) {
+        if (isSpecialSym(line)) {
+            throw Exception("special symbol exists in labels file which is not expected");
+        } else {
+            inpLabelToIndx[line] = i++;
+        }
+    }
 }
 
 void Fst::parseFst(const string& filename) {
