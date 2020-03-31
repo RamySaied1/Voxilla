@@ -19,10 +19,16 @@ int main(int argc, char const* argv[]) {
         vector<vector<double>> activations((uint)stoi(dims[0]), vector<double>((uint)stoi(dims[1])));
         read2d(activationsFile, activations);
         vector<const Arc*> path = fst.decode(activations, 30.);
+
+        const Arc* prefArc = NULL;
         for (const auto& arc : path) {
+            if(prefArc && arc->srcState==prefArc->srcState && arc->dstState==prefArc->dstState ){
+                continue;
+            }
             if (!fst.isSpecialSym(arc->outLabel)) {
                 cout << arc->outLabel << " ";
             }
+            prefArc = arc;
         }
         cout << endl;
     }

@@ -133,7 +133,7 @@ void Fst::applyFinalState() {
     });
 
     for (auto i = begin(activeTokens); i != iend; ++i) {
-        (*i)->lmScore += finalStates.find((*i)->arc->dstState)->second;  // add final state cost
+        (*i)->lmCost += finalStates.find((*i)->arc->dstState)->second;  // add final state cost
     }
 
     activeTokens.erase(iend, end(activeTokens));  // remove non final states

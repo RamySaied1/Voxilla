@@ -6,7 +6,7 @@ struct Arc {
     uint srcState, dstState;
     string inpLabel;
     string outLabel;
-    double cost;
+    double lmCost;
 };
 
 class Fst {
