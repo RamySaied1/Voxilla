@@ -38,7 +38,7 @@ cdef class PyDecoder:
         cdef vector[vector[string]].iterator it = cVec.begin()
         pyVec = []
         while it != cVec.end():
-            pyVec.append((deref(it)[0],deref(it)[1]))
+            pyVec.append((deref(it)[0].decode("utf-8") ,deref(it)[1].decode("utf-8") ))
             inc(it)
 
         #return output
