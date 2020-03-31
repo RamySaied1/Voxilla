@@ -1,14 +1,19 @@
 #include <ctime>
+
 #include "fst.hpp"
 
 int main(int argc, char const* argv[]) {
-    Fst fst(BeamSearch((uint)stoi(argv[1]), stod(argv[2])), "../DecodingGraph-large.txt", "../labels.ciphones");
+    time_t t1, t2;
+    time(&t1);
+    Fst fst(BeamSearch(1000, 0.), "../DecodingGraph_new.txt", "../labels.ciphones_new");
+    time(&t2);
+    cout << "Parsing is Done in: " << t2 - t1 << " seconds \n";
 
     ifstream in;
     in.open("./activations_test/files.txt");
-    time_t t1, t2;
     time(&t1);
     string fileName;
+    int enought = 0;
     while (in >> fileName) {
         string shape;
         ifstream activationsFile;
@@ -18,13 +23,22 @@ int main(int argc, char const* argv[]) {
         split(shape, dims);
         vector<vector<double>> activations((uint)stoi(dims[0]), vector<double>((uint)stoi(dims[1])));
         read2d(activationsFile, activations);
-        vector<const Arc*> path = fst.decode(activations, 30.);
-        for (const auto& arc : path) {
-            if (!fst.isSpecialSym(arc->outLabel)) {
-                cout << arc->outLabel << " ";
+        double intialRelWeight = .25;
+        for (int i = 0; i < 40; ++i) {
+            vector<const Arc*> path = fst.decode(activations, intialRelWeight);
+            for (const auto& arc : path) {
+                if (!fst.isSpecialSym(arc->outLabel)) {
+                    cout << arc->outLabel << " ";
+                }
             }
+            cout << endl
+                 << intialRelWeight << endl;
+            intialRelWeight += .25;
         }
-        cout << endl;
+        enought += 1;
+        if (enought == 2) {
+            break;
+        }
     }
     time(&t2);
     cout << "Decoding is Done in: " << t2 - t1 << " seconds \n";

@@ -6,7 +6,7 @@ struct Arc {
     uint srcState, dstState;
     string inpLabel;
     string outLabel;
-    double cost;
+    double lmCost, transCost;
 };
 
 class Fst {
@@ -23,14 +23,21 @@ class Fst {
     vector<const Arc*> decode(vector<vector<double>>& activations, double lmWeight);
 
    private:
+    struct TransitionInfo {
+        string inpLabel;
+        double transProba;
+    };
+
     vector<vector<const Arc*>> graph;
     unordered_map<string, uint> inpLabelToIndx;
+    unordered_map<uint, TransitionInfo> transIdToTransitionInfo;
     unordered_map<uint, double> finalStates;
     SpecialSymbols espSyms;
     BeamSearch decoder;
 
     void parseFst(const string& filename);
     void parseInputLabels(const string& filename);
+    void parseTransitionsInfo(const string& filename);
     void processArc(const vector<string>& fields);
     void processFinalState(const vector<string>& fields);
     void preprocessActivations(vector<vector<double>>& activations, double relativeWeight);

@@ -1,9 +1,11 @@
 #include "fst.hpp"
+
 #include <exception>
 
 Fst::Fst(BeamSearch decoder, string fstFileName, string labelsFileName, SpecialSymbols espSyms) : espSyms(espSyms), decoder(decoder) {
     inpLabelToIndx = unordered_map<string, uint>();
     parseInputLabels(labelsFileName);
+    parseTransitionsInfo("../hmm.txt");
 
     graph = vector<vector<const Arc*>>();
     finalStates = unordered_map<uint, double>();
@@ -28,9 +30,41 @@ void Fst::parseInputLabels(const string& filename) {
     }
 }
 
+void Fst::parseTransitionsInfo(const string& filename) {
+    ifstream in;
+    in.open(filename, ifstream::in);
+    if (!in.is_open()) {
+        throw Exception("Can't open TransitionsInfo file: " + filename);
+    }
+    string line, currPhone, hmmState, transitionSate;
+    while (getline(in, line)) {
+        vector<string> fields;
+        split(line, fields);
+
+        if (fields.size() == 11) {
+            transitionSate = fields[1].substr(0, fields[1].size() - 1);
+            currPhone = fields[4];
+            hmmState = fields[7];
+            assert(inpLabelToIndx.find(currPhone + "_s" + hmmState) != inpLabelToIndx.end());
+        } else if (fields.size() > 5) {
+            string nextState = currPhone + "_s";
+            nextState += (fields.size() > 7) ? fields[6].substr(1, fields[6].size() - 1) : hmmState;
+            uint transId = stoi(fields[2]);
+            transIdToTransitionInfo[transId] = TransitionInfo{nextState, log(stod(fields[5]))};
+            // cout << nextState << "\t" << transId << endl;
+        } else {
+            cout << fields.size() << endl;
+            throw Exception("File format error -> wrong number of tokens");
+        }
+    }
+}
+
 void Fst::parseFst(const string& filename) {
     ifstream in;
     in.open(filename, ifstream::in);
+    if (!in.is_open()) {
+        throw Exception("Can't open Fst file: " + filename);
+    }
     try {
         string line;
         while (getline(in, line)) {
@@ -61,7 +95,10 @@ void Fst::processFinalState(const vector<string>& fields) {
 
 void Fst::processArc(const vector<string>& fields) {
     uint srcState = (uint)stoi(fields[0]);
-    const Arc* arc = new Arc{srcState, (uint)stoi(fields[1]), fields[2], fields[3], (fields.size() == 5) ? -stod(fields.back()) : 0.};
+    uint transId = stoi(fields[2]);
+    string inpLabel = transIdToTransitionInfo[transId].inpLabel;
+    double transProba = transIdToTransitionInfo[transId].transProba;
+    const Arc* arc = new Arc{srcState, (uint)stoi(fields[1]), inpLabel, fields[3], (fields.size() == 5) ? -stod(fields.back()) : 0., transProba};
 
     if (srcState < graph.size()) {
         graph[srcState].push_back(arc);
@@ -104,7 +141,7 @@ vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWei
     decoder.setRootToken(intialArc.get(), 0., 0.);
 
     for (const auto& row : activations) {
-        decoder.doForward(graph, inpLabelToIndx, row, true);
+        decoder.doForward(graph, inpLabelToIndx, row, false);
         decoder.beamPrune();
         expandEpsStates();
         decoder.moveExpandedToActive();

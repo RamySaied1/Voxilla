@@ -1,5 +1,7 @@
 #include "beam_search.hpp"
+
 #include <ctime>
+
 #include "fst.hpp"
 
 BeamSearch::BeamSearch(uint beamWidth, double pathAcceptingThreshold) : beamWidth(beamWidth), pathAcceptingThreshold(pathAcceptingThreshold), activeTokens(vector<shared_ptr<Token>>()), predeccessor(unordered_map<shared_ptr<Token>, shared_ptr<Token>>()) {
@@ -61,14 +63,15 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
         const auto& token = activeTokens[i];
         for (const Arc* arc : graph[token->arc->dstState]) {
             double lmScore = arc->lmCost;
+            double transScore = arc->transCost;
             double modelScore = 0;
 
             auto iter = inpLabelsToIndx.find(arc->inpLabel);
             if (iter == inpLabelsToIndx.end()) continue;
-            modelScore = activations[iter->second];
+            modelScore = activations[iter->second] + transScore;
 
             //Expand the frontier and add predecessors
-            double expantionScore = logProbas[i] + lmScore;
+            double expantionScore = logProbas[i] + lmScore + modelScore;
             if (exp(expantionScore) > pathAcceptingThreshold) {
                 bool isNewArc = expantions.find(arc) == expantions.end();
                 if (isNewArc) {
@@ -139,8 +142,6 @@ vector<const Arc*> BeamSearch::getBestPath(const vector<vector<const Arc*>>& gra
         arcs.push_back(currToken->arc);
         parentToken = predeccessor[currToken];
         currToken = parentToken;
-            parentToken = predeccessor[currToken];
-        } while (parentToken && currToken->arc == parentToken->arc);  // ignoring self loop
     }
     reverse(begin(arcs), end(arcs));
     return arcs;
