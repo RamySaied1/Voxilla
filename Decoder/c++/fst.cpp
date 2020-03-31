@@ -129,7 +129,7 @@ void Fst::expandEpsStates() {
             }
         }
         decoder.setActiveTokens(epsTokens);
-        decoder.doForward(graph, {{espSyms.epsSymbol, 0}}, vector<double>(1, 0.), false);
+        decoder.doForward(graph, {{espSyms.epsSymbol, 0}}, vector<double>(1, 0.), true);
     }
 
     decoder.keepOnlyBestExpandedTokens();
@@ -141,7 +141,7 @@ vector<const Arc*> Fst::decode(vector<vector<double>>& activations, double lmWei
     decoder.setRootToken(intialArc.get(), 0., 0.);
 
     for (const auto& row : activations) {
-        decoder.doForward(graph, inpLabelToIndx, row, false);
+        decoder.doForward(graph, inpLabelToIndx, row, true);
         decoder.beamPrune();
         expandEpsStates();
         decoder.moveExpandedToActive();
@@ -170,7 +170,7 @@ void Fst::applyFinalState() {
     });
 
     for (auto i = begin(activeTokens); i != iend; ++i) {
-        (*i)->lmScore += finalStates.find((*i)->arc->dstState)->second;  // add final state cost
+        (*i)->lmCost += finalStates.find((*i)->arc->dstState)->second;  // add final state cost
     }
 
     activeTokens.erase(iend, end(activeTokens));  // remove non final states

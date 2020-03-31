@@ -5,12 +5,12 @@ struct Arc;
 struct Token {
     uint tokId;
     const Arc* arc;
-    double lmScore, modelScore;
+    double lmCost, modelCost;
 
-    Token(uint tokId, const Arc* arc, double lmScore, double modelScore) : tokId(tokId), arc(arc), lmScore(lmScore), modelScore(modelScore) {}
-    Token() : tokId(0), arc(0), lmScore(0), modelScore(0) {}
+    Token(uint tokId, const Arc* arc, double lmCost, double modelCost) : tokId(tokId), arc(arc), lmCost(lmCost), modelCost(modelCost) {}
+    Token() : tokId(0), arc(0), lmCost(0), modelCost(0) {}
 
-    void print(ostream& out) const { out << "Token id: " << tokId << " lmScore: " << lmScore << " modelScore: " << modelScore << " Joint score:" << modelScore + lmScore << endl; }
+    void print(ostream& out) const { out << "Token id: " << tokId << " lmCost: " << lmCost << " modelCost: " << modelCost << " Joint Cost:" << modelCost + lmCost << endl; }
     // bool operator==(const Token& other) const { return tokId == other.tokId && node == other.node; }
 };
 
@@ -21,7 +21,7 @@ class BeamSearch {
 
     const vector<shared_ptr<Token>>& getExpandedTokens() const;
     const vector<shared_ptr<Token>>& getActiveTokens() const;
-    void setRootToken(const Arc* arc, double lmScore, double modelScre);
+    void setRootToken(const Arc* arc, double lmCost, double modelScre);
     void setActiveTokens(const vector<shared_ptr<Token>>& tokens);
     void moveExpandedToActive();
     void beamPrune();
@@ -32,9 +32,9 @@ class BeamSearch {
    private:
     struct Expantion {
         shared_ptr<Token> parentToken;
-        double lmScore, modelScore, expantionScore;
-        Expantion(shared_ptr<Token> parentToken, double lmScore, double modelScore, double expantionScore) : parentToken(parentToken), lmScore(lmScore), modelScore(modelScore), expantionScore(expantionScore) {}
-        Expantion() : parentToken(NULL), lmScore(0.), modelScore(0.), expantionScore(0.) {}
+        double lmCost, modelCost, expantionCost;
+        Expantion(shared_ptr<Token> parentToken, double lmCost, double modelCost, double expantionCost) : parentToken(parentToken), lmCost(lmCost), modelCost(modelCost), expantionCost(expantionCost) {}
+        Expantion() : parentToken(NULL), lmCost(0.), modelCost(0.), expantionCost(0.) {}
     };
 
     uint beamWidth;
@@ -44,9 +44,9 @@ class BeamSearch {
 
     vector<double> getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens);
     void createExpandedTokens(const unordered_map<const Arc*, Expantion>& expantions);
-    void expandNewToken(const Arc* arc, double lmScore, double modelScore) {
+    void expandNewToken(const Arc* arc, double lmCost, double modelCost) {
         static uint tokenId = 1;
-        expandedTokens.push_back(shared_ptr<Token>(new Token(tokenId, arc, lmScore, modelScore)));
+        expandedTokens.push_back(shared_ptr<Token>(new Token(tokenId, arc, lmCost, modelCost)));
         ++tokenId;
     }
 };
