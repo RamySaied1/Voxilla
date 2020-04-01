@@ -15,7 +15,7 @@ class Fst {
         string startSymbol, endSymbol, epsSymbol;
     };
 
-    Fst(BeamSearch decoder, string fstFileName, string labelsFileName, SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
+    Fst(BeamSearch decoder, string fstFileName, string labelsFileName,string minmaxArcCostFileName,pair<double,double> newMinMaxArcCost={-3.,0.}, SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
     ~Fst();
 
     bool hasEpsArc(uint state) { return graph[state].size() > 0 && graph[state].front()->inpLabel == espSyms.epsSymbol; }
@@ -28,8 +28,9 @@ class Fst {
     unordered_map<uint, double> finalStates;
     SpecialSymbols espSyms;
     BeamSearch decoder;
+    pair<double,double> initialMinMaxArcCost,newMinMaxArcCost;
 
-    void parseFst(const string& filename);
+    void parseFst(const string& fstFilename,const string& minmaxFilename);
     void parseInputLabels(const string& filename);
     void processArc(const vector<string>& fields);
     void processFinalState(const vector<string>& fields);

@@ -1,13 +1,13 @@
 #include "fst.hpp"
 #include <exception>
 
-Fst::Fst(BeamSearch decoder, string fstFileName, string labelsFileName, SpecialSymbols espSyms) : espSyms(espSyms), decoder(decoder) {
+Fst::Fst(BeamSearch decoder, string fstFileName, string labelsFileName,string minmaxArcCostFileName,pair<double,double> newMinMaxArcCost, SpecialSymbols espSyms) : espSyms(espSyms), decoder(decoder),newMinMaxArcCost(newMinMaxArcCost) {
     inpLabelToIndx = unordered_map<string, uint>();
     parseInputLabels(labelsFileName);
 
     graph = vector<vector<const Arc*>>();
     finalStates = unordered_map<uint, double>();
-    parseFst(fstFileName);
+    parseFst(fstFileName,minmaxArcCostFileName);
     preprocessFst();
 }
 
@@ -28,9 +28,21 @@ void Fst::parseInputLabels(const string& filename) {
     }
 }
 
-void Fst::parseFst(const string& filename) {
+void Fst::parseFst(const string& fstFilename,const string& minmaxFilename) {
+    //parse minmax values
     ifstream in;
-    in.open(filename, ifstream::in);
+    in.open(minmaxFilename, ifstream::in);
+    if (!in.is_open()) {
+        throw Exception("Can't open minmax graph cost file : " + minmaxFilename);
+    }
+    string line;
+    getline(in, line);
+    vector<string> fields;
+    split(line, fields);
+    initialMinMaxArcCost = {-stod(fields[1]),-stod(fields[0])};
+    in.close();
+   
+    in.open(fstFilename, ifstream::in);
     try {
         string line;
         while (getline(in, line)) {
@@ -61,7 +73,9 @@ void Fst::processFinalState(const vector<string>& fields) {
 
 void Fst::processArc(const vector<string>& fields) {
     uint srcState = (uint)stoi(fields[0]);
-    const Arc* arc = new Arc{srcState, (uint)stoi(fields[1]), fields[2], fields[3], (fields.size() == 5) ? -stod(fields.back()) : 0.};
+    double lmCost = (fields.size() == 5) ? -stod(fields.back()) : 0.;
+    lmCost = scale(lmCost,initialMinMaxArcCost,newMinMaxArcCost);
+    const Arc* arc = new Arc{srcState, (uint)stoi(fields[1]), fields[2], fields[3],lmCost };
 
     if (srcState < graph.size()) {
         graph[srcState].push_back(arc);

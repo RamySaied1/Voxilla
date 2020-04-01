@@ -6,7 +6,7 @@ class Decoder {
     Fst fst;
 
    public:
-    Decoder(string wfstFile, string labelsFile, int beamWidth, double pathAcceptingThreshold = 0) : fst(BeamSearch(beamWidth, pathAcceptingThreshold), wfstFile, labelsFile) {
+    Decoder(string wfstFile, string labelsFile,string minmaxFile, int beamWidth, double pathAcceptingThreshold = 0) : fst(BeamSearch(beamWidth, pathAcceptingThreshold), wfstFile, labelsFile,minmaxFile) {
     }
 
     vector<vector<string>> decode(vector<vector<double>>& activations, double lmWeigh) {

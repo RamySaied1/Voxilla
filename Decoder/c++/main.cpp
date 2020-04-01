@@ -2,7 +2,7 @@
 #include "fst.hpp"
 
 int main(int argc, char const* argv[]) {
-    Fst fst(BeamSearch((uint)stoi(argv[1]), stod(argv[2])), "../DecodingGraph-large.txt", "../labels.ciphones");
+    Fst fst(BeamSearch((uint)stoi(argv[1]), stod(argv[2])), "../graphs/large/HCLG.txt", "../graphs/large/labels.ciphones","../graphs/large/minmax.txt",{-5,0.});
 
     ifstream in;
     in.open("./activations_test/files.txt");
