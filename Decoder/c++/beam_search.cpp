@@ -1,7 +1,5 @@
 #include "beam_search.hpp"
-
 #include <ctime>
-
 #include "fst.hpp"
 
 BeamSearch::BeamSearch(uint beamWidth, double pathAcceptingThreshold) : beamWidth(beamWidth), pathAcceptingThreshold(pathAcceptingThreshold), activeTokens(vector<shared_ptr<Token>>()), predeccessor(unordered_map<shared_ptr<Token>, shared_ptr<Token>>()) {
@@ -46,25 +44,21 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
 
     // clock_t begin_time = clock();
     // cout << "Time: " << float(clock() - begin_time) / CLOCKS_PER_SEC << endl;
-    // if (useSelfLoops) {
-    //     for (uint i = 0; i < activeTokens.size(); ++i) {
-    //         const auto& token = activeTokens[i];
-    //         auto iter = inpLabelsToIndx.find(token->arc->inpLabel);
-    //         if (iter == inpLabelsToIndx.end()) continue;
-    //         double modelCost = activations[iter->second];
-    //         double lmCost = 0.;
-    //         double specialCost = (token->arc->srcState == token->arc->dstState) ? log(2.) : 0;
-    //         double expantionCost = logProbas[i] + lmCost + specialCost;
-    //         expantions[token->arc] = Expantion(token, lmCost, modelCost, expantionCost);
-    //     }
-    // }
+    if (useSelfLoops) {
+        for (uint i = 0; i < activeTokens.size(); ++i) {
+            const auto& token = activeTokens[i];
+            auto iter = inpLabelsToIndx.find(token->arc->inpLabel);
+            if (iter == inpLabelsToIndx.end()) continue;
+            double modelCost = activations[iter->second];
+            double specialCost = (token->arc->srcState == token->arc->dstState) ? log(2.) : 0;
+            double expantionCost = logProbas[i];
+            expantions[token->arc] = Expantion(token, 0., modelCost, expantionCost);
+        }
+    }
 
     for (uint i = 0; i < activeTokens.size(); ++i) {
         const auto& token = activeTokens[i];
         for (const Arc* arc : graph[token->arc->dstState]) {
-            // if(token->arc == arc && !useSelfLoops){
-            //     continue;
-            // }
             double lmCost = arc->lmCost;
             double transCost = arc->transCost;
             double modelCost = 0;

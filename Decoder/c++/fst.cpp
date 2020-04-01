@@ -129,7 +129,7 @@ void Fst::expandEpsStates() {
             }
         }
         decoder.setActiveTokens(epsTokens);
-        decoder.doForward(graph, {{espSyms.epsSymbol, 0}}, vector<double>(1, 0.), true);
+        decoder.doForward(graph, {{espSyms.epsSymbol, 0}}, vector<double>(1, 0.), false);
     }
 
     decoder.keepOnlyBestExpandedTokens();
