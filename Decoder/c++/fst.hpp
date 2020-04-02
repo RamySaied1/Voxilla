@@ -15,12 +15,15 @@ class Fst {
         string startSymbol, endSymbol, epsSymbol;
     };
 
-    Fst(BeamSearch decoder, string fstFileName, string labelsFileName, SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
+    Fst(string fstFileName, string labelsFileName, SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
     ~Fst();
 
     bool hasEpsArc(uint state) { return graph[state].size() > 0 && graph[state].front()->inpLabel == espSyms.epsSymbol; }
     bool isSpecialSym(string sym) { return sym == espSyms.epsSymbol || sym == espSyms.startSymbol || sym == espSyms.endSymbol; }
-    vector<const Arc*> decode(vector<vector<double>>& activations, double lmWeight);
+    const SpecialSymbols& getSpecialSyms() const {return espSyms;}
+    const vector<vector<const Arc*>>& getGraph() const {return graph;}
+    const unordered_map<string, uint>& getInpLabelToIndx() const {return inpLabelToIndx;}
+    const unordered_map<uint, double>& getFinalStates() const {return finalStates;}
 
    private:
     struct TransitionInfo {
@@ -33,15 +36,12 @@ class Fst {
     unordered_map<uint, TransitionInfo> transIdToTransitionInfo;
     unordered_map<uint, double> finalStates;
     SpecialSymbols espSyms;
-    BeamSearch decoder;
+    pair<double,double> initialMinMaxArcCost,newMinMaxArcCost;
 
     void parseFst(const string& filename);
     void parseInputLabels(const string& filename);
     void parseTransitionsInfo(const string& filename);
     void processArc(const vector<string>& fields);
     void processFinalState(const vector<string>& fields);
-    void preprocessActivations(vector<vector<double>>& activations, double relativeWeight);
     void preprocessFst();
-    void expandEpsStates();
-    void applyFinalState();
 };

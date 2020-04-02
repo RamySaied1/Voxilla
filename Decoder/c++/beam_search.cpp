@@ -6,24 +6,24 @@ BeamSearch::BeamSearch(uint beamWidth, double pathAcceptingThreshold) : beamWidt
     assert(beamWidth != 0);
 }
 
-void BeamSearch::setRootToken(const Arc* arc, double lmCost, double modelCost) {
+void BeamSearch::setRootToken(const Arc* arc, double lmCost, double amCost, double hmmCost) {
     expandedTokens.clear();
     activeTokens.clear();
     predeccessor.clear();
-    expandNewToken(arc, lmCost, modelCost);
+    expandNewToken(arc, lmCost, amCost,hmmCost);
     predeccessor[expandedTokens.front()] = shared_ptr<Token>(NULL);
     moveExpandedToActive();
 }
 
-void BeamSearch::keepOnlyBestExpandedTokens() {
+void BeamSearch::keepOnlyBestExpandedTokens(function<double(double, double, double)> combineAmLmHmmCosts) {
     unordered_map<const Arc*, shared_ptr<Token>> arcToBestToken;
     for (const auto& token : expandedTokens) {
-        double tokenCost = token->modelCost + token->lmCost;
+        double tokenCost = combineAmLmHmmCosts(token->amCost, token->lmCost, token->hmmCost);
         auto iter = arcToBestToken.find(token->arc);
         if (iter == arcToBestToken.end()) {
             arcToBestToken[token->arc] = token;
         } else {
-            if (tokenCost > iter->second->modelCost + iter->second->lmCost) {
+            if (tokenCost > combineAmLmHmmCosts(iter->second->amCost, iter->second->lmCost, iter->second->hmmCost)) {
                 iter->second = token;
             }
         }
@@ -33,9 +33,9 @@ void BeamSearch::keepOnlyBestExpandedTokens() {
                          end(expandedTokens));
 }
 
-void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops) {
+void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, function<double(double, double, double)> combineAmLmHmmCosts, bool useSelfLoops) {
     unordered_map<const Arc*, Expantion> expantions;  // map expanded node to parent node and expantion cost
-    vector<double> logProbas = getNormalizeTokensLogProba(activeTokens);
+    vector<double> logProbas = getNormalizeTokensLogProba(activeTokens, combineAmLmHmmCosts);
     // vector<int> activationsRank(activations.size());
     // iota(begin(activationsRank), end(activationsRank), 0);
     // sort(begin(activationsRank), end(activationsRank), [&](auto a, auto b) {
@@ -44,39 +44,38 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
 
     // clock_t begin_time = clock();
     // cout << "Time: " << float(clock() - begin_time) / CLOCKS_PER_SEC << endl;
-    if (useSelfLoops) {
-        for (uint i = 0; i < activeTokens.size(); ++i) {
-            const auto& token = activeTokens[i];
-            auto iter = inpLabelsToIndx.find(token->arc->inpLabel);
-            if (iter == inpLabelsToIndx.end()) continue;
-            double modelCost = activations[iter->second];
-            double specialCost = (token->arc->srcState == token->arc->dstState) ? log(2.) : 0;
-            double expantionCost = logProbas[i];
-            expantions[token->arc] = Expantion(token, 0., modelCost, expantionCost);
-        }
-    }
+    // if (useSelfLoops) {
+    //     for (uint i = 0; i < activeTokens.size(); ++i) {
+    //         const auto& token = activeTokens[i];
+    //         auto iter = inpLabelsToIndx.find(token->arc->inpLabel);
+    //         if (iter == inpLabelsToIndx.end()) continue;
+    //         // double lmCost = token->arc->lmCost;
+    //         double amCost = activations[iter->second];
+    //         double specialCost = (token->arc->srcState == token->arc->dstState) ? log(2.) : 0;
+    //         double expantionCost = logProbas[i];
+    //         expantions[token->arc] = Expantion(token, 0., amCost, expantionCost);
+    //     }
+    // }
 
     for (uint i = 0; i < activeTokens.size(); ++i) {
         const auto& token = activeTokens[i];
         for (const Arc* arc : graph[token->arc->dstState]) {
-            double lmCost = arc->lmCost;
-            double transCost = arc->transCost;
-            double modelCost = 0;
-
             auto iter = inpLabelsToIndx.find(arc->inpLabel);
             if (iter == inpLabelsToIndx.end()) continue;
-            modelCost = activations[iter->second];
+            double lmCost = arc->lmCost;
+            double hmmCost = arc->transCost;
+            double amCost = activations[iter->second];
 
             //Expand the frontier and add predecessors
-            double expantionCost = logProbas[i] + lmCost;
+            double expantionCost = logProbas[i] + combineAmLmHmmCosts(amCost, lmCost, hmmCost);
             if (exp(expantionCost) > pathAcceptingThreshold) {
                 bool isNewArc = expantions.find(arc) == expantions.end();
                 if (isNewArc) {
-                    expantions[arc] = Expantion(token, lmCost, modelCost, expantionCost);
+                    expantions[arc] = Expantion(token, lmCost, amCost, hmmCost, expantionCost);
                 } else {
                     double oldCost = expantions[arc].expantionCost;
                     if (expantionCost > oldCost) {
-                        expantions[arc] = Expantion(token, lmCost, modelCost, expantionCost);
+                        expantions[arc] = Expantion(token, lmCost, amCost, hmmCost, expantionCost);
                     }
                 }
             }
@@ -92,10 +91,11 @@ void BeamSearch::createExpandedTokens(const unordered_map<const Arc*, Expantion>
         const auto& expantion = keyVal.second;
         const Arc* arc = keyVal.first;
 
-        double modelCost = expantion.parentToken->modelCost + expantion.modelCost;
+        double amCost = expantion.parentToken->amCost + expantion.amCost;
         double lmCost = expantion.parentToken->lmCost + expantion.lmCost;
+        double hmmCost = expantion.parentToken->hmmCost + expantion.hmmCost;
 
-        expandNewToken(arc, lmCost, modelCost);
+        expandNewToken(arc, lmCost, amCost, hmmCost);
         predeccessor[expandedTokens.back()] = expantion.parentToken;
     }
 }
@@ -116,21 +116,21 @@ void BeamSearch::moveExpandedToActive() {
     activeTokens = move(expandedTokens);
 }
 
-void BeamSearch::beamPrune() {
+void BeamSearch::beamPrune(function<double(double, double, double)> combineAmLmHmmCosts) {
     if (expandedTokens.size() > beamWidth) {
-        sort(begin(expandedTokens), end(expandedTokens), [](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
-            return (a->lmCost + a->modelCost) > (b->lmCost + b->modelCost);
+        sort(begin(expandedTokens), end(expandedTokens), [&](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
+            return combineAmLmHmmCosts(a->amCost, a->lmCost, a->hmmCost) > combineAmLmHmmCosts(b->amCost, b->lmCost, b->hmmCost);
         });
         expandedTokens.resize(beamWidth);
     }
 }
 
-vector<const Arc*> BeamSearch::getBestPath(const vector<vector<const Arc*>>& graph, Token& finalToken) {
+vector<const Arc*> BeamSearch::getBestPath(const vector<vector<const Arc*>>& graph, function<double(double, double, double)> combineAmLmHmmCosts, Token& finalToken) {
     vector<const Arc*> arcs = vector<const Arc*>();
     if (activeTokens.size() <= 0) return arcs;
 
-    const auto& bestToken = *max_element(begin(activeTokens), end(activeTokens), [](const auto& t1, const auto& t2) {
-        return t1->modelCost + t1->lmCost < t2->modelCost + t2->lmCost;
+    const auto& bestToken = *max_element(begin(activeTokens), end(activeTokens), [&](const auto& t1, const auto& t2) {
+        return combineAmLmHmmCosts(t1->amCost, t1->lmCost, t1->hmmCost) < combineAmLmHmmCosts(t2->amCost, t2->lmCost, t2->hmmCost);
     });
 
     finalToken = *(bestToken);
@@ -144,16 +144,16 @@ vector<const Arc*> BeamSearch::getBestPath(const vector<vector<const Arc*>>& gra
     return arcs;
 }
 
-vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens) {
+vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens, function<double(double, double, double)> combineAmLmHmmCosts) {
     if (tokens.size() <= 0) return vector<double>();
-    const auto& bestToken = *max_element(begin(tokens), end(tokens), [](const auto& t1, const auto& t2) {
-        return t1->modelCost + t1->lmCost < t2->modelCost + t2->lmCost;
+    const auto& bestToken = *max_element(begin(tokens), end(tokens), [&](const auto& t1, const auto& t2) {
+        return combineAmLmHmmCosts(t1->amCost, t1->lmCost, t1->hmmCost) < combineAmLmHmmCosts(t2->amCost, t2->lmCost, t2->hmmCost);
     });
-    double bestCost = bestToken->modelCost + bestToken->lmCost;
+    double bestCost = combineAmLmHmmCosts(bestToken->amCost, bestToken->lmCost, bestToken->hmmCost);
 
     vector<double> logProbas(tokens.size(), 0);
     for (uint i = 0; i < tokens.size(); ++i) {
-        logProbas[i] = tokens[i]->lmCost + tokens[i]->modelCost - bestCost;
+        logProbas[i] = combineAmLmHmmCosts(tokens[i]->amCost, tokens[i]->lmCost, tokens[i]->hmmCost) - bestCost;
     }
     return move(logProbas);
 }

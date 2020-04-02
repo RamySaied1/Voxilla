@@ -12,6 +12,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
+#include <limits>
 using namespace std;
 #define uint unsigned int
 
@@ -34,6 +35,12 @@ uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred,
         }
     }
     return isOk;
+}
+
+
+inline double scale(double num,pair<double,double> numMinMax,pair<double,double> newMinMax) {
+    return num/3;
+    // return ((num-numMinMax.first)/( numMinMax.second-numMinMax.first))* (newMinMax.second-newMinMax.first)+newMinMax.first ;
 }
 
 class Exception : public exception {
