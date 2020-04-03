@@ -49,7 +49,7 @@ void Fst::parseTransitionsInfo(const string& filename) {
             string nextState = currPhone + "_s";
             nextState += (fields.size() > 7) ? fields[6].substr(1, fields[6].size() - 1) : hmmState;
             uint transId = stoi(fields[2]);
-            transIdToTransitionInfo[transId] = TransitionInfo{nextState, log(stod(fields[5]))};
+            transIdToInpLabel[transId] = nextState;
             // cout << nextState << "\t" << transId << endl;
         } else {
             cout << fields.size() << endl;
@@ -96,11 +96,10 @@ void Fst::processFinalState(const vector<string>& fields) {
 void Fst::processArc(const vector<string>& fields) {
     uint srcState = (uint)stoi(fields[0]);
     uint transId = stoi(fields[2]);
-    string inpLabel = transIdToTransitionInfo[transId].inpLabel;
-    double transProba = transIdToTransitionInfo[transId].transProba;
+    string inpLabel = transIdToInpLabel[transId];
     double lmCost = (fields.size() == 5) ? -stod(fields.back()) : 0.;
     lmCost = scale(lmCost,initialMinMaxArcCost,newMinMaxArcCost);
-    const Arc* arc = new Arc{srcState, (uint)stoi(fields[1]), inpLabel, fields[3], lmCost, transProba};
+    const Arc* arc = new Arc{srcState, (uint)stoi(fields[1]), inpLabel, fields[3], lmCost};
 
     if (srcState < graph.size()) {
         graph[srcState].push_back(arc);

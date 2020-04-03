@@ -5,12 +5,12 @@ struct Arc;
 struct Token {
     uint tokId;
     const Arc* arc;
-    double lmCost, amCost, hmmCost;
+    double lmCost, amCost;
 
-    Token(uint tokId, const Arc* arc, double lmCost, double amCost, double hmmCost) : tokId(tokId), arc(arc), lmCost(lmCost), amCost(amCost), hmmCost(hmmCost) {}
+    Token(uint tokId, const Arc* arc, double lmCost, double amCost) : tokId(tokId), arc(arc), lmCost(lmCost), amCost(amCost) {}
     Token() : tokId(0), arc(0), lmCost(0), amCost(0) {}
 
-    void print(ostream& out) const { out << "Token id: " << tokId << " lmCost: " << lmCost << " amCost: " << amCost << " hmmCost: " << hmmCost << endl; }
+    void print(ostream& out) const { out << "Token id: " << tokId << " lmCost: " << lmCost << " amCost: " << amCost << endl; }
     // bool operator==(const Token& other) const { return tokId == other.tokId && node == other.node; }
 };
 
@@ -21,19 +21,19 @@ class BeamSearch {
 
     const vector<shared_ptr<Token>>& getExpandedTokens() const;
     const vector<shared_ptr<Token>>& getActiveTokens() const;
-    void setRootToken(const Arc* arc, double lmCost, double modelScre, double hmmCost);
+    void setRootToken(const Arc* arc, double lmCost, double modelScre);
     void setActiveTokens(const vector<shared_ptr<Token>>& tokens);
     void moveExpandedToActive();
-    void beamPrune(std::function<double(double, double, double)> combineAmLmHmmCosts);
-    void keepOnlyBestExpandedTokens(std::function<double(double, double, double)> combineAmLmHmmCosts);
-    void doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, std::function<double(double, double, double)> combineAmLmHmmCosts, bool useSelfLoops);
-    vector<const Arc*> getBestPath(const vector<vector<const Arc*>>& graph, function<double(double, double, double)> combineAmLmHmmCosts, Token& bestToken);
+    void beamPrune();
+    void keepOnlyBestExpandedTokens();
+    void doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops);
+    vector<const Arc*> getBestPath(const vector<vector<const Arc*>>& graph, Token& bestToken);
 
    private:
     struct Expantion {
         shared_ptr<Token> parentToken;
-        double lmCost, amCost, hmmCost, expantionCost;
-        Expantion(shared_ptr<Token> parentToken, double lmCost, double amCost, double hmmCost, double expantionCost) : parentToken(parentToken), lmCost(lmCost), amCost(amCost), hmmCost(hmmCost), expantionCost(expantionCost) {}
+        double lmCost, amCost,  expantionCost;
+        Expantion(shared_ptr<Token> parentToken, double lmCost, double amCost, double expantionCost) : parentToken(parentToken), lmCost(lmCost), amCost(amCost), expantionCost(expantionCost) {}
         Expantion() : parentToken(NULL), lmCost(0.), amCost(0.), expantionCost(0.) {}
     };
 
@@ -42,11 +42,11 @@ class BeamSearch {
     vector<shared_ptr<Token>> activeTokens, expandedTokens;
     unordered_map<shared_ptr<Token>, shared_ptr<Token>> predeccessor;
 
-    vector<double> getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens, function<double(double, double, double)> combineAmLmHmmCosts);
+    vector<double> getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens);
     void createExpandedTokens(const unordered_map<const Arc*, Expantion>& expantions);
-    void expandNewToken(const Arc* arc, double lmCost, double amCost, double hmmCost) {
+    void expandNewToken(const Arc* arc, double lmCost, double amCost) {
         static uint tokenId = 1;
-        expandedTokens.push_back(shared_ptr<Token>(new Token(tokenId, arc, lmCost, amCost, hmmCost)));
+        expandedTokens.push_back(shared_ptr<Token>(new Token(tokenId, arc, lmCost, amCost)));
         ++tokenId;
     }
 };

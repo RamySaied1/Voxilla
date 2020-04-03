@@ -6,7 +6,7 @@ struct Arc {
     uint srcState, dstState;
     string inpLabel;
     string outLabel;
-    double lmCost, transCost;
+    double lmCost;
 };
 
 class Fst {
@@ -26,14 +26,9 @@ class Fst {
     const unordered_map<uint, double>& getFinalStates() const {return finalStates;}
 
    private:
-    struct TransitionInfo {
-        string inpLabel;
-        double transProba;
-    };
-
     vector<vector<const Arc*>> graph;
     unordered_map<string, uint> inpLabelToIndx;
-    unordered_map<uint, TransitionInfo> transIdToTransitionInfo;
+    unordered_map<uint, string> transIdToInpLabel;
     unordered_map<uint, double> finalStates;
     SpecialSymbols espSyms;
     pair<double,double> initialMinMaxArcCost,newMinMaxArcCost;
