@@ -98,7 +98,6 @@ void Fst::processArc(const vector<string>& fields) {
     uint transId = stoi(fields[2]);
     string inpLabel = transIdToInpLabel[transId];
     double lmCost = (fields.size() == 5) ? -stod(fields.back()) : 0.;
-    lmCost = scale(lmCost,initialMinMaxArcCost,newMinMaxArcCost);
     const Arc* arc = new Arc{srcState, (uint)stoi(fields[1]), inpLabel, fields[3], lmCost};
 
     if (srcState < graph.size()) {

@@ -19,8 +19,9 @@ vector<vector<string>> Decoder::decode(vector<vector<double>>& activations, doub
 
 void Decoder::preprocessActivations(vector<vector<double>>& activations, double weight) {
     for (auto& exLogProbas : activations) {
+        double maxVal = *max_element(begin(exLogProbas), end(exLogProbas));
         for (auto& elem : exLogProbas) {
-            elem = (elem)*weight;
+            elem = (elem - maxVal) * weight;
         }
     }
 }
@@ -67,7 +68,7 @@ vector<vector<string>> Decoder::getBestPath() {
         const auto& arc = path[i];
         inOutID[i][0] = arc->inpLabel;
         inOutID[i][1] = arc->outLabel;
-        inOutID[i][2] = to_string(arc->srcState) + "->" + to_string(arc->dstState);
+        inOutID[i][2] = to_string(arc->dstState);
     }
     return move(inOutID);
 }

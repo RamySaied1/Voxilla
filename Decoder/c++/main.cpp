@@ -4,7 +4,7 @@
 int main(int argc, char const* argv[]) {
     time_t t1, t2;
     time(&t1);
-    Decoder decoder("../graphs/New/HCLG.txt", "../graphs/New/labels.ciphones", (uint)stoi(argv[1]), stod(argv[2]));
+    Decoder decoder("../graphs/New_notrans_noself/HCLG.txt", "../graphs/New_notrans_noself/labels.ciphones", (uint)stoi(argv[1]), stod(argv[2]));
     time(&t2);
     // cout << "Parsing is Done in: " << t2 - t1 << " seconds \n";
 
@@ -13,8 +13,8 @@ int main(int argc, char const* argv[]) {
     in.open(activationsFolder + "files.txt");
     string fileName;
     time(&t1);
-    int amwMax = stoi(argv[3]);
-    for (float amw = 1; amw <= amwMax; amw += .5) {
+    double amwMax = stod(argv[3]);
+    for (double amw = 2; amw <= amwMax; amw += 1.) {
         while (in >> fileName) {
             string shape;
             ifstream activationsFile;

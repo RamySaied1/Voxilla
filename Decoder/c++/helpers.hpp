@@ -38,11 +38,6 @@ uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred,
 }
 
 
-inline double scale(double num,pair<double,double> numMinMax,pair<double,double> newMinMax) {
-    return num/3;
-    // return ((num-numMinMax.first)/( numMinMax.second-numMinMax.first))* (newMinMax.second-newMinMax.first)+newMinMax.first ;
-}
-
 class Exception : public exception {
    private:
     string msg;
