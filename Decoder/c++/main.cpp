@@ -8,13 +8,15 @@ int main(int argc, char const* argv[]) {
     time(&t2);
     // cout << "Parsing is Done in: " << t2 - t1 << " seconds \n";
 
-    string activationsFolder = "./BLSTM_activations_test/";
+    string activationsFolder = "./BLSTM1_activations_test/";
     ifstream in;
-    in.open(activationsFolder + "files.txt");
+    in.open(activationsFolder + "files_all.txt");
     string fileName;
     time(&t1);
-    double amwMax = stod(argv[3]);
-    for (double amw = 2; amw <= amwMax; amw += 1.) {
+    double amwStart = stod(argv[3]);
+    double amwEnd = stod(argv[4]);
+    double amwStep = stod(argv[5]);
+    for (double amw = amwStart; amw <= amwEnd; amw += amwStep) {
         while (in >> fileName) {
             string shape;
             ifstream activationsFile;
@@ -34,9 +36,9 @@ int main(int argc, char const* argv[]) {
                     cout << path[i][1] << " ";
                 }
             }
-            cout << "." << endl;
+            cout << "!" << endl;
         }
-        cout <<" amw: " << endl;
+        cout <<"amw: "<< amw << endl;
         in.clear();
         in.seekg(0, ios::beg);
     }

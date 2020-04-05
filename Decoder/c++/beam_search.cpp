@@ -1,7 +1,5 @@
 #include "beam_search.hpp"
-
 #include <ctime>
-
 #include "fst.hpp"
 
 BeamSearch::BeamSearch(uint beamWidth, double pathAcceptingThreshold) : beamWidth(beamWidth), pathAcceptingThreshold(pathAcceptingThreshold), activeTokens(vector<shared_ptr<Token>>()), predeccessor(unordered_map<shared_ptr<Token>, shared_ptr<Token>>()) {
@@ -38,26 +36,18 @@ void BeamSearch::keepOnlyBestExpandedTokens() {
 void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops) {
     unordered_map<const Arc*, Expantion> expantions;  // map expanded node to parent node and expantion cost
     vector<double> logProbas = getNormalizeTokensLogProba(activeTokens);
-    // vector<int> activationsRank(activations.size());
-    // iota(begin(activationsRank), end(activationsRank), 0);
-    // sort(begin(activationsRank), end(activationsRank), [&](auto a, auto b) {
-    //     return activations[a] > activations[b];
-    // });
-
-    // clock_t begin_time = clock();
-    // cout << "Time: " << float(clock() - begin_time) / CLOCKS_PER_SEC << endl;
-    // if (useSelfLoops) {
-    //     for (uint i = 0; i < activeTokens.size(); ++i) {
-    //         const auto& token = activeTokens[i];
-    //         auto iter = inpLabelsToIndx.find(token->arc->inpLabel);
-    //         if (iter == inpLabelsToIndx.end()) continue;
-    //         // double lmCost = token->arc->lmCost;
-    //         double amCost = activations[iter->second];
-    //         double specialCost = (token->arc->srcState == token->arc->dstState) ? log(2.) : 0;
-    //         double expantionCost = logProbas[i];
-    //         expantions[token->arc] = Expantion(token, 0., amCost, expantionCost);
-    //     }
-    // }
+    if (useSelfLoops) {
+        for (uint i = 0; i < activeTokens.size(); ++i) {
+            const auto& token = activeTokens[i];
+            auto iter = inpLabelsToIndx.find(token->arc->inpLabel);
+            if (iter == inpLabelsToIndx.end()) continue;
+            // double lmCost = token->arc->lmCost;
+            double amCost = activations[iter->second];
+            // double specialCost = (token->arc->srcState == token->arc->dstState) ? log(2.) : 0;
+            double expantionCost = logProbas[i];
+            expantions[token->arc] = Expantion(token, 0., amCost, expantionCost);
+        }
+    }
 
     for (uint i = 0; i < activeTokens.size(); ++i) {
         const auto& token = activeTokens[i];

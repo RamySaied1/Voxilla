@@ -1,7 +1,7 @@
 #include "decoder.hpp"
 
 vector<vector<string>> Decoder::decode(vector<vector<double>>& activations, double amw) {
-    preprocessActivations(activations, amw);  // normalize activations and apply lm relative weight
+    preprocessActivations(activations, amw);
     unique_ptr<Arc> intialArc(new Arc{0, 0, fst.getSpecialSyms().epsSymbol, fst.getSpecialSyms().epsSymbol, 0.});
     beamSearch.setRootToken(intialArc.get(), 0., 0.);
 
@@ -53,7 +53,7 @@ void Decoder::applyFinalState() {
         (*i)->lmCost += fst.getFinalStates().find((*i)->arc->dstState)->second;  // add final state cost
     }
 
-    // activeTokens.erase(iend, end(activeTokens));  // remove non final states
+    activeTokens.erase(iend, end(activeTokens));  // remove non final states
 }
 
 vector<vector<string>> Decoder::getBestPath() {

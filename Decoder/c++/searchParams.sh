@@ -1,14 +1,25 @@
 beamWidth=$1
 acceptingThresh=$2
-amwMax=$3
-echo beamWidth is $beamWidth , acceptingThresh is $acceptingThresh, amwMax $amwMax
+amwStart=$3
+amwEnd=$4
+amwStep=$5
+# numOfUlts=$4
+echo beamWidth is $beamWidth , acceptingThresh is $acceptingThresh, amwStart $3, amwEnd $amwEnd, amwStep $amwStep
+
+if [ ! $amwStart ]
+then
+    amwStart=`cat reports.txt | grep -o "[0-9]\+.[0-9]*" > amwEnd`
+    if [ ! $amwStart ]
+    then
+        amwStart="1."
+    fi
+fi
 
 g++ -g *.cpp
-./a.out $beamWidth $acceptingThresh $amwMax > out_$beamWidth\_$acceptingThresh.txt 
+./a.out $beamWidth $acceptingThresh $amwStart $amwEnd $amwStep> out_$beamWidth\_$acceptingThresh.txt 
 
-echo > reports.txt
 sed -i "/Token/d;/^\s*$/d;s/ $//g" out_$beamWidth\_$acceptingThresh.txt
-# sed -i "s/\.//g" out_$beamWidth\_$acceptingThresh.txt
+sed -i "/amw:/d" out_$beamWidth\_$acceptingThresh.txt
 trash-put ./split/*
 split -l 11 out_$beamWidth\_$acceptingThresh.txt -d ./split/
 for file in `ls ./split/`;
