@@ -2,8 +2,8 @@
 #include <ctime>
 #include "fst.hpp"
 
-BeamSearch::BeamSearch(uint beamWidth, double pathAcceptingThreshold) : beamWidth(beamWidth), pathAcceptingThreshold(pathAcceptingThreshold), activeTokens(vector<shared_ptr<Token>>()), predeccessor(unordered_map<shared_ptr<Token>, shared_ptr<Token>>()) {
-    assert(beamWidth != 0);
+BeamSearch::BeamSearch(uint maxActiveTokens, double beamWidth) : maxActiveTokens(maxActiveTokens), beamWidth(beamWidth), activeTokens(vector<shared_ptr<Token>>()), predeccessor(unordered_map<shared_ptr<Token>, shared_ptr<Token>>()) {
+    assert(maxActiveTokens != 0);
 }
 
 void BeamSearch::setRootToken(const Arc* arc, double lmCost, double amCost) {
@@ -58,8 +58,8 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
             double amCost = activations[iter->second];
 
             //Expand the frontier and add predecessors
-            double expantionCost = logProbas[i] + (amCost, lmCost);
-            if (exp(expantionCost) > pathAcceptingThreshold) {
+            double expantionCost = logProbas[i] + lmCost;
+            if (exp(expantionCost) > 0.) {
                 bool isNewArc = expantions.find(arc) == expantions.end();
                 if (isNewArc) {
                     expantions[arc] = Expantion(token, lmCost, amCost, expantionCost);
@@ -107,11 +107,25 @@ void BeamSearch::moveExpandedToActive() {
 }
 
 void BeamSearch::beamPrune() {
-    if (expandedTokens.size() > beamWidth) {
+    if (expandedTokens.size() > maxActiveTokens / 2) {
         sort(begin(expandedTokens), end(expandedTokens), [&](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
             return a->amCost + a->lmCost > b->amCost + b->lmCost;
         });
-        expandedTokens.resize(beamWidth);
+        
+        if (expandedTokens.size() > maxActiveTokens) {
+            expandedTokens.resize(maxActiveTokens);
+            expandedTokens.reserve(maxActiveTokens);
+        }
+        
+        double thresold = expandedTokens.front()->amCost + expandedTokens.front()->lmCost - beamWidth;
+        auto iter = lower_bound(rbegin(expandedTokens), rend(expandedTokens), thresold, [&](const shared_ptr<Token>& t, double val) {
+            return t->amCost + t->lmCost < val;
+        });
+        // cout<<"Original Size: "<<expandedTokens.size()<<endl;
+        int size = rend(expandedTokens) - iter;
+        expandedTokens.resize(size);
+        // cout<<"New Size due to beam: "<<expandedTokens.size()<<endl;
+
     }
 }
 

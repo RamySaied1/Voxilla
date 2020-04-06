@@ -2,20 +2,23 @@
 #include "decoder.hpp"
 
 int main(int argc, char const* argv[]) {
+    string graphFolder = argv[1];
+    string activationsFolder = argv[2]; 
+    string filesFile = argv[3];
+
     time_t t1, t2;
     time(&t1);
-    Decoder decoder("../graphs/New_notrans_noself/HCLG.txt", "../graphs/New_notrans_noself/labels.ciphones", (uint)stoi(argv[1]), stod(argv[2]));
+    Decoder decoder(graphFolder+"HCLG.txt",graphFolder+"labels.ciphones",graphFolder+"hmm.txt", (uint)stoi(argv[4]), stod(argv[5]));
     time(&t2);
-    // cout << "Parsing is Done in: " << t2 - t1 << " seconds \n";
+    cout << "Parsing is Done in: " << t2 - t1 << " seconds \n";
 
-    string activationsFolder = "./BLSTM1_activations_test/";
     ifstream in;
-    in.open(activationsFolder + "files_all.txt");
+    in.open(activationsFolder + filesFile);
     string fileName;
     time(&t1);
-    double amwStart = stod(argv[3]);
-    double amwEnd = stod(argv[4]);
-    double amwStep = stod(argv[5]);
+    double amwStart = stod(argv[6]);
+    double amwEnd = stod(argv[7]);
+    double amwStep = stod(argv[8]);
     for (double amw = amwStart; amw <= amwEnd; amw += amwStep) {
         while (in >> fileName) {
             string shape;
@@ -32,11 +35,11 @@ int main(int argc, char const* argv[]) {
                 if (i && path[i].back() == path[i - 1].back()) {
                     continue;
                 }
-                if (path[i][1] != "<eps>") {
+                if (path[i][1] != "<eps>" && path[i][1] != "<s>" && path[i][1] != "<\\s>") {
                     cout << path[i][1] << " ";
                 }
             }
-            cout << "!" << endl;
+            cout << endl;
         }
         cout <<"amw: "<< amw << endl;
         in.clear();

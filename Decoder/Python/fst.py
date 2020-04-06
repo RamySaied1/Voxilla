@@ -123,6 +123,7 @@ class FST:
                     eps_val.append(score)
                     eps_col.append(arc.index)
                     eps_row.append(next_arc_index)
+        
 
         # The linear transition score for arcs with emitting symbols
         self.emit_trans = scipy.sparse.csc_matrix(
@@ -142,6 +143,8 @@ class FST:
             shape=(len(self._arcs), len(self._arcs)),
             dtype=np.float32
         )
+        # print(self.emit_trans.diagonal())
+        # self.emit_trans[self.emit_trans > 1] = 1.
 
     def decode(self, decoder, activations, lmweight, emit_trans=None, eps_trans=None, all_trans=None):
         """
@@ -158,30 +161,31 @@ class FST:
         decoder.active_tokens = []
 
         # selecte the intial active token
-        prevArcI = -1
-        arcI = 0
-        score = 0.
-        # while(len(self.state_outgoing_arcs[self._arcs[arcI].target_state]) == 1):
-        #     score += self._arcs[arcI].cost
-        #     prevArcI = arcI
-        #     arcI = self.state_outgoing_arcs[self._arcs[arcI].target_state][0]
-        startToken = Token( id=0, prev_id=-1, arc_number=arcI, model_score=0., lm_score=score)
+        startToken = Token( id=0, prev_id=-1, arc_number=0, model_score=0., lm_score=0.)
         decoder.set_intial_active_token(startToken)
 
 
         #  Turn the given activations of the acoustic model scores into something useful
         model_scores = self._preprocess_activations(activations) / lmweight
 
-        # Here is the core of the search algorithm. It loops over time, using the acoustic model scores
+        # Start seaching in WFST grpah using model scores
         for t, obs_vector in enumerate(model_scores):
-            # print(t)
             # replace old active tokens with new ones (expantion of frontier)
+
+            # print(t)
+            # with open("debug.txt","w") as f:
+            #     [f.write(f'{tok.model_score} {tok.lm_score} {self._arcs[tok.arc_number].source_state} {self._arcs[tok.arc_number].target_state}\n') for tok in sorted(decoder.active_tokens,key=lambda t:t.model_score+t.lm_score,reverse=True)]
+            # input()
+
             decoder.active_tokens = decoder.do_forward(emit_trans, np.array(obs_vector).squeeze(), self._arcs, all_trans,creating_frame_num=t)
-            
+
+            # with open("debugAfter.txt","w") as f:
+            #     [f.write(f'{tok.model_score} {tok.lm_score} {self._arcs[tok.arc_number].source_state} {self._arcs[tok.arc_number].target_state}\n') for tok in sorted(decoder.active_tokens,key=lambda t:t.model_score+t.lm_score,reverse=True)]
+            # input("---------------------------------")
             # Keep the search to a manageable size.
             decoder.beam_prune()
 
-            # Advance the tokens we've just created onto any arcs with epsilon input symbols they can reach.
+            # Advance the tokens to eps states the can reach
             epsilon_tokens = []
             curr_active_tokens = decoder.active_tokens
 
@@ -199,7 +203,7 @@ class FST:
                 )
             ]
 
-            # Ensure the tokens are sorted by ID. This invariant is used by the tok_backtrace member function.
+            # Ensure the tokens are sorted by ID. This  is used by the tok_backtrace member function.
             epsilon_tokens.sort(key=lambda token: token.id)
 
             #Add and commit the newly add tokens

@@ -43,8 +43,7 @@ class BeamSearch:
         # limit scores between 0->1 this very important as pathcost will weight the next transition cost limmiting numbers betwee 0->1 will prevent overflow and maintain relative difference
         tokens_scores = np.exp(tokens_scores - np.max(tokens_scores))
         # make a column vector; row index is arc number
-        rows = np.array(
-            [token.arc_number for token in token_list], dtype=np.int)
+        rows = np.array([token.arc_number for token in token_list], dtype=np.int)
         cols = np.zeros(rows.shape)
         scores = scipy.sparse.csc_matrix(
             (tokens_scores, (rows, cols)),
@@ -52,8 +51,7 @@ class BeamSearch:
             dtype=np.float32
         )
 
-        # try to change to dict mappng the arc number to token directly ____!!!!!
-        score_index_to_token_index = np.ones(num_arcs, dtype=np.int32) * -1  # bogus initialization
+        score_index_to_token_index = np.ones(num_arcs, dtype=np.int32) * -1 
         for i, token in enumerate(token_list):
             score_index_to_token_index[token.arc_number] = i
 
@@ -95,6 +93,7 @@ class BeamSearch:
                 arc_number = token.arc_number
                 path.append((arc_number,token.creating_frame_num))
                 looking_for_token_id = token.prev_id
+                
         # reverse backtrace so tokens are in forward-time-order
         path = path[::-1]
 

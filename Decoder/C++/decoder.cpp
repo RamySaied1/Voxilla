@@ -9,7 +9,6 @@ vector<vector<string>> Decoder::decode(vector<vector<double>>& activations, doub
         beamSearch.doForward(fst.getGraph(), fst.getInpLabelToIndx(), activations[i], true);
         beamSearch.beamPrune();
         expandEpsStates();
-
         beamSearch.moveExpandedToActive();
     }
 
@@ -53,7 +52,7 @@ void Decoder::applyFinalState() {
         (*i)->lmCost += fst.getFinalStates().find((*i)->arc->dstState)->second;  // add final state cost
     }
 
-    activeTokens.erase(iend, end(activeTokens));  // remove non final states
+    // activeTokens.erase(iend, end(activeTokens));  // remove non final states
 }
 
 vector<vector<string>> Decoder::getBestPath() {

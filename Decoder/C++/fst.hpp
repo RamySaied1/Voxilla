@@ -15,7 +15,7 @@ class Fst {
         string startSymbol, endSymbol, epsSymbol;
     };
 
-    Fst(string fstFileName, string labelsFileName, SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
+    Fst(string fstFile, string labelsFile,string hmmFile, SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
     ~Fst();
 
     bool hasEpsArc(uint state) { return graph[state].size() > 0 && graph[state].front()->inpLabel == espSyms.epsSymbol; }

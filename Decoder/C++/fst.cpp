@@ -1,14 +1,18 @@
 #include "fst.hpp"
 #include <exception>
 
-Fst::Fst(string fstFileName, string labelsFileName, SpecialSymbols espSyms) : espSyms(espSyms) {
+Fst::Fst(string fstFile, string labelsFile,string hmmFile, SpecialSymbols espSyms) : espSyms(espSyms) {
     inpLabelToIndx = unordered_map<string, uint>();
-    parseInputLabels(labelsFileName);
-    parseTransitionsInfo("../hmm.txt");
+    parseInputLabels(labelsFile);
 
+    transIdToInpLabel = unordered_map<uint, string>();
+    if(hmmFile!=""){
+        parseTransitionsInfo(hmmFile);
+    }
+    
     graph = vector<vector<const Arc*>>();
     finalStates = unordered_map<uint, double>();
-    parseFst(fstFileName);
+    parseFst(fstFile);
     preprocessFst();
 }
 
@@ -95,8 +99,7 @@ void Fst::processFinalState(const vector<string>& fields) {
 
 void Fst::processArc(const vector<string>& fields) {
     uint srcState = (uint)stoi(fields[0]);
-    uint transId = stoi(fields[2]);
-    string inpLabel = transIdToInpLabel[transId];
+    string inpLabel = transIdToInpLabel.empty()? fields[2]: transIdToInpLabel[stoi(fields[2])];
     double lmCost = (fields.size() == 5) ? -stod(fields.back()) : 0.;
     const Arc* arc = new Arc{srcState, (uint)stoi(fields[1]), inpLabel, fields[3], lmCost};
 

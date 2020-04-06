@@ -16,7 +16,7 @@ struct Token {
 
 class BeamSearch {
    public:
-    BeamSearch(uint beamWidth, double pathAcceptingThreshold = 0.);
+    BeamSearch(uint maxActiveTokens, double beamWidth = 0.);
     ~BeamSearch();
 
     const vector<shared_ptr<Token>>& getExpandedTokens() const;
@@ -37,8 +37,8 @@ class BeamSearch {
         Expantion() : parentToken(NULL), lmCost(0.), amCost(0.), expantionCost(0.) {}
     };
 
-    uint beamWidth;
-    double pathAcceptingThreshold;
+    uint maxActiveTokens;
+    double beamWidth;
     vector<shared_ptr<Token>> activeTokens, expandedTokens;
     unordered_map<shared_ptr<Token>, shared_ptr<Token>> predeccessor;
 
