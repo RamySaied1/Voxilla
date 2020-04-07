@@ -1,0 +1,34 @@
+---------------------------------------------------------------
+graphFolder: ./Graphs/New_notrans_noself/ ,activationsFolder: ./Activations/BLSTM1_activations/ ,filesFile: files_dev.txt
+maxActiveTokens is 1000 ,beam is 12 ,amwStart 12 ,amwEnd 12 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_orig_19.txt
+Parsing is Done in: 51 seconds 
+amw: 12
+Decoding 19 files with 25410 frames is Done in: 180 seconds  Avg: 0.00708383 frame/sec
+wer count: 176, ser count: 19
+wer% : 24.18, ser% : 100.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/New_notrans_noself/ ,activationsFolder: ./Activations/BLSTM1_activations/ ,filesFile: files_dev.txt
+maxActiveTokens is 1500 ,beam is 12 ,amwStart 12 ,amwEnd 12 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_orig_19.txt
+---------------------------------------------------------------
+graphFolder: ./Graphs/New_notrans_noself/ ,activationsFolder: ./Activations/BLSTM1_activations/ ,filesFile: files_dev.txt
+maxActiveTokens is 1500 ,beam is 15 ,amwStart 12 ,amwEnd 12 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_orig_19.txt
+Parsing is Done in: 49 seconds 
+amw: 12
+Decoding 19 files with 25410 frames is Done in: 353 seconds  Avg: 0.0138922 frame/sec
+wer count: 156, ser count: 19
+wer% : 21.43, ser% : 100.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/New_notrans_noself/ ,activationsFolder: ./Activations/BLSTM1_activations/ ,filesFile: files_dev.txt
+maxActiveTokens is 3000 ,beam is 15 ,amwStart 12 ,amwEnd 12 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_orig_19.txt
+Parsing is Done in: 50 seconds 
+amw: 12
+Decoding 19 files with 25410 frames is Done in: 583 seconds  Avg: 0.0229437 frame/sec
+wer count: 147, ser count: 19
+wer% : 20.19, ser% : 100.0
+-------------------------------------------------------------

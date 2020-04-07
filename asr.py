@@ -1,6 +1,3 @@
-from htk_featio import read_htk_user_feat
-
-
 class ASR:
 
     def __init__(self, model_file, fst_file, fst_input_labels_file):

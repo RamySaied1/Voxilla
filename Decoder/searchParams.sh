@@ -20,8 +20,8 @@ amwStep=$8
 refFilePath=./RefTrans/$9
 refFileLen=`cat $refFilePath | wc -l `
 
-echo graphFolder: $graphFolder, activationsFolder: $activationsFolder, filesFile: $filesFile
-echo maxActiveTokens is $maxActiveTokens , beam is $beam, amwStart $amwStart, amwEnd $amwEnd, amwStep $amwStep
+echo graphFolder: $graphFolder ,activationsFolder: $activationsFolder ,filesFile: $filesFile
+echo maxActiveTokens is $maxActiveTokens ,beam is $beam ,amwStart $amwStart ,amwEnd $amwEnd ,amwStep $amwStep
 echo ReferencePath fie is $refFilePath
 
 
@@ -37,24 +37,31 @@ then
 fi
 
 
-# g++ -g ./C++/*.cpp
-# ./a.out  $params >> $outFilePath 
+echo "---------------------------------------------------------------" >> reports.txt
+echo graphFolder: $graphFolder ,activationsFolder: $activationsFolder ,filesFile: $filesFile >> reports.txt
+echo maxActiveTokens is $maxActiveTokens ,beam is $beam ,amwStart $amwStart ,amwEnd $amwEnd ,amwStep $amwStep >> reports.txt
+echo ReferencePath fie is $refFilePath >> reports.txt
 
-sed -i "/Token/d;/^\s*$/d;/in:/d" $outFilePath
+g++ -g ./C++/*.cpp
+./a.out  $params >> $outFilePath 
+
+sed  "/Token/d;/^\s*$/d;" $outFilePath > tmp.txt
+cat tmp.txt | head -n 1 >> reports.txt
+sed -i "/Parsing/d" tmp.txt
+
+
 trash-put ./PredTrans/Split/*
-
-
-echo > reports.txt
 let refFileLen="refFileLen+2"
-split -l $refFileLen $outFilePath -d ./PredTrans/Split/
+split -l $refFileLen tmp.txt -d ./PredTrans/Split/
+/bin/rm tmp.txt
+
 for file in `ls ./PredTrans/Split/`;
 do
     numOfLines=`cat ./PredTrans/Split/$file | wc -l`
     if [ "$numOfLines" == "$refFileLen" ] 
     then
-        echo "-------------------------------------------------------------" >> reports.txt
-        tail -n 1 ./PredTrans/Split/$file >>  reports.txt
-        sed -i "/amw:/d" ./PredTrans/Split/$file
+        tail -n 2 ./PredTrans/Split/$file >>  reports.txt
+        sed -i "/amw:/d;/in:/d" ./PredTrans/Split/$file
         python3 ../PerformanceMeasure/performance.py -hyp ./PredTrans/Split/$file  -ref $refFilePath | tail -n 2 >> reports.txt
     else
         echo "Wrong number of lines discard split: $file"

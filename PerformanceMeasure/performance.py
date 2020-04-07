@@ -40,7 +40,7 @@ def sed(ref=None, hyp=None):
                 j-=1
                 sub_err+=1
             else:
-                raise("unexpected behaboir in string edit distance")
+                RuntimeError("unexpected behavoir in string edit distance")
 
     return (len(ref),ins_errs+del_errs+sub_err, ins_errs,del_errs,sub_err)
 
@@ -92,21 +92,22 @@ def string_edit_distance(ref=None, hyp=None):
 def read_trn_hyp_files(ref_trn=None, hyp_trn=None):
     with open(ref_trn) as reference:
         with open(hyp_trn) as hypothesis:
-            return reference.readlines(), hypothesis.readlines()
+            return  hypothesis.readlines(),reference.readlines()
 
 
 def score(hypothesis : [str]=None, reference : [str]=None):
     assert(len(hypothesis) == len(reference))
-    wer = ser = total_tokens_n = 0
+    wer = ser = total_tokens_n = total_del = total_insert = total_sub = 0
     for reference_string, hypothesis_string in zip(reference,hypothesis):
         reference_string_words = reference_string.split()
         hypothesis_string_words = hypothesis_string.split()
-        tokens_n, errs_n, del_n, insert_n, sub_n = sed(ref=reference_string_words, hyp=hypothesis_string_words)
+        tokens_n, errs_n, del_n, insert_n, sub_n = string_edit_distance(ref=reference_string_words, hyp=hypothesis_string_words)
         wer += errs_n
+        total_del+=del_n; total_insert+=insert_n; total_sub+=sub_n
         ser += 1 if errs_n>0 else 0
         total_tokens_n += tokens_n
         print(f'ref -> {reference_string}hyp -> {hypothesis_string}words_n: {tokens_n}, sub_errs: {sub_n}, del_errs: {del_n}, insert_errs: {insert_n}, total_erros: {errs_n} \n----------------')
-    
+    print(f'total del: {total_del}, total insert: {total_insert}, total sub: {total_sub}')
     print(f'wer count: {wer}, ser count: {ser}')
     wer /= total_tokens_n
     ser /= len(hypothesis)

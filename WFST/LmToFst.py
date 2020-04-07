@@ -15,9 +15,9 @@ def main():
     parser = argparse.ArgumentParser(
         description='Transform gzipped languague model file into an approximate FST.')
 
-    parser.add_argument('-lmfile', help='the source language model')
+    parser.add_argument('-lmfile', help='the source language model',required=True)
     parser.add_argument(
-        '-out_file_base', help='we will write output to here, adding .tfsa and .syms extensions')
+        '-out_file_base', help='we will write output to here, adding .tfsa and .syms extensions',required=True)
     parser.add_argument('--prune_5k', '-prune_5k',
                         help='artificially limit to the top 5000 unigrams in the model', action='store_true')
     args = parser.parse_args()

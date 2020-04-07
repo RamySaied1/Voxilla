@@ -3,12 +3,12 @@
 
 int main(int argc, char const* argv[]) {
     string graphFolder = argv[1];
-    string activationsFolder = argv[2]; 
+    string activationsFolder = argv[2];
     string filesFile = argv[3];
 
     time_t t1, t2;
     time(&t1);
-    Decoder decoder(graphFolder+"HCLG.txt",graphFolder+"labels.ciphones",graphFolder+"hmm.txt", (uint)stoi(argv[4]), stod(argv[5]));
+    Decoder decoder(graphFolder + "HCLG.txt", graphFolder + "labels.ciphones", graphFolder + "hmm.txt", (uint)stoi(argv[4]), stod(argv[5]));
     time(&t2);
     cout << "Parsing is Done in: " << t2 - t1 << " seconds \n";
 
@@ -19,15 +19,21 @@ int main(int argc, char const* argv[]) {
     double amwStart = stod(argv[6]);
     double amwEnd = stod(argv[7]);
     double amwStep = stod(argv[8]);
+    vector<vector<double>> activations;
     for (double amw = amwStart; amw <= amwEnd; amw += amwStep) {
+        long long totalFramesNum = 0;
+        uint filesCount = 0;
+        time(&t1);
         while (in >> fileName) {
+            ++filesCount;
             string shape;
             ifstream activationsFile;
             activationsFile.open(activationsFolder + fileName);
             getline(activationsFile, shape);
             vector<string> dims;
             split(shape, dims);
-            vector<vector<double>> activations((uint)stoi(dims[0]), vector<double>((uint)stoi(dims[1])));
+            activations = vector<vector<double>>((uint)stoi(dims[0]), vector<double>((uint)stoi(dims[1])));
+            totalFramesNum += activations.size();
             read2d(activationsFile, activations);
 
             vector<vector<string>> path = decoder.decode(activations, 1 / amw);
@@ -41,7 +47,10 @@ int main(int argc, char const* argv[]) {
             }
             cout << endl;
         }
-        cout <<"amw: "<< amw << endl;
+        cout << "amw: " << amw << endl;
+        time(&t2);
+        cout << "Decoding " << filesCount << " files with " << totalFramesNum << " frames is Done in: " << t2 - t1 << " seconds "
+             << " Avg: " << (t2 - t1) * 1. / totalFramesNum << " frame/sec"<< endl;
         in.clear();
         in.seekg(0, ios::beg);
     }
