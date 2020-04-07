@@ -3,3 +3,5 @@ PredTrans
 RefTrans
 kaldi
 test_voices
+**.out
+reports.txt
