@@ -8,7 +8,7 @@ int main(int argc, char const* argv[]) {
 
     time_t t1, t2;
     time(&t1);
-    Decoder decoder(graphFolder + "HCLG.txt", graphFolder + "labels.ciphones", graphFolder + "hmm.txt", (uint)stoi(argv[4]), stod(argv[5]));
+    Decoder decoder(graphFolder, graphFolder + "labels.ciphones", (uint)stoi(argv[4]), stod(argv[5]));
     time(&t2);
     cout << "Parsing is Done in: " << t2 - t1 << " seconds \n";
 
@@ -41,7 +41,7 @@ int main(int argc, char const* argv[]) {
                 if (i && path[i].back() == path[i - 1].back()) {
                     continue;
                 }
-                if (path[i][1] != "<eps>" && path[i][1] != "<s>" && path[i][1] != "<\\s>") {
+                if (!decoder.isSpecialSym(path[i][1])) {
                     cout << path[i][1] << " ";
                 }
             }
@@ -50,7 +50,7 @@ int main(int argc, char const* argv[]) {
         cout << "amw: " << amw << endl;
         time(&t2);
         cout << "Decoding " << filesCount << " files with " << totalFramesNum << " frames is Done in: " << t2 - t1 << " seconds "
-             << " Avg: " << (t2 - t1) * 1. / totalFramesNum << " frame/sec"<< endl;
+             << " Avg: " << (t2 - t1) * 1. / totalFramesNum << " frame/sec" << endl;
         in.clear();
         in.seekg(0, ios::beg);
     }

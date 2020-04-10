@@ -1,12 +1,41 @@
 #include "decoder.hpp"
 
+Decoder::Decoder(string graphFolder, string inputLabelsFile, uint maxActiveTokens, double beamWidth, SpecialSymbols espSyms) : beamSearch(maxActiveTokens, beamWidth), fst(graphFolder + "HCLG.txt", graphFolder + "input.syms", graphFolder + "output.syms", espSyms.epsSymbol),espSyms(espSyms) {
+    inpIdToActivationsIndx = unordered_map<uint, uint>();
+    parseInputLabels(inputLabelsFile);
+    mapInpIdToActivationsIndx();
+}
+
+void Decoder::parseInputLabels(const string& filename) {
+    ifstream in;
+    in.open(filename, ifstream::in);
+    if (!in.is_open()) {
+        throw Exception("Can't open input labels file: " + filename);
+    }
+    string line;
+    uint i = 0;
+    while (in >> line) {
+        if (isSpecialSym(line)) {
+            throw Exception("special symbol exists in labels file which is not expected");
+        } else {
+            inpLabelToIndx[line] = i++;
+        }
+    }
+}
+
+void Decoder::mapInpIdToActivationsIndx() {
+    for (const auto& elem : fst.getInpSymsTable()) {
+        inpIdToActivationsIndx[elem.first] = inpLabelToIndx[elem.second];
+    }
+}
+
 vector<vector<string>> Decoder::decode(vector<vector<double>>& activations, double amw) {
     preprocessActivations(activations, amw);
-    unique_ptr<Arc> intialArc(new Arc{0, 0, fst.getSpecialSyms().epsSymbol, fst.getSpecialSyms().epsSymbol, 0.});
+    unique_ptr<Arc> intialArc(new Arc{0, 0, 0, 0, 0.});  // dummy arc connected to intial state 0
     beamSearch.setRootToken(intialArc.get(), 0., 0.);
 
     for (size_t i = 0; i < activations.size(); i++) {
-        beamSearch.doForward(fst.getGraph(), fst.getInpLabelToIndx(), activations[i], true);
+        beamSearch.doForward(fst.getGraph(), inpIdToActivationsIndx, activations[i], true);
         beamSearch.beamPrune();
         expandEpsStates();
         beamSearch.moveExpandedToActive();
@@ -37,7 +66,7 @@ void Decoder::expandEpsStates() {
             }
         }
         beamSearch.setActiveTokens(epsTokens);
-        beamSearch.doForward(fst.getGraph(), {{fst.getSpecialSyms().epsSymbol, 0}}, vector<double>(1, 0.), false);
+        beamSearch.doForward(fst.getGraph(), {{0, 0}}, vector<double>(1, 0.), false);  // eps symbol is assumed to have id 0
     }
     beamSearch.keepOnlyBestExpandedTokens();
 }
@@ -62,11 +91,13 @@ vector<vector<string>> Decoder::getBestPath() {
     // cout << endl;
     // cout << "Combined Cost: " << (finalToken.amCost, finalToken.lmCost, finalToken.hmmCost);
     // cout << "\n---------------------------------\n";
+    auto inpSymsTable = fst.getInpSymsTable();
+    auto outSymsTable = fst.getOutSymsTable();
     vector<vector<string>> inOutID(path.size(), vector<string>(3, ""));
     for (uint i = 0; i < path.size(); ++i) {
         const auto& arc = path[i];
-        inOutID[i][0] = arc->inpLabel;
-        inOutID[i][1] = arc->outLabel;
+        inOutID[i][0] = inpSymsTable.find(arc->inpId)->second;
+        inOutID[i][1] = outSymsTable.find(arc->outId)->second;
         inOutID[i][2] = to_string(arc->dstState);
     }
     return move(inOutID);

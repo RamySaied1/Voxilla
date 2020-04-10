@@ -26,7 +26,7 @@ class BeamSearch {
     void moveExpandedToActive();
     void beamPrune();
     void keepOnlyBestExpandedTokens();
-    void doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops);
+    void doForward(const vector<vector<const Arc*>>& graph, const unordered_map<uint, uint>& inpIdsToIndx, const vector<double>& activations, bool useSelfLoops);
     vector<const Arc*> getBestPath(const vector<vector<const Arc*>>& graph, Token& bestToken);
 
    private:

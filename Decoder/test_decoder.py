@@ -1,19 +1,18 @@
 import sys
 sys.path.append("../FeatureExtraction/")
 sys.path.append("../Classifier/")
-sys.path.append("./python/")
-sys.path.append("./c++/")
+sys.path.append("./Python/")
+sys.path.append("./C++/")
 from os import path
 import argparse
 import collections
 import re
 from time import time
-from fst import FST
 from classifier import Classifier
-from beam_search import *
 from htk_featio import read_htk_user_feat
 # from decoder_wrapper import PyDecoder as Decoder
 from itertools import groupby
+import numpy as np
 
 
 def parse_script_line(script_line: str, script_path: str):
@@ -88,20 +87,20 @@ def main():
         with open(args.script, 'r') as ftest:
             all_time_start = time()
             for t,line in enumerate(ftest):
-                time_start = time()
+                # time_start = time()
                 feature_vectors, audio_features_filename = get_features(line.rstrip(), script_path)
-                activations = classifier.eval(feature_vectors,do_stack_features=False) # returns all activations as shape (1, number of examples, number of last layer neurorns) we us [0] to remove the first dimention
-                with open(f"{audio_features_filename}_BLSTM1_activations.txt","w") as f:
-                    f.write(f"{activations.shape[0]} {activations.shape[1]}\n")
-                    np.savetxt(f,activations)
-                continue      
+                # activations = classifier.eval(feature_vectors,do_stack_features=False) # returns all activations as shape (1, number of examples, number of last layer neurorns) we us [0] to remove the first dimention
+                # with open(f"{audio_features_filename}_BLSTM1_activations.txt","w") as f:
+                #     f.write(f"{activations.shape[0]} {activations.shape[1]}\n")
+                #     np.savetxt(f,activations)
+                # continue      
                 # hypothesis,best_token = fst.decode(BeamSearch(args.beam_width), activations, lmweight=args.lmweight)
-                hypothesis = decoder.decode(activations,30.)
+                # hypothesis = decoder.decode(activations,30.)
                 # print(hypothesis)
                 # return
-                hypothesis = [key for key, group in groupby(hypothesis)] # remove self loops
-                predictedSents.append(' '.join([outlabel for _,outlabel in hypothesis if outlabel not in ["<eps>","<s>","</s>"]]))
-                print(f"line {line} takes {int(time()-time_start)} seconds")
+                # hypothesis = [key[:2] for key, group in groupby(hypothesis,lambda key:key[-1])] # remove self loops
+                # predictedSents.append(' '.join([outlabel for _,outlabel in hypothesis if outlabel not in ["<eps>","<s>","</s>"]]))
+                # print(f"line {line} takes {int(time()-time_start)} seconds")
                 write_ref_output("../LibriSpeech/dev-clean",audio_features_filename)
     except KeyboardInterrupt:
         print("[CTRL+C detected]")

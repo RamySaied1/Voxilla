@@ -33,14 +33,14 @@ void BeamSearch::keepOnlyBestExpandedTokens() {
                          end(expandedTokens));
 }
 
-void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<string, uint>& inpLabelsToIndx, const vector<double>& activations, bool useSelfLoops) {
+void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<uint, uint>& inpIdsToIndx, const vector<double>& activations, bool useSelfLoops) {
     unordered_map<const Arc*, Expantion> expantions;  // map expanded node to parent node and expantion cost
     vector<double> logProbas = getNormalizeTokensLogProba(activeTokens);
     if (useSelfLoops) {
         for (uint i = 0; i < activeTokens.size(); ++i) {
             const auto& token = activeTokens[i];
-            auto iter = inpLabelsToIndx.find(token->arc->inpLabel);
-            if (iter == inpLabelsToIndx.end()) continue;
+            auto iter = inpIdsToIndx.find(token->arc->inpId);
+            if (iter == inpIdsToIndx.end()) continue;
             // double lmCost = token->arc->lmCost;
             double amCost = activations[iter->second];
             // double specialCost = (token->arc->srcState == token->arc->dstState) ? log(2.) : 0;
@@ -52,8 +52,8 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
     for (uint i = 0; i < activeTokens.size(); ++i) {
         const auto& token = activeTokens[i];
         for (const Arc* arc : graph[token->arc->dstState]) {
-            auto iter = inpLabelsToIndx.find(arc->inpLabel);
-            if (iter == inpLabelsToIndx.end()) continue;
+            auto iter = inpIdsToIndx.find(arc->inpId);
+            if (iter == inpIdsToIndx.end()) continue;
             double lmCost = arc->lmCost;
             double amCost = activations[iter->second];
 

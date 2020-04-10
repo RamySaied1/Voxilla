@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <vector>
 #include <limits>
+#include <string.h>
 using namespace std;
 #define uint unsigned int
 
