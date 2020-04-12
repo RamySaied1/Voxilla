@@ -81,7 +81,7 @@ void Decoder::applyFinalState() {
         (*i)->lmCost += fst.getFinalStates().find((*i)->arc->dstState)->second;  // add final state cost
     }
 
-    // activeTokens.erase(iend, end(activeTokens));  // remove non final states
+    activeTokens.erase(iend, end(activeTokens));  // remove non final states
 }
 
 vector<vector<string>> Decoder::getBestPath() {
