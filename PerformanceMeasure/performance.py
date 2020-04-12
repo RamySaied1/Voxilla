@@ -97,21 +97,20 @@ def read_trn_hyp_files(ref_trn=None, hyp_trn=None):
 
 def score(hypothesis : [str]=None, reference : [str]=None):
     assert(len(hypothesis) == len(reference))
-    wer = ser = total_tokens_n = total_del = total_insert = total_sub = 0
+    wec = sec = total_tokens_n = total_del = total_insert = total_sub = 0
     for reference_string, hypothesis_string in zip(reference,hypothesis):
         reference_string_words = reference_string.split()
         hypothesis_string_words = hypothesis_string.split()
         tokens_n, errs_n, del_n, insert_n, sub_n = string_edit_distance(ref=reference_string_words, hyp=hypothesis_string_words)
-        wer += errs_n
+        wec += errs_n
         total_del+=del_n; total_insert+=insert_n; total_sub+=sub_n
-        ser += 1 if errs_n>0 else 0
+        sec += 1 if errs_n>0 else 0
         total_tokens_n += tokens_n
         print(f'ref -> {reference_string}hyp -> {hypothesis_string}words_n: {tokens_n}, sub_errs: {sub_n}, del_errs: {del_n}, insert_errs: {insert_n}, total_erros: {errs_n} \n----------------')
     print(f'total del: {total_del}, total insert: {total_insert}, total sub: {total_sub}')
-    print(f'wer count: {wer}, ser count: {ser}')
-    wer /= total_tokens_n
-    ser /= len(hypothesis)
-    print(f'wer% : {round(wer*100,2)}, ser% : {round(ser*100,2)}')
+    wer = wec/total_tokens_n
+    ser = sec/len(hypothesis)
+    print(f'wer% {wec}/{total_tokens_n} : {round(wer*100,2)}, ser% {sec}/{len(hypothesis)} : {round(ser*100,2)}')
     return wer,ser
 
 
