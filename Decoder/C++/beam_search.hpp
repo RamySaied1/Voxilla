@@ -16,12 +16,12 @@ struct Token {
 
 class BeamSearch {
    public:
-    BeamSearch(uint maxActiveTokens, double beamWidth = 0.);
+    BeamSearch(uint maxActiveTokens = 500, double beamWidth = 0.);
     ~BeamSearch();
 
     const vector<shared_ptr<Token>>& getExpandedTokens() const;
     const vector<shared_ptr<Token>>& getActiveTokens() const;
-    void setRootToken(const Arc* arc, double lmCost, double modelScre);
+    void intiate(const Arc* arc, double lmCost, double modelScre, uint maxActiveTokens, double beamWidth);
     void setActiveTokens(const vector<shared_ptr<Token>>& tokens);
     void moveExpandedToActive();
     void beamPrune();
@@ -32,7 +32,7 @@ class BeamSearch {
    private:
     struct Expantion {
         shared_ptr<Token> parentToken;
-        double lmCost, amCost,  expantionCost;
+        double lmCost, amCost, expantionCost;
         Expantion(shared_ptr<Token> parentToken, double lmCost, double amCost, double expantionCost) : parentToken(parentToken), lmCost(lmCost), amCost(amCost), expantionCost(expantionCost) {}
         Expantion() : parentToken(NULL), lmCost(0.), amCost(0.), expantionCost(0.) {}
     };

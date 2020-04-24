@@ -7,9 +7,9 @@ class Decoder {
         string startSymbol, endSymbol, epsSymbol;
     };
 
-    Decoder(string graphFolder, string inputLabelsFile, uint maxActiveTokens, double beamWidth = 10., SpecialSymbols espSyms = {"<s>", "</s>","<eps>"});
+    Decoder(string graphFolder, string inputLabelsFile, SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
     bool isSpecialSym(string sym) { return sym == espSyms.epsSymbol || sym == espSyms.startSymbol || sym == espSyms.endSymbol; }
-    vector<vector<string>> decode(vector<vector<double>>& activations, double amw);
+    vector<vector<string>> decode(vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw);
     ~Decoder(){};
 
    private:

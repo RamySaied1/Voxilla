@@ -5,10 +5,12 @@ int main(int argc, char const* argv[]) {
     string graphFolder = argv[1];
     string activationsFolder = argv[2];
     string filesFile = argv[3];
+    uint maxActiveTokens = (uint)stoi(argv[4]);
+    double beamWidth = stod(argv[5]);
 
     time_t t1, t2;
     time(&t1);
-    Decoder decoder(graphFolder, graphFolder + "labels.ciphones", (uint)stoi(argv[4]), stod(argv[5]));
+    Decoder decoder(graphFolder, graphFolder + "labels.ciphones");
     time(&t2);
     cout << "Parsing is Done in: " << t2 - t1 << " seconds \n";
 
@@ -36,7 +38,7 @@ int main(int argc, char const* argv[]) {
             totalFramesNum += activations.size();
             read2d(activationsFile, activations);
 
-            vector<vector<string>> path = decoder.decode(activations, 1 / amw);
+            vector<vector<string>> path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw);
             for (int i = 0; i < path.size(); ++i) {
                 if (i && path[i].back() == path[i - 1].back()) {
                     continue;

@@ -1,6 +1,6 @@
 #include "decoder.hpp"
 
-Decoder::Decoder(string graphFolder, string inputLabelsFile, uint maxActiveTokens, double beamWidth, SpecialSymbols espSyms) : beamSearch(maxActiveTokens, beamWidth), fst(graphFolder + "HCLG.txt", graphFolder + "input.syms", graphFolder + "output.syms", espSyms.epsSymbol),espSyms(espSyms) {
+Decoder::Decoder(string graphFolder, string inputLabelsFile, SpecialSymbols espSyms) : beamSearch(), fst(graphFolder + "HCLG.txt", graphFolder + "input.syms", graphFolder + "output.syms", espSyms.epsSymbol), espSyms(espSyms) {
     inpIdToActivationsIndx = unordered_map<uint, uint>();
     parseInputLabels(inputLabelsFile);
     mapInpIdToActivationsIndx();
@@ -29,10 +29,10 @@ void Decoder::mapInpIdToActivationsIndx() {
     }
 }
 
-vector<vector<string>> Decoder::decode(vector<vector<double>>& activations, double amw) {
+vector<vector<string>> Decoder::decode(vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw) {
     preprocessActivations(activations, amw);
     unique_ptr<Arc> intialArc(new Arc{0, 0, 0, 0, 0.});  // dummy arc connected to intial state 0
-    beamSearch.setRootToken(intialArc.get(), 0., 0.);
+    beamSearch.intiate(intialArc.get(), 0., 0., maxActiveTokens, beamWidth);
 
     for (size_t i = 0; i < activations.size(); i++) {
         beamSearch.doForward(fst.getGraph(), inpIdToActivationsIndx, activations[i], true);

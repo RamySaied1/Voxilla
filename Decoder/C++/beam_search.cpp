@@ -6,7 +6,10 @@ BeamSearch::BeamSearch(uint maxActiveTokens, double beamWidth) : maxActiveTokens
     assert(maxActiveTokens != 0);
 }
 
-void BeamSearch::setRootToken(const Arc* arc, double lmCost, double amCost) {
+void BeamSearch::intiate(const Arc* arc, double lmCost, double amCost, uint maxActiveTokens, double beamWidth) {
+    this->maxActiveTokens = maxActiveTokens;
+    this->beamWidth = beamWidth;
+
     expandedTokens.clear();
     activeTokens.clear();
     predeccessor.clear();
@@ -111,12 +114,12 @@ void BeamSearch::beamPrune() {
         sort(begin(expandedTokens), end(expandedTokens), [&](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
             return a->amCost + a->lmCost > b->amCost + b->lmCost;
         });
-        
+
         if (expandedTokens.size() > maxActiveTokens) {
             expandedTokens.resize(maxActiveTokens);
             expandedTokens.reserve(maxActiveTokens);
         }
-        
+
         double thresold = expandedTokens.front()->amCost + expandedTokens.front()->lmCost - beamWidth;
         auto iter = lower_bound(rbegin(expandedTokens), rend(expandedTokens), thresold, [&](const shared_ptr<Token>& t, double val) {
             return t->amCost + t->lmCost < val;
@@ -125,7 +128,6 @@ void BeamSearch::beamPrune() {
         int size = rend(expandedTokens) - iter;
         expandedTokens.resize(size);
         // cout<<"New Size due to beam: "<<expandedTokens.size()<<endl;
-
     }
 }
 
