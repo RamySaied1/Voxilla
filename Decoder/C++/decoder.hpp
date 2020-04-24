@@ -1,4 +1,4 @@
-#include "beam_search.hpp"
+#pragma once
 #include "fst.hpp"
 
 class Decoder {

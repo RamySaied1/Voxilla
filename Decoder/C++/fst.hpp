@@ -1,7 +1,6 @@
-
 #pragma once
 #include "beam_search.hpp"
-#include "helpers.hpp"
+
 struct Arc {
     uint srcState, dstState, inpId, outId;
     double lmCost;
