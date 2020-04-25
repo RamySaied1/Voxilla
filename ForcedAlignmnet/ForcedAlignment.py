@@ -2,11 +2,14 @@ from AcousticsSegmentTree import AcousticsSegmentTree as AST
 from itertools import groupby
 import string
 import numpy as np
+import re
 
 class ForcedAlignment():
-    def __init__(self,wordsLexiconFile,phonesLexiconFile):
+    def __init__(self,wordsLexiconFile = "words_lexicon.txt", phonesLexiconFile = "phones_lexicon.txt", silence_phones = ["sil","spn"]):
         self.wordsLexicon = {}
         self.phonesLexicon = {}
+        self.silWords = {}
+        self.silence_phones = silence_phones
         self.lexicons = [self.wordsLexicon,self.phonesLexicon]
         lexiconFiles = [wordsLexiconFile ,phonesLexiconFile]
 
@@ -16,19 +19,49 @@ class ForcedAlignment():
                     tokens = line.split()
                     lexicon[tokens[0]] = lexicon.get(tokens[0],[])
                     lexicon[tokens[0]].append(tokens[1:])
+                    if(lexiconFile == wordsLexiconFile and tokens[1] in self.silence_phones):
+                        self.silWords[tokens[1]] = tokens[0] # ingore <spoken_noise> word and use only <unk> it will be overriden due to order of file
+
+        
+        # define some useful functions
+        self.sub_phone_to_phone = lambda sph: re.sub("_s[0-9]","",sph)
+        self.is_sil_phone = lambda ph: ph in self.silence_phones
+        self.is_sil_subphone = lambda sph: self.is_sil_phone(sph.split("_")[0])
 
     def _preprocess(self,decoderOutPath):
-        uniquePairs = np.array([key for key, group in groupby(decoderOutPath)])
-        inpLabels = list(filter(lambda w : w not in  ["<eps>"],map(lambda x: "[sil_s2]" if "sil" in x else x, np.array(decoderOutPath)[:,0])) )
-        for i in range(len(decoderOutPath)):
-            a,b= decoderOutPath[i] 
-            decoderOutPath[i] = ("[sil_s2]","sil") if(b in ["<eps>","<s>","</s>"] and "sil" in a) else (a,b)
-        uniquePairs = np.array([key for key, group in groupby(filter(lambda inout :''.join(inout)!="<eps>"*2,decoderOutPath))])
-        outLabels = list(filter(lambda w : w not in  ["<eps>","<s>","</s>"],uniquePairs[:,1]))
+        # uniquePairs = np.array([key for key, group in groupby(decoderOutPath)])
+        # ensure all strings are lower case
+        tolower = np.vectorize(lambda x: x.lower() ,otypes=[str])
+        decoderOutPath = tolower(np.array(decoderOutPath))
         
-        self.wordsLexicon["sil"] = self.wordsLexicon.get("sil",[])
-        self.wordsLexicon["sil"].append(["sil"])
-        self.phonesLexicon["sil"] = [["[sil_s2]"]]
+        def process_silence(subPhones):
+            def transform_ifsil(subPhone):
+                if(self.is_sil_subphone(subPhone)): return self.sub_phone_to_phone(subPhone)+"_s2"
+                return subPhone
+            return np.vectorize(transform_ifsil)(subPhones)
+        
+        #process silence phones
+        decoderOutPath[:,0] = process_silence(decoderOutPath[:,0]) 
+
+        #remove <eps> input
+        maskRows = np.apply_along_axis(lambda inoutid: not(inoutid[0]=="<eps>"),axis=1,arr=decoderOutPath)
+        inpLabels = decoderOutPath[maskRows][:,0]
+
+        #map sil phones to sil words
+        for i in range(len(decoderOutPath)):
+            if(self.is_sil_subphone(decoderOutPath[i][0]) and decoderOutPath[i][1] in ["<eps>"]): # second check is meant if silence is part of a word
+                decoderOutPath[i][1] = self.silWords[self.sub_phone_to_phone (decoderOutPath[i][0])]
+
+        predicate = lambda inoutid: not(inoutid[0]==inoutid[1]=="<eps>")
+        maskRows = np.apply_along_axis(predicate,axis=1,arr=decoderOutPath)
+        uniquePairs = [key for key, group in groupby(decoderOutPath[maskRows], lambda x : ",".join(x[:2]))]
+        outLabels = [inout.split(",")[1] for inout in uniquePairs]
+        outLabels = list(filter(lambda w : w not in  ["<eps>","<s>","</s>"],outLabels))
+
+        # override silence phone lexicon
+        for phone in self.silence_phones:
+            self.phonesLexicon[phone] = [[phone + "_s2"]]
+
         return inpLabels,outLabels
 
     def _get_groupings(self,parents,childeren,associations,childerenGroupings,parentI=0,childI=0):
@@ -47,10 +80,11 @@ class ForcedAlignment():
         assert(framesCount == len(inpLabels))
 
         # group repeated frames
-        framesGroupings = [(len(list(group)),subphone) for subphone, group in groupby(inpLabels)]
-        # group subphones to phones
-        subphones = [subphone for _,subphone in framesGroupings if "2" in subphone]
-        phones = [subphone.split("_")[0][1:] for subphone in subphones]
+        framesGroupings = [(len(list(group)),subPhone) for subPhone, group in groupby(inpLabels)]
+        
+        # group subPhones to phones
+        subPhones = [subPhone for _,subPhone in framesGroupings if "2" in subPhone]
+        phones = [self.sub_phone_to_phone(subPhone) for subPhone in subPhones]
         subPhoneGroupings = [(len(self.phonesLexicon[phone][0]),phone) for phone in phones]
 
         # group phones to words
@@ -63,16 +97,6 @@ class ForcedAlignment():
         # levels groups
         levelsGroups = [wordsGroupings,phonesGroupings,subPhoneGroupings,framesGroupings]
         
-        ast = AST()
-        ast.build(levelsGroups,["sentences","words","phones","subphones","frames"])
-        return ast
-
-
-if __name__ == "__main__":
-    fa = ForcedAlignment("words_lexicon","phones_lexicon")
-    decouderOutPath =[('<eps>', '<eps>'), ('[sil_s2]', '<s>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[ih_s2]', '<eps>'), ('[ih_s2]', '<eps>'), ('[ih_s2]', '<eps>'), ('[ih_s3]', '<eps>'), ('[ih_s4]', '<eps>'), ('[ih_s4]', '<eps>'), ('[ih_s4]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s3]', '<eps>'), ('[t_s4]', '<eps>'), ('<eps>', 'it'), ('[t_s2]', '<eps>'), ('[t_s3]', '<eps>'), ('[t_s3]', '<eps>'), ('[t_s3]', '<eps>'), ('[t_s3]', '<eps>'), ('[t_s3]', '<eps>'), ('[t_s4]', '<eps>'), ('[t_s4]', '<eps>'), ('[t_s4]', '<eps>'), ('[t_s4]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('[n_s2]', '<eps>'), ('[n_s3]', '<eps>'), ('[n_s3]', '<eps>'), ('[n_s3]', '<eps>'), ('[n_s3]', '<eps>'), ('[n_s3]', '<eps>'), ('[n_s4]', '<eps>'), ('[n_s4]', '<eps>'), ('[d_s2]', 'turned'), ('[d_s3]', '<eps>'), ('[d_s4]', '<eps>'), ('[d_s4]', '<eps>'), ('[d_s4]', '<eps>'), ('[aw_s2]', 'out'), ('[aw_s2]', 'out'), ('[aw_s2]', 'out'), ('[aw_s3]', '<eps>'), ('[aw_s3]', '<eps>'), ('[aw_s3]', '<eps>'), ('[aw_s3]', '<eps>'), ('[aw_s3]', '<eps>'), ('[aw_s3]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s3]', '<eps>'), ('[t_s3]', '<eps>'), ('[t_s4]', '<eps>'), ('[t_s4]', '<eps>'), ('[t_s4]', '<eps>'), ('[t_s4]', '<eps>'), ('<eps>', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('\
-    [sil_s2]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[dh_s2]', '<eps>'), ('[dh_s2]', '<eps>'), ('[dh_s3]', '<eps>'), ('[dh_s3]', '<eps>'), ('[dh_s4]', '<eps>'), ('[dh_s4]', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s3]', '<eps>'), ('[ah_s4]', '<eps>'), ('[ah_s4]', '<eps>'), ('[t_s2]', 'that'), ('[t_s2]', 'that'), ('[t_s2]', 'that'), ('[t_s3]', '<eps>'), ('[t_s4]', '<eps>'), ('[t_s4]', '<eps>'), ('<eps>', '<eps>'), ('[sh_s2]', '<eps>'), ('[sh_s2]', '<eps>'), ('[sh_s3]', '<eps>'), ('[sh_s3]', '<eps>'), ('[sh_s3]', '<eps>'), ('[sh_s3]', '<eps>'), ('[sh_s3]', '<eps>'), ('[sh_s3]', '<eps>'), ('[sh_s4]', '<eps>'), ('[sh_s4]', '<eps>'), ('[sh_s4]', '<eps>'), ('[iy_s2]', 'she'), ('[iy_s2]', 'she'), ('[iy_s2]', 'she'), ('[iy_s2]', 'she'), ('[iy_s3]', '<eps>'), ('[iy_s3]', '<eps>'), ('[iy_s3]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[hh_s2]', '<eps>'), ('[hh_s2]', '<eps>'), ('[hh_s3]', '<eps>'), ('[hh_s4]', '<eps>'), ('[ae_s2]', '<eps>'), ('[ae_s2]', '<eps>'), ('[ae_s2]', '<eps>'), ('[ae_s3]', '<eps>'), ('[ae_s4]', '<eps>'), ('[ae_s4]', '<eps>'), ('[ae_s4]', '<eps>'), ('[d_s2]', 'had'), ('[d_s3]', '<eps>'), ('[d_s4]', '<eps>'), ('[d_s4]', '<eps>'), ('<eps>', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s3]', '<eps>'), ('[ah_s4]', '<eps>'), ('<eps>', 'a'), ('<eps>', '<eps>'), ('[l_s2]', '<eps>'), ('[l_s2]', '<eps>'), ('[l_s2]', '<eps>'), ('[l_s2]', '<eps>'), ('[l_s2]', '<eps>'), ('[l_s3]', '<eps>'), ('[l_s3]', '<eps>'), ('[l_s3]', '<eps>'), ('[l_s4]', '<eps>'), ('[ih_s2]', '<eps>'), ('[ih_s3]', '<eps>'), ('[ih_s3]', '<eps>'), ('[ih_s4]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s3]', '<eps>'), ('[t_s4]', '<eps>'), ('[t_s4]', '<eps>'), ('[ah_s2]', 'little'), ('[ah_s3]', '<eps>'), ('[ah_s4]', '<eps>'), ('[l_s2]', '<eps>'), ('[l_s2]', '<eps>'), ('[l_s2]', '<eps>'), ('[l_s2]', '<eps>'), ('[l_s2]', '<eps>'), ('[l_s3]', '<eps>'), ('[l_s3]', '<eps>'), ('[l_s3]', '<eps>'), ('[l_s3]', '<eps>'), ('[l_s4]', '<eps>'), ('[m_s2]', '<eps>'), ('[m_s3]', '<eps>'), ('[m_s4]', '<eps>'), ('[m_s4]', '<eps>'), ('[ah_s2]', 'money'), ('[ah_s2]', 'money'), ('[ah_s2]', 'money'), ('[ah_s2]', 'money'), ('[ah_s2]', 'money'), ('[ah_s3]', '<eps>'), ('[ah_s4]', '<eps>'), ('[n_s2]', '<eps>'), ('[n_s3]', '<eps>'), ('[n_s4]', '<eps>'), ('[n_s4]', '<eps>'), ('[iy_s2]', '<eps>'), ('[iy_s2]', '<eps>'), ('[iy_s2]', '<eps>'), ('[iy_s3]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('<eps>', '<eps>'), ('<eps>', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s3]', '<eps>'), ('[ah_s4]', '<eps>'), ('[v_s2]', '<eps>'), ('[v_s2]', '<eps>'), ('[v_s2]', '<eps>'), ('[v_s3]', '<eps>'), ('[v_s4]', '<eps>'), ('[v_s4]', '<eps>'), ('[v_s4]', '<eps>'), ('<eps>', 'of'), ('[hh_s2]', '<eps>'), ('[hh_s3]', '<eps>'), ('[hh_s4]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('<eps>', 'her'), ('[ow_s2]', 'own'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s3]', '<eps>'), ('[ow_s4]', '<eps>'), ('[ow_s4]', '<eps>'), ('[ow_s4]', '<eps>'), ('[ow_s4]', '<eps>'), ('[ow_s4]', '<eps>'), ('[ow_s4]', '<eps>'), ('[ow_s4]', '<eps>'), ('[ow_s4]', '<eps>'), ('[n_s2]', '<eps>'), ('[n_s3]', '<eps>'), ('[n_s4]', '<eps>'), ('[n_s4]', '<eps>'), ('[n_s4]', '<eps>'), ('[n_s4]', '<eps>'), ('[n_s4]', '<eps>'), ('[n_s4]', '<eps>'), ('<eps>', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s3]', '<eps>'), ('[sil_s3]', '<eps>'), ('[sil_s3]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s2]', '<eps>'), ('<eps>', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s3]', '<eps>'), ('[ah_s4]', '<eps>'), ('[b_s2]', '<eps>'), ('[b_s2]', '<eps>'), ('[b_s3]', '<eps>'), ('[b_s3]', '<eps>'), ('[b_s4]', '<eps>'), ('[b_s4]', '<eps>'), ('[b_s4]', '<eps>'), ('[b_s4]', '<eps>'), ('[aw_s2]', 'about'), ('[aw_s2]', 'about'), ('[aw_s3]', '<eps>'), ('[aw_s4]', '<eps>'), ('[t_s2]', '<eps>'), ('[t_s3]', '<eps>'), ('[t_s4]', '<eps>'), ('[t_s4]', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s3]', '<eps>'), ('[ah_s3]', '<eps>'), ('[ah_s4]', '<eps>'), ('[ah_s4]', '<eps>'), ('[ah_s4]', '<eps>'), ('[ah_s4]', '<eps>'), ('<eps>', 'a'), ('[hh_s2]', 'hundred'), ('[hh_s3]', '<eps>'), ('[hh_s3]', '<eps>'), ('[hh_s4]', '<eps>'), ('[hh_s4]', '<eps>'), ('[hh_s4]', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s3]', '<eps>'), ('[ah_s3]', '<eps>'), ('[ah_s4]', '<eps>'), ('[n_s2]', '<eps>'), ('[n_s2]', '<eps>'), ('[n_s3]', '<eps>'), ('[n_s4]', '<eps>'), ('[d_s2]', '<eps>'), ('[d_s3]', '<eps>'), ('[d_s4]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('[d_s2]', '<eps>'), ('[d_s2]', '<eps>'), ('[d_s2]', '<eps>'), ('[d_s2]', '<eps>'), ('[d_s2]', '<eps>'), ('[d_s3]', '<eps>'), ('[d_s4]', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s2]', '<eps>'), ('[ah_s3]', '<eps>'), ('[ah_s4]', '<eps>'), ('[n_s2]', 'and'), ('[n_s3]', '<eps>'), ('[n_s4]', '<eps>'), ('[d_s2]', '<eps>'), ('[d_s3]', '<eps>'), ('[d_s4]', '<eps>'), ('[th_s2]', '<eps>'), ('[th_s3]', '<eps>'), ('[th_s3]', '<eps>'), ('[th_s4]', '<eps>'), ('[th_s4]', '<eps>'), ('[th_s4]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s2]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s3]', '<eps>'), ('[er_s4]', '<eps>'), ('[er_s4]', '<eps>'), ('[d_s2]', 'thirty'), ('[d_s3]', '<eps>'), ('[d_s4]', '<eps>'), ('[iy_s2]', '<eps>'), ('[iy_s2]', '<eps>'), ('[iy_s3]', '<eps>'), ('[iy_s3]', '<eps>'), ('[iy_s3]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('[iy_s4]', '<eps>'), ('<eps>', '<eps>'), ('[p_s2]', '<eps>'), ('[p_s2]', '<eps>'), ('[p_s3]', '<eps>'), ('[p_s3]', '<eps>'), ('[p_s4]', '<eps>'), ('[p_s4]', '<eps>'), ('[p_s4]', '<eps>'), ('[p_s4]', '<eps>'), ('[p_s4]', '<eps>'), ('[p_s4]', '<eps>'), ('[p_s4]', '<eps>'), ('[p_s4]', '<eps>'), ('[aw_s2]', 'pounds'), ('[aw_s2]', 'pounds'), ('[aw_s2]', 'pounds'), ('[aw_s2]', 'pounds'), ('[aw_s3]', '<eps>'), ('[aw_s3]', '<eps>'), ('[aw_s3]', '<eps>'), ('[aw_s3]', '<eps>'), ('[aw_s3]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[aw_s4]', '<eps>'), ('[n_s2]', '<eps>'), ('[n_s3]', '<eps>'), ('[n_s4]', '<eps>'), ('[z_s2]', '<eps>'), ('[z_s2]', '<eps>'), ('[z_s2]', '<eps>'), ('[z_s2]', '<eps>'), ('[z_s3]', '<eps>'), ('[z_s4]', '<eps>'), ('[z_s4]', '<eps>'), ('[z_s4]', '<eps>'), ('[z_s4]', '<eps>'), ('<eps>', '<eps>'), ('[ey_s2]', 'a'), ('[ey_s2]', 'a'), ('[ey_s3]', '<eps>'), ('[ey_s4]', '<eps>'), ('[y_s2]', 'year'), ('[y_s2]', 'year'), ('[y_s2]', 'year'), ('[y_s2]', 'year'), ('[y_s2]', 'year'), ('[y_s2]', 'year'), ('[y_s2]', 'year'), ('[y_s3]', '<eps>'), ('[y_s3]', '<eps>'), ('[y_s3]', '<eps>'), ('[y_s3]', '<eps>'), ('[y_s4]', '<eps>'), ('[y_s4]', '<eps>'), ('[y_s4]', '<eps>'), ('[ih_s2]', '<eps>'), ('[ih_s3]', '<eps>'), ('[ih_s3]', '<eps>'), ('[ih_s4]', '<eps>'), ('[ih_s4]', '<eps>'), ('[r_s2]', '<eps>'), ('[r_s2]', '<eps>'), ('[r_s2]', '<eps>'), ('[r_s2]', '<eps>'), ('[r_s2]', '<eps>'), ('[r_s2]', '<eps>'), ('[r_s2]', '<eps>'), ('[r_s2]', '<eps>'), ('[r_s2]', '<eps>'), ('[r_s3]', '<eps>'), ('[r_s3]', '<eps>'), ('[r_s3]', '<eps>'), ('[r_s4]', '<eps>'), ('[r_s4]', '<eps>'), ('[r_s4]', '<eps>'), ('[r_s4]', '<eps>'), ('[r_s4]', '<eps>'), ('[r_s4]', '<eps>'), ('[r_s4]', '<eps>'), ('[r_s4]', '<eps>'), ('[r_s4]', '<eps>'), ('<eps>', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s4]', '<eps>'), ('[sil_s2]', '<eps>'), ('[sil_s3]', '<eps>'), ('[sil_s3]', '<eps>'), ('[sil_s3]', '<eps>'), ('[sil_s3]', '<eps>')]
-    
-    ast =  fa.align(decouderOutPath,587)
-    print(" ".join(list(map(str,np.array([ast.getRangeWRT(i,"words",-1) for i in range(24)]).flatten()))))
-    
+        acoustics_seg_tree = AST()
+        acoustics_seg_tree.build(levelsGroups,["sentences","words","phones","subphones","frames"])
+        return acoustics_seg_tree
