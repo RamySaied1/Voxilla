@@ -43,7 +43,8 @@ echo maxActiveTokens is $maxActiveTokens ,beam is $beam ,amwStart $amwStart ,amw
 echo ReferencePath fie is $refFilePath >> reports.txt
 
 g++ -g ./C++/*.cpp
-./a.out  $params >> $outFilePath 
+./a.out  $params >> $outFilePath
+/bin/rm a.out
 
 sed  "/Token/d;/^\s*$/d;" $outFilePath > tmp.txt
 cat tmp.txt | head -n 1 >> reports.txt
