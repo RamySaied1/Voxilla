@@ -15,6 +15,7 @@ void Decoder::parseInputLabels(const string& filename) {
     string line;
     uint i = 0;
     while (in >> line) {
+        tolower(line);
         if (isSpecialSym(line)) {
             throw Exception("special symbol exists in labels file which is not expected");
         } else {

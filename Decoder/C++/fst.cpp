@@ -45,6 +45,7 @@ void Fst::parseSymsTable(const string& symsFile, unordered_map<uint, string>& sy
 
     string label, id;
     while (in >> label) {
+        tolower(label);
         in >> id;
         symsTable[stoi(id)] = label;
     }

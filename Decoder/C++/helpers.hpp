@@ -1,5 +1,7 @@
 #pragma once
 #include <math.h>
+#include <string.h>
+
 #include <algorithm>
 #include <cassert>
 #include <exception>
@@ -7,13 +9,12 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <memory>
 #include <numeric>
 #include <sstream>
 #include <unordered_map>
 #include <vector>
-#include <limits>
-#include <string.h>
 using namespace std;
 #define uint unsigned int
 
@@ -38,6 +39,9 @@ uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred,
     return isOk;
 }
 
+void tolower(string& s) {
+    transform(begin(s), end(s), begin(s), [](unsigned char c) { return tolower(c); });
+}
 
 class Exception : public exception {
    private:
