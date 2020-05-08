@@ -8,8 +8,8 @@ from time import time
 from asr import ASR
 from performance import *
 
-
-# python3 test_asr.py -model ./Experiments/BLSTM1/BLSTM_CE -fst_folder ./Decoder/Graphs/200k-vocab/ -acoustic_model_labels_file ./Decoder/Graphs/200k-vocab/labels.ciphones -srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
+# scr file , classifier
+#python3 test_asr.py -model_arch ./Classifier/model_cpu.json  -model_weights ./Classifier/weights.h5 -fst_folder ./Decoder/Graphs/200k-vocab/ -acoustic_model_labels_file ./Decoder/Graphs/200k-vocab/labels.ciphones -srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
 
 def write_ref_output(wav_file,ref_file="ref_transcript.txt"):
     transFilePath = wav_file[::-1].split('-',1)[1][::-1] + ".trans.txt"
@@ -24,7 +24,8 @@ def write_ref_output(wav_file,ref_file="ref_transcript.txt"):
 
 def main():
     parser = argparse.ArgumentParser( description="Decode speech from parameter files.")
-    parser.add_argument('-model', '--model', help='classifier file', required=True, default=None)
+    parser.add_argument('-model_arch', '--model_arch', help='classifier file arch', required=True, default=None)
+    parser.add_argument('-model_weights', '--model_weights', help='classifier file weights', required=True, default=None)
     parser.add_argument('-fst_folder', '--fst_folder', help="folder containg HCLG graph", required=True, default=None)
     parser.add_argument('-acoustic_model_labels_file', '--acoustic_model_labels_file', help="Text file name containing input labels", required=True, default=None)
     parser.add_argument('-srcfile', '--srcfile', help='file containing wave files pathes to test on', required=True, default=None)
@@ -36,7 +37,7 @@ def main():
 
     args = parser.parse_args()
 
-    asr = ASR(args.model, args.fst_folder, args.acoustic_model_labels_file)
+    asr = ASR(args.model_arch,args.model_weights, args.fst_folder, args.acoustic_model_labels_file)
 
     all_time_start = time()
     predictedSents = []
@@ -49,7 +50,7 @@ def main():
                 for line in ftest.read().split():
                     text = asr.speech_to_text(line,1000,12,3,include_alignment=False)
                     predictedSents.append(text)
-                    write_ref_output(line)
+                    swrite_ref_output(line)
     except KeyboardInterrupt:
         print("[CTRL+C detected]")
         text = '\n'.join(predictedSents)

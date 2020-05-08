@@ -63,6 +63,8 @@ class Classifier_keras:
         json_savedModel= json_file.read()
         self.model = model_from_json(json_savedModel)
         print(self.model.summary())
+      self.model.compile(loss='categorical_crossentropy',
+              optimizer='adam',metrics=["categorical_accuracy"])
       self.model.load_weights(model_weight)
       print("Model Loadded successfully")
     except:
@@ -74,6 +76,8 @@ class Classifier_keras:
         json_savedModel= json_file.read()
         self.model = model_from_json(json_savedModel)
         print(self.model.summary())
+      self.model.compile(loss='categorical_crossentropy',
+              optimizer='adam',metrics=["categorical_accuracy"])
       self.model.load_weights(model_weight)
       print("Model Loadded successfully")
     except:
