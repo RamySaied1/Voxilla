@@ -16,15 +16,10 @@
 using namespace std;
 #define uint unsigned int
 
-inline void split(string str, vector<string>& fields) {
-    istringstream iss(str);
-    copy(istream_iterator<string>(iss),
-         istream_iterator<string>(),
-         back_inserter(fields));
-}
+void split(string str, vector<string>& fields);
 
 template <class T>
-inline uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred, uint start = 0) {
+uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred, uint start = 0) {
     uint isOk = start;
     for (uint i = start; i < items.size(); ++i) {
         if (isRelevantPred(items[i])) {
@@ -37,7 +32,7 @@ inline uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isReleva
     return isOk;
 }
 
-inline void strtolower(string& s) { transform(begin(s), end(s), begin(s), ::tolower);}
+void strtolower(string& s);
 
 class Exception : public exception {
    private:

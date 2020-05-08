@@ -149,26 +149,6 @@ vector<const Arc*> BeamSearch::getBestPath(Token& finalToken) {
     return arcs;
 }
 
-vector<vector<const Arc*>> BeamSearch::getBestNPath(uint N) {
-    vector<vector<const Arc*>> pathes = vector<vector<const Arc*>>(N);
-    if (activeTokens.size() <= 0) return pathes;
-    
-    vector<shared_ptr<Token>> mockActiveTokens(begin(activeTokens),end(activeTokens));
-    sort(begin(activeTokens), end(activeTokens), [&](const auto& t1, const auto& t2) {
-        return t1->amCost + t1->lmCost > t2->amCost + t2->lmCost;
-    });
-
-    for (uint i = 0; i < N; ++i) {
-        shared_ptr<Token> currToken = activeTokens[i], parentToken;
-        while (currToken) {
-            pathes[i].push_back(currToken->arc);
-            parentToken = predeccessor[currToken];
-            currToken = parentToken;
-        }
-        reverse(begin(pathes[i]), end(pathes[i]));
-    }
-    return pathes;
-}
 
 vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens) {
     if (tokens.size() <= 0) return vector<double>();

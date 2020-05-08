@@ -30,7 +30,7 @@ void Decoder::mapInpIdToActivationsIndx() {
     }
 }
 
-vector<vector<string>> Decoder::decode(vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw) {
+Decoder::Path Decoder::decode(vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw) {
     preprocessActivations(activations, amw);
     unique_ptr<Arc> intialArc(new Arc{0, 0, 0, 0, 0.});  // dummy arc connected to intial state 0
     beamSearch.intiate(intialArc.get(), 0., 0., maxActiveTokens, beamWidth);
@@ -85,7 +85,7 @@ void Decoder::applyFinalState() {
     activeTokens.erase(iend, end(activeTokens));  // remove non final states
 }
 
-vector<vector<string>> Decoder::getBestPath() {
+Decoder::Path Decoder::getBestPath() {
     Token finalToken = Token();
     auto path = beamSearch.getBestPath(finalToken);
     // finalToken.print(cout);
@@ -94,7 +94,7 @@ vector<vector<string>> Decoder::getBestPath() {
     // cout << "\n---------------------------------\n";
     auto inpSymsTable = fst.getInpSymsTable();
     auto outSymsTable = fst.getOutSymsTable();
-    vector<vector<string>> inOutID(path.size(), vector<string>(3, ""));
+    Path inOutID(path.size(), vector<string>(3, ""));
     for (uint i = 0; i < path.size(); ++i) {
         const auto& arc = path[i];
         inOutID[i][0] = inpSymsTable.find(arc->inpId)->second;
