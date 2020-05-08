@@ -8,8 +8,14 @@ from time import time
 from asr import ASR
 from performance import *
 
-# scr file , classifier
-#python3 test_asr.py -model_arch ./Classifier/model_cpu.json  -model_weights ./Classifier/weights.h5 -fst_folder ./Decoder/Graphs/200k-vocab/ -acoustic_model_labels_file ./Decoder/Graphs/200k-vocab/labels.ciphones -srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
+"""
+# runing command
+
+python3 test_asr.py -model_arch ./Classifier/model_cpu.json -model_weights ./Classifier/weights.h5 -model_priori_proba_file ./Classifier/priori.txt \
+-fst_folder ./Decoder/Graphs/200k-vocab/ -acoustic_model_labels_file ./Decoder/Graphs/200k-vocab/labels.ciphones \
+-srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
+
+"""
 
 def write_ref_output(wav_file,ref_file="ref_transcript.txt"):
     transFilePath = wav_file[::-1].split('-',1)[1][::-1] + ".trans.txt"

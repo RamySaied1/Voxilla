@@ -4,7 +4,7 @@ sys.path.append("./Decoder/C++/PythonBinding/")
 sys.path.append("./Classifier/")
 sys.path.append("./FeatureExtraction/")
 sys.path.append("./ForcedAlignmnet/")
-# from decoder_wrapper import PyDecoder as Decoder
+from decoder_wrapper import PyDecoder as Decoder
 from classifier import Classifier_keras as Classifier
 from Transcript import Transcript
 from itertools import groupby
@@ -14,7 +14,7 @@ import numpy as np
 class ASR:
     def __init__(self, model_arch, model_weight, model_priori_proba_file, fst_folder, acoustic_model_labels_file, words_lexicon_file = "./ForcedAlignmnet/words_lexicon.txt", phones_lexicon_file = "./ForcedAlignmnet/phones_lexicon.txt"):
         if fst_folder and fst_folder[-1] != '/': fst_folder+="/"
-        # self.decoder = Decoder(fst_folder, acoustic_model_labels_file) 
+        self.decoder = Decoder(fst_folder, acoustic_model_labels_file) 
         self.classifier = Classifier(model_arch, model_weight, model_priori_proba_file)
         self.trans = Transcript(words_lexicon_file, phones_lexicon_file)
 
@@ -30,8 +30,8 @@ class ASR:
 
     def _decode(self, features, max_active_tokens, beam_width, acoustic_model_weight):
         activations = self.classifier.eval(features)
-        print(activations.shape)
-        np.savetxt("ramy.txt",np.argmax(activations,axis=1))
+        # print(activations.shape)
+        # np.savetxt("ramy.txt",activations)
         return self.decoder.decode(activations, max_active_tokens, beam_width, 1/acoustic_model_weight)
     
     def _remove_selfloops(self,states_seq):
