@@ -3,11 +3,11 @@ import numpy as np
 import os.path
 import re
 import sys
-# import cntk
 from keras.models import model_from_json
 
 class Classifier_cntk:
     def __init__(self,model_filename: str):
+        import cntk
         self.model = None
         try:
           self.load_model(model_filename)
@@ -72,7 +72,6 @@ class Classifier_keras:
         with open(prior_file,"r") as f:
             priori = [line.split()[1] for line in f.readlines()]
             self.priori_logproba = np.log(np.array(list(map(float,priori))))
-
     except:
         raise Exception("Model didn't load successfully")
 
