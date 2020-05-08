@@ -1,9 +1,8 @@
-from distutils.core import setup
-from distutils.extension import Extension
-from Cython.Distutils import build_ext
+from setuptools import Extension, setup
 from Cython.Build import cythonize
 
-setup(ext_modules=[Extension("decoder_wrapper", 
-                             ["decoder_wrapper.pyx", "../decoder.cpp","../beam_search.cpp","../fst.cpp","../helpers.cpp"], language="c++",)],
-      cmdclass = {'build_ext': build_ext})
-
+setup(ext_modules = cythonize(Extension(
+           "decoder_wrapper",
+           sources=["decoder_wrapper.pyx","../beam_search.cpp","../decoder.cpp","../fst.cpp","../helpers.cpp"],  # additional source file(s)
+           language="c++"
+      )))
