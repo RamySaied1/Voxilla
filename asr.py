@@ -4,7 +4,7 @@ sys.path.append("./Decoder/C++/PythonBinding/")
 sys.path.append("./Classifier/")
 sys.path.append("./FeatureExtraction/")
 sys.path.append("./ForcedAlignmnet/")
-#from decoder_wrapper import PyDecoder as Decoder
+# from decoder_wrapper import PyDecoder as Decoder
 from classifier import Classifier_keras as Classifier
 from Transcript import Transcript
 from itertools import groupby
@@ -12,10 +12,10 @@ from Wav2Feat import wav_to_feat
 import numpy as np
 
 class ASR:
-    def __init__(self, model_arch,model_weight, fst_folder, acoustic_model_labels_file, words_lexicon_file = "./ForcedAlignmnet/words_lexicon.txt", phones_lexicon_file = "./ForcedAlignmnet/phones_lexicon.txt"):
+    def __init__(self, model_arch, model_weight, model_priori_proba_file, fst_folder, acoustic_model_labels_file, words_lexicon_file = "./ForcedAlignmnet/words_lexicon.txt", phones_lexicon_file = "./ForcedAlignmnet/phones_lexicon.txt"):
         if fst_folder and fst_folder[-1] != '/': fst_folder+="/"
-        #self.decoder = Decoder(fst_folder, acoustic_model_labels_file) 
-        self.classifier = Classifier(model_arch,model_weight)
+        # self.decoder = Decoder(fst_folder, acoustic_model_labels_file) 
+        self.classifier = Classifier(model_arch, model_weight, model_priori_proba_file)
         self.trans = Transcript(words_lexicon_file, phones_lexicon_file)
 
     def speech_to_text(self, wav_file, max_active_tokens, beam_width, acoustic_model_weigh, include_alignment = False):

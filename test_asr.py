@@ -26,6 +26,7 @@ def main():
     parser = argparse.ArgumentParser( description="Decode speech from parameter files.")
     parser.add_argument('-model_arch', '--model_arch', help='classifier file arch', required=True, default=None)
     parser.add_argument('-model_weights', '--model_weights', help='classifier file weights', required=True, default=None)
+    parser.add_argument('-model_priori_proba_file', '--model_priori_proba_file', help='activations priori proba file', required=True, default=None)
     parser.add_argument('-fst_folder', '--fst_folder', help="folder containg HCLG graph", required=True, default=None)
     parser.add_argument('-acoustic_model_labels_file', '--acoustic_model_labels_file', help="Text file name containing input labels", required=True, default=None)
     parser.add_argument('-srcfile', '--srcfile', help='file containing wave files pathes to test on', required=True, default=None)
@@ -37,7 +38,7 @@ def main():
 
     args = parser.parse_args()
 
-    asr = ASR(args.model_arch,args.model_weights, args.fst_folder, args.acoustic_model_labels_file)
+    asr = ASR(args.model_arch,args.model_weights, args.model_priori_proba_file, args.fst_folder, args.acoustic_model_labels_file)
 
     all_time_start = time()
     predictedSents = []
@@ -50,7 +51,7 @@ def main():
                 for line in ftest.read().split():
                     text = asr.speech_to_text(line,1000,12,3,include_alignment=False)
                     predictedSents.append(text)
-                    swrite_ref_output(line)
+                    write_ref_output(line)
     except KeyboardInterrupt:
         print("[CTRL+C detected]")
         text = '\n'.join(predictedSents)
