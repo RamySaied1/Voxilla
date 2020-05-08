@@ -1,7 +1,5 @@
 #pragma once
 #include <math.h>
-#include <string.h>
-
 #include <algorithm>
 #include <cassert>
 #include <exception>
@@ -26,7 +24,7 @@ inline void split(string str, vector<string>& fields) {
 }
 
 template <class T>
-uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred, uint start = 0) {
+inline uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred, uint start = 0) {
     uint isOk = start;
     for (uint i = start; i < items.size(); ++i) {
         if (isRelevantPred(items[i])) {
@@ -39,9 +37,7 @@ uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred,
     return isOk;
 }
 
-void tolower(string& s) {
-    transform(begin(s), end(s), begin(s), [](unsigned char c) { return tolower(c); });
-}
+inline void strtolower(string& s) { transform(begin(s), end(s), begin(s), ::tolower);}
 
 class Exception : public exception {
    private:

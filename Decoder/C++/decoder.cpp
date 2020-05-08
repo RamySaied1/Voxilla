@@ -15,7 +15,7 @@ void Decoder::parseInputLabels(const string& filename) {
     string line;
     uint i = 0;
     while (in >> line) {
-        tolower(line);
+        strtolower(line);
         if (isSpecialSym(line)) {
             throw Exception("special symbol exists in labels file which is not expected");
         } else {
@@ -43,7 +43,7 @@ vector<vector<string>> Decoder::decode(vector<vector<double>>& activations, uint
     }
 
     applyFinalState();
-    return move(getBestPath());
+    return getBestPath();
 }
 
 void Decoder::preprocessActivations(vector<vector<double>>& activations, double weight) {
@@ -87,7 +87,7 @@ void Decoder::applyFinalState() {
 
 vector<vector<string>> Decoder::getBestPath() {
     Token finalToken = Token();
-    auto path = beamSearch.getBestPath(fst.getGraph(), finalToken);
+    auto path = beamSearch.getBestPath(finalToken);
     // finalToken.print(cout);
     // cout << endl;
     // cout << "Combined Cost: " << (finalToken.amCost, finalToken.lmCost, finalToken.hmmCost);
@@ -101,5 +101,5 @@ vector<vector<string>> Decoder::getBestPath() {
         inOutID[i][1] = outSymsTable.find(arc->outId)->second;
         inOutID[i][2] = to_string(arc->dstState);
     }
-    return move(inOutID);
+    return inOutID;
 }
