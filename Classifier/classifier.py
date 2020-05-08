@@ -70,20 +70,6 @@ class Classifier_keras:
     except:
       raise Exception("Model didn't load successfully")
 
-  def load_model(self,model_arch: str,model_weight: str):
-    try:
-      with open(model_arch, 'r') as json_file:
-        json_savedModel= json_file.read()
-        self.model = model_from_json(json_savedModel)
-        print(self.model.summary())
-      self.model.compile(loss='categorical_crossentropy',
-              optimizer='adam',metrics=["categorical_accuracy"])
-      self.model.load_weights(model_weight)
-      print("Model Loadded successfully")
-    except:
-      raise Exception("Model didn't load successfully")
-
-
   def eval(self, features):
     if(self.model):
       sample=features.reshape(1,features.shape[0],features.shape[1])
