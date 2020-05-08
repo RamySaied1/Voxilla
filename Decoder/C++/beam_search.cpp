@@ -1,5 +1,4 @@
 #include "beam_search.hpp"
-#include <ctime>
 #include "fst.hpp"
 
 BeamSearch::BeamSearch(uint maxActiveTokens, double beamWidth) : maxActiveTokens(maxActiveTokens), beamWidth(beamWidth), activeTokens(vector<shared_ptr<Token>>()), predeccessor(unordered_map<shared_ptr<Token>, shared_ptr<Token>>()) {
@@ -131,7 +130,7 @@ void BeamSearch::beamPrune() {
     }
 }
 
-vector<const Arc*> BeamSearch::getBestPath(const vector<vector<const Arc*>>& graph, Token& finalToken) {
+vector<const Arc*> BeamSearch::getBestPath(Token& finalToken) {
     vector<const Arc*> arcs = vector<const Arc*>();
     if (activeTokens.size() <= 0) return arcs;
 
@@ -150,6 +149,27 @@ vector<const Arc*> BeamSearch::getBestPath(const vector<vector<const Arc*>>& gra
     return arcs;
 }
 
+vector<vector<const Arc*>> BeamSearch::getBestNPath(uint N) {
+    vector<vector<const Arc*>> pathes = vector<vector<const Arc*>>(N);
+    if (activeTokens.size() <= 0) return pathes;
+    
+    vector<shared_ptr<Token>> mockActiveTokens(begin(activeTokens),end(activeTokens));
+    sort(begin(activeTokens), end(activeTokens), [&](const auto& t1, const auto& t2) {
+        return t1->amCost + t1->lmCost > t2->amCost + t2->lmCost;
+    });
+
+    for (uint i = 0; i < N; ++i) {
+        shared_ptr<Token> currToken = activeTokens[i], parentToken;
+        while (currToken) {
+            pathes[i].push_back(currToken->arc);
+            parentToken = predeccessor[currToken];
+            currToken = parentToken;
+        }
+        reverse(begin(pathes[i]), end(pathes[i]));
+    }
+    return pathes;
+}
+
 vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens) {
     if (tokens.size() <= 0) return vector<double>();
     const auto& bestToken = *max_element(begin(tokens), end(tokens), [&](const auto& t1, const auto& t2) {
@@ -161,7 +181,7 @@ vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<To
     for (uint i = 0; i < tokens.size(); ++i) {
         logProbas[i] = tokens[i]->amCost + tokens[i]->lmCost - bestCost;
     }
-    return move(logProbas);
+    return logProbas;
 }
 
 BeamSearch::~BeamSearch() {
