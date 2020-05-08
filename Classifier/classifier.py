@@ -4,8 +4,7 @@ import os.path
 import re
 import sys
 import cntk
-from keras.models import load_model
-
+from keras.models import model_from_json
 
 class Classifier_cntk:
     def __init__(self,model_filename: str):
@@ -56,18 +55,27 @@ class Classifier_cntk:
         else:
             raise  Exception("Model isn't loaded yet")
 
-
 class Classifier_keras:
-  def __init__(self,model_filename: str):
+  def __init__(self,model_arch: str,model_weight: str):
     self.model = None
     try:
-      self.model = load_model(model_filename)
+      with open(model_arch, 'r') as json_file:
+        json_savedModel= json_file.read()
+        self.model = model_from_json(json_savedModel)
+        print(self.model.summary())
+      self.model.load_weights(model_weight)
+      print("Model Loadded successfully")
     except:
       raise Exception("Model didn't load successfully")
 
-  def load_model(self,model_filename):
+  def load_model(self,model_arch: str,model_weight: str):
     try:
-      self.model = load_model(model_filename)
+      with open(model_arch, 'r') as json_file:
+        json_savedModel= json_file.read()
+        self.model = model_from_json(json_savedModel)
+        print(self.model.summary())
+      self.model.load_weights(model_weight)
+      print("Model Loadded successfully")
     except:
       raise Exception("Model didn't load successfully")
 
@@ -79,4 +87,3 @@ class Classifier_keras:
       return pred[0]
     else:
       raise  Exception("Model isn't loaded yet")
-
