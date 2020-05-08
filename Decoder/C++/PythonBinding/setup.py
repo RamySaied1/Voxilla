@@ -4,6 +4,6 @@ from Cython.Distutils import build_ext
 from Cython.Build import cythonize
 
 setup(ext_modules=[Extension("decoder_wrapper", 
-                             ["decoder_wrapper.pyx", "../decoder.cpp","../beam_search.cpp","../fst.cpp"], language="c++",)],
+                             ["decoder_wrapper.pyx", "../decoder.cpp","../beam_search.cpp","../fst.cpp","../helpers.cpp"], language="c++",)],
       cmdclass = {'build_ext': build_ext})
 
