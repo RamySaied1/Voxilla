@@ -1,4 +1,5 @@
 #include "beam_search.hpp"
+
 #include "fst.hpp"
 
 BeamSearch::BeamSearch(uint maxActiveTokens, double beamWidth) : maxActiveTokens(maxActiveTokens), beamWidth(beamWidth), activeTokens(vector<shared_ptr<Token>>()), predeccessor(unordered_map<shared_ptr<Token>, shared_ptr<Token>>()) {
@@ -149,7 +150,6 @@ vector<const Arc*> BeamSearch::getBestPath(Token& finalToken) {
     return arcs;
 }
 
-
 vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens) {
     if (tokens.size() <= 0) return vector<double>();
     const auto& bestToken = *max_element(begin(tokens), end(tokens), [&](const auto& t1, const auto& t2) {
@@ -162,6 +162,27 @@ vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<To
         logProbas[i] = tokens[i]->amCost + tokens[i]->lmCost - bestCost;
     }
     return logProbas;
+}
+
+vector<vector<const Arc*>> BeamSearch::getBestNPath(uint n) {
+    vector<vector<const Arc*>> pathes = vector<vector<const Arc*>>(n);
+    if (activeTokens.size() <= 0) return pathes;
+
+    vector<shared_ptr<Token>> mockActiveTokens(begin(activeTokens), end(activeTokens));
+    sort(begin(mockActiveTokens), end(mockActiveTokens), [&](const auto& t1, const auto& t2) {
+        return t1->amCost + t1->lmCost > t2->amCost + t2->lmCost;
+    });
+
+    for (uint i = 0; i < n; ++i) {
+        shared_ptr<Token> currToken = mockActiveTokens[i], parentToken = predeccessor[currToken];
+        while (parentToken) {
+            pathes[i].push_back(currToken->arc);
+            currToken = parentToken;
+            parentToken = predeccessor[currToken];
+        }
+        reverse(begin(pathes[i]), end(pathes[i]));
+    }
+    return pathes;
 }
 
 BeamSearch::~BeamSearch() {

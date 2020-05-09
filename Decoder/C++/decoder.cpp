@@ -103,3 +103,22 @@ Decoder::Path Decoder::getBestPath() {
     }
     return inOutID;
 }
+
+vector<Decoder::Path> Decoder::getBestNPath(uint n) {
+    auto pathes = beamSearch.getBestNPath(n);
+    vector<Decoder::Path> inOutIdPathes(pathes.size());
+    auto inpSymsTable = fst.getInpSymsTable();
+    auto outSymsTable = fst.getOutSymsTable();
+    int i = 0;
+    for (auto& path : pathes) {
+        Path inOutID(path.size(), vector<string>(3, ""));
+        for (uint i = 0; i < path.size(); ++i) {
+            const auto& arc = path[i];
+            inOutID[i][0] = inpSymsTable.find(arc->inpId)->second;
+            inOutID[i][1] = outSymsTable.find(arc->outId)->second;
+            inOutID[i][2] = to_string(arc->dstState);
+        }
+        inOutIdPathes[i++] = move(inOutID);
+    }
+    return inOutIdPathes;
+}

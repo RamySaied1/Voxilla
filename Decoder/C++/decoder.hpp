@@ -11,6 +11,7 @@ class Decoder {
     Decoder(string graphFolder, string inputLabelsFile, SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
     bool isSpecialSym(string sym) { return sym == espSyms.epsSymbol || sym == espSyms.startSymbol || sym == espSyms.endSymbol; }
     Path decode(vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw);
+    vector<Path> getBestNPath(uint n);
     ~Decoder(){};
 
    private:

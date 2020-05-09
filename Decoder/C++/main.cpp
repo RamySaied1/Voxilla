@@ -37,17 +37,19 @@ int main(int argc, char const* argv[]) {
             activations = vector<vector<double>>((uint)stoi(dims[0]), vector<double>((uint)stoi(dims[1])));
             totalFramesNum += activations.size();
             read2d(activationsFile, activations);
-
-            vector<vector<string>> path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw);
-            for (int i = 0; i < path.size(); ++i) {
-                if (i && path[i].back() == path[i - 1].back()) {
-                    continue;
+            
+            decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw);
+            for(auto & path: decoder.getBestNPath(10)){
+                for (int i = 0; i < path.size(); ++i) {
+                    if (i && path[i].back() == path[i - 1].back()) {
+                        continue;
+                    }
+                    if (!decoder.isSpecialSym(path[i][1])) {
+                        cout << path[i][1] << " ";
+                    }
                 }
-                if (!decoder.isSpecialSym(path[i][1])) {
-                    cout << path[i][1] << " ";
-                }
+                cout << endl;
             }
-            cout << endl;
         }
         cout << "amw: " << amw << endl;
         time(&t2);
