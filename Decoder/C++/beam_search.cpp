@@ -139,11 +139,10 @@ vector<const Arc*> BeamSearch::getBestPath(Token& finalToken) {
     });
 
     finalToken = *(bestToken);
-    shared_ptr<Token> currToken = bestToken, parentToken;
+    shared_ptr<Token> currToken = bestToken;
     while (currToken) {
         arcs.push_back(currToken->arc);
-        parentToken = predeccessor[currToken];
-        currToken = parentToken;
+        currToken = predeccessor[currToken];
     }
     reverse(begin(arcs), end(arcs));
     return arcs;
