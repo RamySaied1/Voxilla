@@ -2,6 +2,11 @@ import struct
 import numpy as np
 import sys
 
+def load_ascii_vector(file_name, var_name=None):
+    x = np.asarray(np.loadtxt(file_name), dtype=np.float32)
+    return x
+
+
 def write_htk_user_feat(x, name='filename'):
     default_period = 100000 # assumes 0.010 ms frame shift
     num_dim = x.shape[0]
