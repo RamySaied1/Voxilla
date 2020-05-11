@@ -38,8 +38,8 @@ int main(int argc, char const* argv[]) {
             totalFramesNum += activations.size();
             read2d(activationsFile, activations);
             
-            decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw);
-            for(auto & path: decoder.getBestNPath(10)){
+            auto path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw);
+            // for(auto& path: decoder.getBestNPath(500)){
                 for (int i = 0; i < path.size(); ++i) {
                     if (i && path[i].back() == path[i - 1].back()) {
                         continue;
@@ -49,7 +49,7 @@ int main(int argc, char const* argv[]) {
                     }
                 }
                 cout << endl;
-            }
+            // }
         }
         cout << "amw: " << amw << endl;
         time(&t2);

@@ -37,7 +37,7 @@ void BeamSearch::keepOnlyBestExpandedTokens() {
 }
 
 void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<uint, uint>& inpIdsToIndx, const vector<double>& activations, bool useSelfLoops) {
-    unordered_map<const Arc*, Expantion> expantions;  // map expanded node to parent node and expantion cost
+    unordered_map<const Arc*, Expantion> expantions;  // map expanded arc to parent arc and expantion cost
     vector<double> logProbas = getNormalizeTokensLogProba(activeTokens);
     if (useSelfLoops) {
         for (uint i = 0; i < activeTokens.size(); ++i) {
@@ -135,9 +135,15 @@ vector<const Arc*> BeamSearch::getBestPath(Token& finalToken) {
     vector<const Arc*> arcs = vector<const Arc*>();
     if (activeTokens.size() <= 0) return arcs;
 
-    const auto& bestToken = *max_element(begin(activeTokens), end(activeTokens), [&](const auto& t1, const auto& t2) {
+    auto bestToken = *max_element(begin(activeTokens), end(activeTokens), [&](const auto& t1, const auto& t2) {
         return t1->amCost + t1->lmCost < t2->amCost + t2->lmCost;
     });
+    // const shared_ptr<Token>& bestToken = *(minmaxTokens.first);
+    // const shared_ptr<Token>& worstToken = *(minmaxTokens.first);
+    // cout << bestToken->amCost + bestToken->lmCost - worstToken->amCost - worstToken->lmCost << endl;
+    // cout << bestToken->amCost + bestToken->lmCost - worstToken->amCost - worstToken->lmCost << endl;
+    // cout << bestToken->amCost + bestToken->lmCost - worstToken->amCost - worstToken->lmCost << endl;
+    // cout << bestToken->amCost + bestToken->lmCost - worstToken->amCost - worstToken->lmCost << endl;
 
     finalToken = *(bestToken);
     shared_ptr<Token> currToken = bestToken;
@@ -164,25 +170,40 @@ vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<To
 }
 
 vector<vector<const Arc*>> BeamSearch::getBestNPath(uint n) {
+    n = min(n, (uint)activeTokens.size());
     vector<vector<const Arc*>> pathes = vector<vector<const Arc*>>(n);
-    if (activeTokens.size() <= 0) return pathes;
+    if (n <= 0) return pathes;
 
     vector<shared_ptr<Token>> mockActiveTokens(begin(activeTokens), end(activeTokens));
+
+    // // remove dupliceates
+    // sort(begin(mockActiveTokens), end(mockActiveTokens), [&](const auto& t1, const auto& t2) {
+    //     return t1->arc < t2->arc;
+    // });
+    // mockActiveTokens.erase(unique(mockActiveTokens.begin(), mockActiveTokens.end(),[&](const shared_ptr<Token>& t1, const shared_ptr<Token>& t2) {
+    //     return t1->arc == t2->arc;
+    // }), mockActiveTokens.end());
+
+    // sort by cost
     sort(begin(mockActiveTokens), end(mockActiveTokens), [&](const auto& t1, const auto& t2) {
         return t1->amCost + t1->lmCost > t2->amCost + t2->lmCost;
     });
+    // int cd = 0;
+    // for (int i = 1; i < mockActiveTokens.size(); ++i) {
+    //     if (mockActiveTokens[i]->amCost + mockActiveTokens[i]->lmCost == mockActiveTokens[i - 1]->amCost + mockActiveTokens[i - 1]->lmCost) {
+    //         ++cd;
+    //     }
+    // }
 
     for (uint i = 0; i < n; ++i) {
-        shared_ptr<Token> currToken = mockActiveTokens[i], parentToken = predeccessor[currToken];
-        while (parentToken) {
+        shared_ptr<Token> currToken = mockActiveTokens[i];
+        while (currToken) {
             pathes[i].push_back(currToken->arc);
-            currToken = parentToken;
-            parentToken = predeccessor[currToken];
+            currToken = predeccessor[currToken];
         }
         reverse(begin(pathes[i]), end(pathes[i]));
     }
     return pathes;
 }
 
-BeamSearch::~BeamSearch() {
-}
+BeamSearch::~BeamSearch() {}

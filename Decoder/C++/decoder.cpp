@@ -34,15 +34,29 @@ Decoder::Path Decoder::decode(vector<vector<double>>& activations, uint maxActiv
     preprocessActivations(activations, amw);
     static unique_ptr<Arc> intialArc(new Arc{0, 0, 0, 0, 0.});  // dummy arc connected to intial state 0
     beamSearch.intiate(intialArc.get(), 0., 0., maxActiveTokens, beamWidth);
+    Lattice lattice(intialArc.get());
 
     for (size_t i = 0; i < activations.size(); i++) {
         beamSearch.doForward(fst.getGraph(), inpIdToActivationsIndx, activations[i], true);
         beamSearch.beamPrune();
         expandEpsStates();
         beamSearch.moveExpandedToActive();
+
+        lattice.expandLattice(beamSearch.getActiveTokens(), inpIdToActivationsIndx, activations[i]);
     }
 
     applyFinalState();
+
+    // vector<vector<string>> wordSeqs;
+    // getLatticeWordSeqs(lattice, wordSeqs);
+    // for(auto & wordSeq: wordSeqs){
+    //     string sentence; 
+    //     for(auto & word: wordSeq){
+    //         sentence += word + " ";
+    //     }
+    //     cout<<sentence<<endl;
+    // }
+
     return getBestPath();
 }
 
@@ -121,4 +135,33 @@ vector<Decoder::Path> Decoder::getBestNPath(uint n) {
         inOutIdPathes[i++] = move(inOutID);
     }
     return inOutIdPathes;
+}
+
+void Decoder::getLatticeWordSeqs(const Lattice& lattice, vector<vector<string>>& wordSeqs, const LatticeNode* root, vector<string>&& wordSeq) {
+    if (!root) {
+        root = lattice.getRoot();
+    }
+
+    if (lattice.isFinalNode(root)) {
+        wordSeqs.push_back(wordSeq);
+        return;
+    }
+
+    for (auto& node : root->children) {
+        bool newWordAdded = false;
+        if (node->arc != node->parent->arc) {
+            auto outSymsTable = fst.getOutSymsTable();
+            string outLabel = outSymsTable.find(node->arc->outId)->second;
+            if (!isSpecialSym(outLabel)) {
+                wordSeq.push_back(outLabel);
+                newWordAdded = true;
+            }
+        }
+
+        getLatticeWordSeqs(lattice, wordSeqs, node.get(), forward<vector<string>>(wordSeq));
+
+        if (newWordAdded) {
+            wordSeq.pop_back();
+        }
+    }
 }
