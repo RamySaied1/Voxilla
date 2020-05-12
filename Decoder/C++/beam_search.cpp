@@ -49,12 +49,18 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
             // double specialCost = (token->arc->srcState == token->arc->dstState) ? log(2.) : 0;
             double expantionCost = logProbas[i];
             expantions[token->arc] = Expantion(token, 0., amCost, expantionCost);
+            createExpandedTokens(expantions);
+            expantions.clear();
         }
     }
 
     for (uint i = 0; i < activeTokens.size(); ++i) {
         const auto& token = activeTokens[i];
         for (const Arc* arc : graph[token->arc->dstState]) {
+            if(token->arc->dstState == arc->dstState ){
+                continue;
+            }
+
             auto iter = inpIdsToIndx.find(arc->inpId);
             if (iter == inpIdsToIndx.end()) continue;
             double lmCost = arc->lmCost;
@@ -63,21 +69,22 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
             //Expand the frontier and add predecessors
             double expantionCost = logProbas[i] + lmCost;
             if (exp(expantionCost) > 0.) {
-                bool isNewArc = expantions.find(arc) == expantions.end();
-                if (isNewArc) {
+                // bool isNewArc = expantions.find(arc) == expantions.end();
+                // if (isNewArc) {
                     expantions[arc] = Expantion(token, lmCost, amCost, expantionCost);
-                } else {
-                    double oldCost = expantions[arc].expantionCost;
-                    if (expantionCost > oldCost) {
-                        expantions[arc] = Expantion(token, lmCost, amCost, expantionCost);
-                    }
-                }
+                    createExpandedTokens(expantions);
+                    expantions.clear();
+                // } else {
+                //     double oldCost = expantions[arc].expantionCost;
+                //     if (expantionCost > oldCost) {
+                //         expantions[arc] = Expantion(token, lmCost, amCost, expantionCost);
+                //     }
+                // }
             }
         }
     }
 
     // create new tokens
-    createExpandedTokens(expantions);
 }
 
 void BeamSearch::createExpandedTokens(const unordered_map<const Arc*, Expantion>& expantions) {
