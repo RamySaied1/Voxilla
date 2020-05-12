@@ -122,18 +122,17 @@ void BeamSearch::beamPrune() {
             return a->amCost + a->lmCost > b->amCost + b->lmCost;
         });
 
-        if (expandedTokens.size() > maxActiveTokens) {
-            expandedTokens.resize(maxActiveTokens);
-            expandedTokens.reserve(maxActiveTokens);
-        }
-
         double thresold = expandedTokens.front()->amCost + expandedTokens.front()->lmCost - beamWidth;
         auto iter = lower_bound(rbegin(expandedTokens), rend(expandedTokens), thresold, [&](const shared_ptr<Token>& t, double val) {
             return t->amCost + t->lmCost < val;
         });
         // cout<<"Original Size: "<<expandedTokens.size()<<endl;
-        int size = rend(expandedTokens) - iter;
-        expandedTokens.resize(size);
+        uint newSize = rend(expandedTokens) - iter;
+        newSize = min(newSize, maxActiveTokens);
+        for (int i = newSize; i < expandedTokens.size(); ++i) {
+            predeccessor.erase(expandedTokens[i]);
+        }
+        expandedTokens.resize(newSize);
         // cout<<"New Size due to beam: "<<expandedTokens.size()<<endl;
     }
 }
