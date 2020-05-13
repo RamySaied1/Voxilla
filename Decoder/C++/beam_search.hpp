@@ -18,7 +18,10 @@ class BeamSearch {
     void doForward(const vector<vector<const Arc*>>& graph, const unordered_map<uint, uint>& inpIdsToIndx, const vector<double>& activations, bool useSelfLoops);
     vector<const Arc*> getBestPath(Token& bestToken);
     vector<vector<const Arc*>> getBestNPath(uint n);
-    void applyFinalState(const unordered_map<uint,double>& finalStates);
+    void applyFinalState(const unordered_map<uint, double>& finalStates);
+    void startNewExpantions() { lattice.startNewExpantions(); }
+    void createExpandedTokens() { lattice.createExpandedTokens(expandedTokens); }
+    void finishExpantions() { lattice.finishExpantions(); }
 
    private:
     uint maxActiveTokens;

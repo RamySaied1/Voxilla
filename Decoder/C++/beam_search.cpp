@@ -14,7 +14,8 @@ void BeamSearch::intiate(const Arc* arc, double lmCost, double amCost, uint maxA
 
     lattice.startNewExpantions();
     lattice.expand(nullptr, arc, lmCost, amCost);
-    lattice.finishExpantions(expandedTokens);
+    lattice.createExpandedTokens(expandedTokens);
+    lattice.finishExpantions();
     moveExpandedToActive();
 }
 
@@ -64,9 +65,6 @@ void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unorde
             lattice.expand(token, arc, lmCost, amCost);
         }
     }
-
-    // get new created tokens
-    lattice.finishExpantions(expandedTokens);
 }
 
 void BeamSearch::setActiveTokens(const vector<shared_ptr<Token>>& tokens) {
@@ -125,7 +123,7 @@ vector<const Arc*> BeamSearch::getBestPath(Token& finalToken) {
 
 void BeamSearch::applyFinalState(const unordered_map<uint, double>& finalStates) {
     auto iend = remove_if(begin(activeTokens), end(activeTokens), [&](const auto& t) {
-        return finalStates.find(t->arc->dstState) == fst.getFinalStates().end();  // remove if it's not a final state
+        return finalStates.find(t->arc->dstState) == finalStates.end();  // remove if it's not a final state
     });
 
     for (auto i = begin(activeTokens); i != iend; ++i) {

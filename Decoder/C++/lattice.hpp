@@ -1,7 +1,8 @@
 #pragma once
-#include "helpers.hpp"
-#include "fst.hpp"
+#include <set>
 
+#include "fst.hpp"
+#include "helpers.hpp"
 
 struct Token {
     uint tokId;
@@ -19,28 +20,40 @@ class Lattice {
    private:
     struct Topology {
         vector<shared_ptr<Token>> predecessors;
-        uint successorsCount = 0;
+        uint successorsCount;
+        Topology() : predecessors(vector<shared_ptr<Token>>()), successorsCount(0) {}
     };
 
     struct Expantion {
         shared_ptr<Token> parentToken;
         double lmCost, amCost;
-        Expantion(shared_ptr<Token> parentToken, double lmCost, double amCost) : parentToken(parentToken), lmCost(lmCost), amCost(amCost) {}
+        Expantion(shared_ptr<Token> parentToken, double lmCost, double amCost) : parentToken(parentToken), lmCost(lmCost), amCost(amCost) {
+            amCost = amCost + (parentToken ? parentToken->amCost : 0);
+            lmCost = lmCost + (parentToken ? parentToken->lmCost : 0);
+        }
         Expantion() : parentToken(NULL), lmCost(0.), amCost(0.) {}
     };
 
-    shared_ptr<Token> root;
-    unordered_map<const Arc*, vector<Expantion>> expantions;
+    struct ExpantionsComparator {
+        bool operator()(const Expantion& lhs, const Expantion& rhs) const {
+            return lhs.amCost + lhs.lmCost > rhs.amCost + rhs.lmCost;
+        }
+    };
+
+    unordered_map<const Arc*, set<Expantion, ExpantionsComparator>> expantions;
     unordered_map<shared_ptr<Token>, Topology> tokenToplogy;
-    vector<shared_ptr<Token>> lastlyExpandedTokens;
+    unordered_map<const Arc*, shared_ptr<Token>> arcToToken;
     uint tokenId = 1;
 
    public:
     Lattice();
     ~Lattice(){};
+
     void startNewExpantions();
     void expand(const shared_ptr<Token>& parent, const Arc*& arc, double lmCost, double amCost);
-    void finishExpantions(vector<shared_ptr<Token>> & newToken);
+    void createExpandedTokens(vector<shared_ptr<Token>>& newTokens);
+    void finishExpantions();
+
     vector<shared_ptr<Token>> getBestPath(shared_ptr<Token> token);
     void removeToken(shared_ptr<Token> token);
 

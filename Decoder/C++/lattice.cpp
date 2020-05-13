@@ -5,43 +5,50 @@ Lattice::Lattice() {
 
 void Lattice::startNewExpantions() {
     expantions.clear();
-    lastlyExpandedTokens.clear();
+    arcToToken.clear();
 }
 
 void Lattice::expand(const shared_ptr<Token>& parent, const Arc*& arc, double lmCost, double amCost) {
-    expantions[arc].push_back(Expantion(parent, lmCost, amCost));
+    expantions[arc].insert(Expantion(parent, lmCost, amCost));
 };
 
-void Lattice::finishExpantions(vector<shared_ptr<Token>>& newTokens) {
+void Lattice::createExpandedTokens(vector<shared_ptr<Token>>& newTokens) {
+    for (auto& keyVal : expantions) {
+        const auto& arc = keyVal.first;
+        auto& expantionsSet = keyVal.second;
+        double lmCost =  expantionsSet.begin()->lmCost;
+        double amCost =  expantionsSet.begin()->amCost;
+
+        if (arcToToken.find(arc) != arcToToken.end()) {  // this token created before in same time step
+            arcToToken[arc]->lmCost = lmCost;
+            arcToToken[arc]->amCost = amCost;
+        } else {
+            shared_ptr<Token> newToken = shared_ptr<Token>(new Token(tokenId++, arc, lmCost, amCost));
+            newTokens.push_back(newToken);
+            arcToToken[arc] = newToken;
+        }
+    }
+}
+
+void Lattice::finishExpantions() {
     for (auto& keyVal : expantions) {
         uint topK = 5;
         const auto& arc = keyVal.first;
-        auto& expantionsVector = keyVal.second;
+        auto& expantionsSet = keyVal.second;
 
-        shared_ptr<Token> newToken = shared_ptr<Token>(new Token(tokenId++, arc, 0, 0));
-        newTokens.push_back(newToken);
+        const auto& createdToken = arcToToken[arc];
+        for (auto& expantion : expantionsSet) {
+            if (topK-- == 0) break;  // use only best k expantions
 
-        sort(begin(expantionsVector), end(expantionsVector), [](const Expantion& expan1, const Expantion& expan2) {
-            return expan1.amCost + expan1.lmCost < expan2.amCost + expan2.lmCost;
-        });
-        if (expantionsVector.size() > topK)
-            expantionsVector.resize(topK);
-
-        for (uint i = 0; i < expantionsVector.size(); ++i) {
-            double amCost = expantionsVector[i].amCost + (expantionsVector[i].parentToken.get() ? expantionsVector[i].parentToken->amCost : 0);
-            double lmCost = expantionsVector[i].lmCost + (expantionsVector[i].parentToken.get() ? expantionsVector[i].parentToken->lmCost : 0);
-            if (!i) {
-                newToken->amCost = amCost;
-                newToken->lmCost = lmCost;
-            }
-            tokenToplogy[newToken];  // make sure to copy token pointer
-            if (expantionsVector[i].parentToken.get()) {
-                tokenToplogy[newToken].predecessors.push_back(expantionsVector[i].parentToken);
-                tokenToplogy[expantionsVector[i].parentToken].successorsCount += 1;
+            tokenToplogy[createdToken].successorsCount = 0;  // make sure to copy token pointer
+            if (expantion.parentToken.get()) {
+                tokenToplogy[createdToken].predecessors.push_back(expantion.parentToken);
+                tokenToplogy[expantion.parentToken].successorsCount += 1;
             }
         }
     }
     expantions.clear();
+    arcToToken.clear();
 }
 
 vector<shared_ptr<Token>> Lattice::getBestPath(shared_ptr<Token> token) {
@@ -49,7 +56,10 @@ vector<shared_ptr<Token>> Lattice::getBestPath(shared_ptr<Token> token) {
     shared_ptr<Token> currToken = token;
     while (currToken) {
         tokenSeq.push_back(token);
-        currToken = tokenToplogy[currToken].predecessors.front();
+        if(tokenToplogy[currToken].predecessors.size())
+            currToken = tokenToplogy[currToken].predecessors.front();
+        else
+            break;
     }
 
     reverse(begin(tokenSeq), end(tokenSeq));
@@ -58,7 +68,7 @@ vector<shared_ptr<Token>> Lattice::getBestPath(shared_ptr<Token> token) {
 
 void Lattice::removeToken(shared_ptr<Token> token) {
     if (tokenToplogy[token].successorsCount == 0) {
-        auto& predecessors = tokenToplogy[token].predecessors;
+        vector<shared_ptr<Token>> predecessors = tokenToplogy[token].predecessors;
         tokenToplogy.erase(token);
         for (auto& predecessor : predecessors) {
             tokenToplogy[predecessor].successorsCount -= 1;
@@ -66,6 +76,8 @@ void Lattice::removeToken(shared_ptr<Token> token) {
                 removeToken(predecessor);
             }
         }
+    } else {
+        string DEBUG = "DEBUG";
     }
 }
 
