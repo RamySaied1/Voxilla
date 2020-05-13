@@ -47,7 +47,7 @@ Decoder::Path Decoder::decode(vector<vector<double>>& activations, uint maxActiv
     // vector<vector<string>> wordSeqs;
     // getLatticeWordSeqs(lattice, wordSeqs);
     // for(auto & wordSeq: wordSeqs){
-    //     string sentence; 
+    //     string sentence;
     //     for(auto & word: wordSeq){
     //         sentence += word + " ";
     //     }
@@ -80,7 +80,7 @@ void Decoder::expandEpsStates() {
         beamSearch.setActiveTokens(epsTokens);
         beamSearch.doForward(fst.getGraph(), {{0, 0}}, vector<double>(1, 0.), false);  // eps symbol is assumed to have id 0
     }
-    // beamSearch.keepOnlyBestExpandedTokens();
+    beamSearch.keepOnlyBestExpandedTokens();
 }
 
 
