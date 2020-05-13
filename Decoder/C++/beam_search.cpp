@@ -123,6 +123,22 @@ vector<const Arc*> BeamSearch::getBestPath(Token& finalToken) {
     return arcs;
 }
 
+void BeamSearch::applyFinalState(const unordered_map<uint, double>& finalStates) {
+    auto iend = remove_if(begin(activeTokens), end(activeTokens), [&](const auto& t) {
+        return finalStates.find(t->arc->dstState) == fst.getFinalStates().end();  // remove if it's not a final state
+    });
+
+    for (auto i = begin(activeTokens); i != iend; ++i) {
+        (*i)->lmCost += finalStates.find((*i)->arc->dstState)->second;  // add final state cost
+    }
+
+    uint newSize = iend - begin(activeTokens);
+    for (int i = newSize; i < activeTokens.size(); ++i) {
+        lattice.removeToken(activeTokens[i]);
+    }
+    activeTokens.resize(newSize); // remove non final states
+}
+
 // vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens) {
 //     if (tokens.size() <= 0) return vector<double>();
 //     const auto& bestToken = *max_element(begin(tokens), end(tokens), [&](const auto& t1, const auto& t2) {

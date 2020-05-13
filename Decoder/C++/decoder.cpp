@@ -42,7 +42,7 @@ Decoder::Path Decoder::decode(vector<vector<double>>& activations, uint maxActiv
         beamSearch.moveExpandedToActive();
     }
 
-    applyFinalState();
+    beamSearch.applyFinalState(fst.getFinalStates());
 
     // vector<vector<string>> wordSeqs;
     // getLatticeWordSeqs(lattice, wordSeqs);
@@ -83,18 +83,6 @@ void Decoder::expandEpsStates() {
     // beamSearch.keepOnlyBestExpandedTokens();
 }
 
-void Decoder::applyFinalState() {
-    auto activeTokens = beamSearch.getActiveTokens();
-    auto iend = remove_if(begin(activeTokens), end(activeTokens), [&](const auto& t) {
-        return fst.getFinalStates().find(t->arc->dstState) == fst.getFinalStates().end();  // remove if it's not a final state
-    });
-
-    for (auto i = begin(activeTokens); i != iend; ++i) {
-        (*i)->lmCost += fst.getFinalStates().find((*i)->arc->dstState)->second;  // add final state cost
-    }
-
-    activeTokens.erase(iend, end(activeTokens));  // remove non final states
-}
 
 Decoder::Path Decoder::getBestPath() {
     Token finalToken = Token();
