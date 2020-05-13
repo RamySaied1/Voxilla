@@ -14,8 +14,8 @@ class Decoder {
     Decoder(string graphFolder, string inputLabelsFile, SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
     bool isSpecialSym(string sym) { return sym == espSyms.epsSymbol || sym == espSyms.startSymbol || sym == espSyms.endSymbol; }
     Path decode(vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw);
-    vector<Path> getBestNPath(uint n);
-    void getLatticeWordSeqs(const Lattice& lattice, vector<vector<string>>& wordSeqs,const LatticeNode * root = NULL, vector<string>&& wordSeq = vector<string>());
+    // vector<Path> getBestNPath(uint n);
+    // void getLatticeWordSeqs(const Lattice& lattice, vector<vector<string>>& wordSeqs,const LatticeNode * root = NULL, vector<string>&& wordSeq = vector<string>());
     ~Decoder(){};
 
    private:

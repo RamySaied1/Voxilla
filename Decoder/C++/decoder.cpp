@@ -34,15 +34,12 @@ Decoder::Path Decoder::decode(vector<vector<double>>& activations, uint maxActiv
     preprocessActivations(activations, amw);
     static unique_ptr<Arc> intialArc(new Arc{0, 0, 0, 0, 0.});  // dummy arc connected to intial state 0
     beamSearch.intiate(intialArc.get(), 0., 0., maxActiveTokens, beamWidth);
-    // Lattice lattice(intialArc.get());
 
     for (size_t i = 0; i < activations.size(); i++) {
         beamSearch.doForward(fst.getGraph(), inpIdToActivationsIndx, activations[i], true);
         beamSearch.beamPrune();
         expandEpsStates();
         beamSearch.moveExpandedToActive();
-
-        // lattice.expandLattice(beamSearch.getActiveTokens(), inpIdToActivationsIndx, activations[i]);
     }
 
     applyFinalState();
@@ -118,50 +115,50 @@ Decoder::Path Decoder::getBestPath() {
     return inOutID;
 }
 
-vector<Decoder::Path> Decoder::getBestNPath(uint n) {
-    auto pathes = beamSearch.getBestNPath(n);
-    vector<Decoder::Path> inOutIdPathes(pathes.size());
-    auto inpSymsTable = fst.getInpSymsTable();
-    auto outSymsTable = fst.getOutSymsTable();
-    int i = 0;
-    for (auto& path : pathes) {
-        Path inOutID(path.size(), vector<string>(3, ""));
-        for (uint i = 0; i < path.size(); ++i) {
-            const auto& arc = path[i];
-            inOutID[i][0] = inpSymsTable.find(arc->inpId)->second;
-            inOutID[i][1] = outSymsTable.find(arc->outId)->second;
-            inOutID[i][2] = to_string(arc->dstState);
-        }
-        inOutIdPathes[i++] = move(inOutID);
-    }
-    return inOutIdPathes;
-}
+// vector<Decoder::Path> Decoder::getBestNPath(uint n) {
+//     auto pathes = beamSearch.getBestNPath(n);
+//     vector<Decoder::Path> inOutIdPathes(pathes.size());
+//     auto inpSymsTable = fst.getInpSymsTable();
+//     auto outSymsTable = fst.getOutSymsTable();
+//     int i = 0;
+//     for (auto& path : pathes) {
+//         Path inOutID(path.size(), vector<string>(3, ""));
+//         for (uint i = 0; i < path.size(); ++i) {
+//             const auto& arc = path[i];
+//             inOutID[i][0] = inpSymsTable.find(arc->inpId)->second;
+//             inOutID[i][1] = outSymsTable.find(arc->outId)->second;
+//             inOutID[i][2] = to_string(arc->dstState);
+//         }
+//         inOutIdPathes[i++] = move(inOutID);
+//     }
+//     return inOutIdPathes;
+// }
 
-void Decoder::getLatticeWordSeqs(const Lattice& lattice, vector<vector<string>>& wordSeqs, const LatticeNode* root, vector<string>&& wordSeq) {
-    if (!root) {
-        root = lattice.getRoot();
-    }
+// void Decoder::getLatticeWordSeqs(const Lattice& lattice, vector<vector<string>>& wordSeqs, const LatticeNode* root, vector<string>&& wordSeq) {
+//     if (!root) {
+//         root = lattice.getRoot();
+//     }
 
-    if (lattice.isFinalNode(root)) {
-        wordSeqs.push_back(wordSeq);
-        return;
-    }
+//     if (lattice.isFinalNode(root)) {
+//         wordSeqs.push_back(wordSeq);
+//         return;
+//     }
 
-    for (auto& node : root->children) {
-        bool newWordAdded = false;
-        if (node->arc != node->parent->arc) {
-            auto outSymsTable = fst.getOutSymsTable();
-            string outLabel = outSymsTable.find(node->arc->outId)->second;
-            if (!isSpecialSym(outLabel)) {
-                wordSeq.push_back(outLabel);
-                newWordAdded = true;
-            }
-        }
+//     for (auto& node : root->children) {
+//         bool newWordAdded = false;
+//         if (node->arc != node->parent->arc) {
+//             auto outSymsTable = fst.getOutSymsTable();
+//             string outLabel = outSymsTable.find(node->arc->outId)->second;
+//             if (!isSpecialSym(outLabel)) {
+//                 wordSeq.push_back(outLabel);
+//                 newWordAdded = true;
+//             }
+//         }
 
-        getLatticeWordSeqs(lattice, wordSeqs, node.get(), forward<vector<string>>(wordSeq));
+//         getLatticeWordSeqs(lattice, wordSeqs, node.get(), forward<vector<string>>(wordSeq));
 
-        if (newWordAdded) {
-            wordSeq.pop_back();
-        }
-    }
-}
+//         if (newWordAdded) {
+//             wordSeq.pop_back();
+//         }
+//     }
+// }
