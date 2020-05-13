@@ -80,7 +80,8 @@ void Decoder::applyFinalState(vector<shared_ptr<Token>>& tokens) {
         (*i)->lmCost += fst.getFinalStates().find((*i)->arc->dstState)->second;  // add final state cost
     }
 
-    tokens.erase(iend, end(tokens));  // remove non final states
+    uint newSize = iend - begin(tokens);
+    tokens.resize(newSize);  // remove non final states
 }
 
 Decoder::Path Decoder::getBestPath() {
