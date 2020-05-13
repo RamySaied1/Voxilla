@@ -129,16 +129,11 @@ void BeamSearch::beamPrune() {
     }
 }
 
-vector<const Arc*> BeamSearch::getBestPath(Token& finalToken) {
+vector<const Arc*> BeamSearch::getPath(shared_ptr<Token> rootToken) {
     vector<const Arc*> arcs = vector<const Arc*>();
     if (activeTokens.size() <= 0) return arcs;
 
-    const auto& bestToken = *max_element(begin(activeTokens), end(activeTokens), [&](const auto& t1, const auto& t2) {
-        return t1->amCost + t1->lmCost < t2->amCost + t2->lmCost;
-    });
-
-    finalToken = *(bestToken);
-    shared_ptr<Token> currToken = bestToken;
+    shared_ptr<Token> currToken = rootToken;
     while (currToken) {
         arcs.push_back(currToken->arc);
         currToken = predeccessor[currToken];

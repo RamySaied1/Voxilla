@@ -42,7 +42,6 @@ Decoder::Path Decoder::decode(vector<vector<double>>& activations, uint maxActiv
         beamSearch.moveExpandedToActive();
     }
 
-    applyFinalState();
     return getBestPath();
 }
 
@@ -72,26 +71,27 @@ void Decoder::expandEpsStates() {
     beamSearch.keepOnlyBestExpandedTokens();
 }
 
-void Decoder::applyFinalState() {
-    auto activeTokens = beamSearch.getActiveTokens();
-    auto iend = remove_if(begin(activeTokens), end(activeTokens), [&](const auto& t) {
+void Decoder::applyFinalState(vector<shared_ptr<Token>>& tokens) {
+    auto iend = remove_if(begin(tokens), end(tokens), [&](const auto& t) {
         return fst.getFinalStates().find(t->arc->dstState) == fst.getFinalStates().end();  // remove if it's not a final state
     });
 
-    for (auto i = begin(activeTokens); i != iend; ++i) {
+    for (auto i = begin(tokens); i != iend; ++i) {
         (*i)->lmCost += fst.getFinalStates().find((*i)->arc->dstState)->second;  // add final state cost
     }
 
-    activeTokens.erase(iend, end(activeTokens));  // remove non final states
+    tokens.erase(iend, end(tokens));  // remove non final states
 }
 
 Decoder::Path Decoder::getBestPath() {
-    Token finalToken = Token();
-    auto path = beamSearch.getBestPath(finalToken);
-    // finalToken.print(cout);
-    // cout << endl;
-    // cout << "Combined Cost: " << (finalToken.amCost, finalToken.lmCost, finalToken.hmmCost);
-    // cout << "\n---------------------------------\n";
+    vector<shared_ptr<Token>> activeTokens = beamSearch.getActiveTokens();
+    applyFinalState(activeTokens);
+
+    const auto& bestToken = *max_element(begin(activeTokens), end(activeTokens), [&](const auto& t1, const auto& t2) {
+        return t1->amCost + t1->lmCost < t2->amCost + t2->lmCost;
+    });
+
+    auto path = beamSearch.getPath(bestToken);
     auto inpSymsTable = fst.getInpSymsTable();
     auto outSymsTable = fst.getOutSymsTable();
     Path inOutID(path.size(), vector<string>(3, ""));

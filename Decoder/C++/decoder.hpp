@@ -24,6 +24,6 @@ class Decoder {
     void mapInpIdToActivationsIndx();
     void preprocessActivations(vector<vector<double>>& activations, double weight);
     void expandEpsStates();
-    void applyFinalState();
+    void applyFinalState(vector<shared_ptr<Token>>& tokens);
     Path getBestPath();
 };

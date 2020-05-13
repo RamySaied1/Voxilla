@@ -27,7 +27,7 @@ class BeamSearch {
     void beamPrune();
     void keepOnlyBestExpandedTokens();
     void doForward(const vector<vector<const Arc*>>& graph, const unordered_map<uint, uint>& inpIdsToIndx, const vector<double>& activations, bool useSelfLoops);
-    vector<const Arc*> getBestPath(Token& bestToken);
+    vector<const Arc*> getPath(shared_ptr<Token> rootToken);
 
    private:
     struct Expantion {
