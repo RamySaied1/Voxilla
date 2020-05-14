@@ -55,10 +55,11 @@ class Lattice {
     void createExpandedTokens(vector<shared_ptr<Token>>& newTokens);
     void finishExpantions();
 
-    vector<shared_ptr<Token>> getBestPath(shared_ptr<Token> token);
-    void removeToken(shared_ptr<Token> token);
+    void pruneChildLess(shared_ptr<Token> token);
+    vector<const Arc*> getBestPath(shared_ptr<Token> token);
+    void getAllPathes(shared_ptr<Token> token, vector<vector<const Arc*>>& pathes);
+    void finishExpantions();
 
-    // void pruneChildLess(LatticeNode* node);
     // void finalize();
     // bool isFinalNode(const LatticeNode* node) const { return node == &finalNode; };
     // const LatticeNode* getRoot() const { return &root; };

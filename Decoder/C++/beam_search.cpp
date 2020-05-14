@@ -95,7 +95,7 @@ void BeamSearch::beamPrune() {
         uint newSize = rend(expandedTokens) - iter;
         newSize = min(newSize, maxActiveTokens);
         for (uint i = newSize; i < expandedTokens.size(); ++i) {
-            lattice.removeToken(expandedTokens[i]);
+            lattice.pruneChildLess(expandedTokens[i]);
         }
         expandedTokens.resize(newSize);
         // cout<<"New Size due to beam: "<<expandedTokens.size()<<endl;
@@ -110,13 +110,8 @@ vector<const Arc*> BeamSearch::getBestPath(Token& finalToken) {
     });
     finalToken = *(bestToken);
 
-    vector<shared_ptr<Token>> tokensSeq = lattice.getBestPath(bestToken);
+    return lattice.getBestPath(bestToken);
 
-    vector<const Arc*> arcs = vector<const Arc*>(tokensSeq.size());
-    transform(begin(tokensSeq), end(tokensSeq), begin(arcs), [](const auto& token) {
-        return token->arc;
-    });
-    return arcs;
 }
 
 void BeamSearch::applyFinalState(const unordered_map<uint, double>& finalStates) {
@@ -130,7 +125,7 @@ void BeamSearch::applyFinalState(const unordered_map<uint, double>& finalStates)
 
     uint newSize = iend - begin(activeTokens);
     for (uint i = newSize; i < activeTokens.size(); ++i) {
-        lattice.removeToken(activeTokens[i]);
+        lattice.pruneChildLess(activeTokens[i]);
     }
     activeTokens.resize(newSize);  // remove non final states
 }

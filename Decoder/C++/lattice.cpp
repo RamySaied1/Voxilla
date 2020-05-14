@@ -51,26 +51,40 @@ void Lattice::finishExpantions() {
     arcToToken.clear();
 }
 
-vector<shared_ptr<Token>> Lattice::getBestPath(shared_ptr<Token> token) {
-    vector<shared_ptr<Token>> tokenSeq;
+vector<const Arc*> Lattice::getBestPath(shared_ptr<Token> token) {
+    vector<const Arc*> arcSeq;
     shared_ptr<Token> currToken = token;
     while (currToken) {
-        tokenSeq.push_back(currToken);
+        arcSeq.push_back(currToken->arc);
         currToken = tokenToplogy[currToken].predecessors.front();
     }
 
-    reverse(begin(tokenSeq), end(tokenSeq));
-    return tokenSeq;
+    reverse(begin(arcSeq), end(arcSeq));
+    return arcSeq;
 }
 
-void Lattice::removeToken(shared_ptr<Token> token) {
+void Lattice::getAllPathes(shared_ptr<Token> token, vector<vector<const Arc*>> & pathes) {
+    static vector<const Arc*> arcSeq;
+    if (!token) {
+        pathes.push_back(arcSeq);
+        reverse(begin(pathes.back()), end(pathes.back()));
+    } else {
+        arcSeq.push_back(token->arc);
+        for (const auto& predecessor : tokenToplogy[token].predecessors) {
+            getAllPathes(predecessor, pathes);
+        }
+        arcSeq.pop_back();
+    }
+}
+
+void Lattice::pruneChildLess(shared_ptr<Token> token) {
     if (token.get() && tokenToplogy[token].successorsCount == 0) {
         vector<shared_ptr<Token>> predecessors = tokenToplogy[token].predecessors;
         tokenToplogy.erase(token);
         for (auto& predecessor : predecessors) {
             tokenToplogy[predecessor].successorsCount -= 1;
             if (tokenToplogy[predecessor].successorsCount == 0) {
-                removeToken(predecessor);
+                pruneChildLess(predecessor);
             }
         }
     }
