@@ -1,6 +1,6 @@
 #include "lattice.hpp"
 
-Lattice::Lattice() {
+Lattice::Lattice(uint latticeBeam) : latticeBeam(latticeBeam), tokenId(1) {
 }
 
 void Lattice::startNewExpantions() {
@@ -16,8 +16,8 @@ void Lattice::createExpandedTokens(vector<shared_ptr<Token>>& newTokens) {
     for (auto& keyVal : expantions) {
         const auto& arc = keyVal.first;
         auto& expantionsSet = keyVal.second;
-        double lmCost =  expantionsSet.begin()->lmCost;
-        double amCost =  expantionsSet.begin()->amCost;
+        double lmCost = expantionsSet.begin()->lmCost;
+        double amCost = expantionsSet.begin()->amCost;
 
         if (arcToToken.find(arc) != arcToToken.end()) {  // this token created before in same time step
             arcToToken[arc]->lmCost = lmCost;
@@ -31,20 +31,20 @@ void Lattice::createExpandedTokens(vector<shared_ptr<Token>>& newTokens) {
 }
 
 void Lattice::finishExpantions() {
-    for (auto& keyVal : expantions) {
-        uint topK = 5;
+    for (const auto& keyVal : expantions) {
         const auto& arc = keyVal.first;
-        auto& expantionsSet = keyVal.second;
+        const auto& expantionsSet = keyVal.second;
 
+        uint topK = latticeBeam;
         const auto& createdToken = arcToToken[arc];
-        for (auto& expantion : expantionsSet) {
-            if (topK-- == 0) break;  // use only best k expantions
 
-            tokenToplogy[createdToken].successorsCount = 0;  // make sure to copy token pointer
-            if (expantion.parentToken.get()) {
-                tokenToplogy[createdToken].predecessors.push_back(expantion.parentToken);
-                tokenToplogy[expantion.parentToken].successorsCount += 1;
-            }
+        if (tokenToplogy.find(createdToken) != tokenToplogy.end()) {
+            assert(tokenToplogy[createdToken].successorsCount);
+        }
+        for (const auto& expantion : expantionsSet) {
+            if (topK-- == 0) break;  // use only best k expantions
+            tokenToplogy[createdToken].predecessors.push_back(expantion.parentToken);
+            tokenToplogy[expantion.parentToken].successorsCount += 1;
         }
     }
     expantions.clear();
@@ -55,11 +55,8 @@ vector<shared_ptr<Token>> Lattice::getBestPath(shared_ptr<Token> token) {
     vector<shared_ptr<Token>> tokenSeq;
     shared_ptr<Token> currToken = token;
     while (currToken) {
-        tokenSeq.push_back(token);
-        if(tokenToplogy[currToken].predecessors.size())
-            currToken = tokenToplogy[currToken].predecessors.front();
-        else
-            break;
+        tokenSeq.push_back(currToken);
+        currToken = tokenToplogy[currToken].predecessors.front();
     }
 
     reverse(begin(tokenSeq), end(tokenSeq));
@@ -67,7 +64,7 @@ vector<shared_ptr<Token>> Lattice::getBestPath(shared_ptr<Token> token) {
 }
 
 void Lattice::removeToken(shared_ptr<Token> token) {
-    if (tokenToplogy[token].successorsCount == 0) {
+    if (token.get() && tokenToplogy[token].successorsCount == 0) {
         vector<shared_ptr<Token>> predecessors = tokenToplogy[token].predecessors;
         tokenToplogy.erase(token);
         for (auto& predecessor : predecessors) {
@@ -76,8 +73,6 @@ void Lattice::removeToken(shared_ptr<Token> token) {
                 removeToken(predecessor);
             }
         }
-    } else {
-        string DEBUG = "DEBUG";
     }
 }
 

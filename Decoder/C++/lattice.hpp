@@ -27,9 +27,9 @@ class Lattice {
     struct Expantion {
         shared_ptr<Token> parentToken;
         double lmCost, amCost;
-        Expantion(shared_ptr<Token> parentToken, double lmCost, double amCost) : parentToken(parentToken), lmCost(lmCost), amCost(amCost) {
-            amCost = amCost + (parentToken ? parentToken->amCost : 0);
-            lmCost = lmCost + (parentToken ? parentToken->lmCost : 0);
+        Expantion(shared_ptr<Token> parentToken, double lmCost, double amCost) : parentToken(parentToken) {
+            this->lmCost = lmCost + (parentToken ? parentToken->lmCost : 0);
+            this->amCost = amCost + (parentToken ? parentToken->amCost : 0);
         }
         Expantion() : parentToken(NULL), lmCost(0.), amCost(0.) {}
     };
@@ -43,10 +43,11 @@ class Lattice {
     unordered_map<const Arc*, set<Expantion, ExpantionsComparator>> expantions;
     unordered_map<shared_ptr<Token>, Topology> tokenToplogy;
     unordered_map<const Arc*, shared_ptr<Token>> arcToToken;
-    uint tokenId = 1;
+    uint tokenId;
+    uint latticeBeam;
 
    public:
-    Lattice();
+    Lattice(uint latticeBeam);
     ~Lattice(){};
 
     void startNewExpantions();

@@ -13,7 +13,7 @@ void BeamSearch::intiate(const Arc* arc, double lmCost, double amCost, uint maxA
     lattice = Lattice();
 
     lattice.startNewExpantions();
-    lattice.expand(nullptr, arc, lmCost, amCost);
+    lattice.expand(shared_ptr<Token>(nullptr), arc, lmCost, amCost);
     lattice.createExpandedTokens(expandedTokens);
     lattice.finishExpantions();
     moveExpandedToActive();
@@ -38,8 +38,6 @@ void BeamSearch::keepOnlyBestExpandedTokens() {
 }
 
 void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<uint, uint>& inpIdsToIndx, const vector<double>& activations, bool useSelfLoops) {
-    lattice.startNewExpantions();  // start new expantions stage
-
     if (useSelfLoops) {
         for (uint i = 0; i < activeTokens.size(); ++i) {
             const auto& token = activeTokens[i];
@@ -96,7 +94,7 @@ void BeamSearch::beamPrune() {
         // cout<<"Original Size: "<<expandedTokens.size()<<endl;
         uint newSize = rend(expandedTokens) - iter;
         newSize = min(newSize, maxActiveTokens);
-        for (int i = newSize; i < expandedTokens.size(); ++i) {
+        for (uint i = newSize; i < expandedTokens.size(); ++i) {
             lattice.removeToken(expandedTokens[i]);
         }
         expandedTokens.resize(newSize);
@@ -131,10 +129,10 @@ void BeamSearch::applyFinalState(const unordered_map<uint, double>& finalStates)
     }
 
     uint newSize = iend - begin(activeTokens);
-    for (int i = newSize; i < activeTokens.size(); ++i) {
+    for (uint i = newSize; i < activeTokens.size(); ++i) {
         lattice.removeToken(activeTokens[i]);
     }
-    activeTokens.resize(newSize); // remove non final states
+    activeTokens.resize(newSize);  // remove non final states
 }
 
 // vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens) {
