@@ -1,9 +1,9 @@
 import numpy as np
-# import matplotlib.pyplot as plt
+from scipy.ndimage.interpolation import shift
 class FrontEnd:
 
-    def __init__(self, samp_rate=16000, frame_duration=0.025, frame_shift=0.010, preemphasis=0.97,
-                 num_mel=40, lo_freq=0, hi_freq=None, mean_norm_feat=True, mean_norm_wav=True, compute_stats=False):
+    def __init__(self,samp_rate=16000, frame_duration=0.025, frame_shift=0.010, preemphasis=0.97,delta=0,
+                 num_mel=40, average=0, power=0 ,lo_freq=0, hi_freq=None, mean_norm_feat=True, mean_norm_wav=True, compute_stats=False):
         self.samp_rate = samp_rate
         self.win_size = int(np.floor(frame_duration * samp_rate))
         self.win_shift = int(np.floor(frame_shift * samp_rate))
@@ -24,10 +24,13 @@ class FrontEnd:
         self.make_mel_filterbank()
         self.mean_normalize = mean_norm_feat
         self.zero_mean_wav = mean_norm_wav
-        self.global_mean = np.zeros([num_mel])
-        self.global_var = np.zeros([num_mel])
+        self.global_mean = np.zeros([((num_mel+power)*(delta+1))+average])
+        self.global_var  = np.zeros([((num_mel+power)*(delta+1)+average)])
         self.global_frames = 0
         self.compute_global_stats = compute_stats
+        self.is_power=power
+        self.is_delta=delta
+        self.is_average=average
     # linear-scale frequency (Hz) to mel-scale frequency
     def lin2mel(self,freq):
         return 2595*np.log10(1+freq/700)
@@ -85,13 +88,16 @@ class FrontEnd:
 
     def wav_to_frames(self, wav):
         # only process whole frames
-        num_frames = self.num_frames
+        num_frames = int(np.floor((wav.shape[0] - self.win_size) / self.win_shift) + 1)
+        #print(num_frames,"num frames")
         frames = np.zeros([self.win_size, num_frames])
         for t in range(0, num_frames):
             frame = wav[t * self.win_shift:t * self.win_shift + self.win_size]
+            #print(frame)
             if (self.zero_mean_wav):
                 frame = frame - np.mean(frame)
             frames[:, t] = self.hamwin * frame
+        #print(frames)
         return frames
 
     # for each frame (column of 2D array 'frames'), compute the magnitude spectrum using the fft
@@ -123,6 +129,31 @@ class FrontEnd:
         self.global_var += np.sum(fbank**2,axis=1)
         self.global_frames += fbank.shape[1]
 
+
+    def delta(self,feature):
+      tm1=shift(feature,[0,1],mode='nearest')
+      tp1=shift(feature,[0,-1],mode='nearest')
+      tm2=shift(feature,[0,2],mode='nearest')
+      tp2=shift(feature,[0,-2],mode='nearest')
+      denomenator=10
+      result=((tp1-tm1)+2*(tp2-tm2))/denomenator
+      return result
+    
+    def energy(self,frames):
+      result = np.sum(frames**2,axis=0)
+      result= result.reshape((1,-1))
+      return result
+
+    def average(self,features):
+      result=np.sum(features,axis=0)/features.shape[0]
+      result= result.reshape((1,-1))
+      return result
+
+
+
+    
+
+
     # compute corpus mean and variance based on sufficient statistics
     def compute_stats(self):
         self.global_mean /= self.global_frames
@@ -133,15 +164,32 @@ class FrontEnd:
 
     def process_utterance(self, utterance):
         wav     = self.dither(utterance)
-        self.num_frames = int(np.floor((wav.shape[0] - self.win_size) / self.win_shift) + 1)
         wav     = self.pre_emphasize(wav)
+
         frames  = self.wav_to_frames(wav)
         magspec = self.frames_to_magspec(frames)
         fbank   = self.magspec_to_fbank(magspec)
-        if (self.mean_normalize and self.num_frames > 1):
+
+        if self.is_power==1:
+          energy = self.energy(frames)
+          fbank=np.concatenate((fbank,energy),axis=0)
+
+        if self.is_delta==2:
+          delta1=self.delta(fbank)
+          delta2=self.delta(delta1)
+          fbank=np.concatenate((fbank,delta1,delta2),axis=0)
+
+        if self.is_average==1:
+          average= self.average(fbank)
+          fbank=np.concatenate((fbank,average),axis=0)
+
+        if (self.mean_normalize):
             fbank = self.mean_norm_fbank(fbank)
 
         if (self.compute_global_stats):
             self.accumulate_stats(fbank)
 
         return fbank
+
+
+
