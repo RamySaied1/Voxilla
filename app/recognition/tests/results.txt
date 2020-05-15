@@ -1,0 +1,4 @@
+loss 0.3071 - categorical_accuracy 0.8429 - val_loss 0.7275 - val_categorical_accuracy 0.7764 
+train --- 10 
+dev ---- 16
+test --- 19

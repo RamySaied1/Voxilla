@@ -1,6 +1,7 @@
 .history
 .vscode
 __pycache__
-LibriSpeech
-Scripts
-kaldi
+waves_test.txt
+pred_transcript.txt
+ref_transcript.txt
+
