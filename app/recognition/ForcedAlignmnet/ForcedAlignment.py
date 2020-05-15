@@ -4,6 +4,7 @@ import string
 import numpy as np
 import re
 
+
 class ForcedAlignment():
     def __init__(self,wordsLexiconFile = "words_lexicon.txt", phonesLexiconFile = "phones_lexicon.txt", silence_phones = ["sil","spn"]):
         self.wordsLexicon = {}

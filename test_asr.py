@@ -3,15 +3,16 @@ import argparse
 import collections
 import re
 import sys
-sys.path.append("./PerformanceMeasure/")
+from config import Config
+sys.path.append(Config.RECOGNITION_DIR+"PerformanceMeasure/")
 from time import time
-from asr import ASR
+from app.recognition.asr import ASR
 from performance import *
 
 """
 # runing command
 
-python3 test_asr.py -model_arch ./Classifier/model_cpu.json -model_weights ./Classifier/weights.h5 -model_priori_proba_file ./Classifier/priori.txt -fst_folder ./Decoder/Graphs/200k-vocab/ -acoustic_model_labels_file ./Decoder/Graphs/200k-vocab/labels.ciphones -srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
+python3 test_asr.py -model_arch ./app/recognition/Classifier/model_cpu.json -model_weights ./app/recognition/Classifier/weights.h5 -model_priori_proba_file ./app/recognition/Classifier/priori.txt -fst_folder ./app/recognition/Decoder/Graphs/200k-vocab/ -acoustic_model_labels_file ./app/recognition/Decoder/Graphs/200k-vocab/labels.ciphones -srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
 
 """
 

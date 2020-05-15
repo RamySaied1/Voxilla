@@ -1,6 +1,7 @@
 class Config(object):
     DEVELOPMENT = False
     DEBUG = False
+
     UPLOAD_FILE="./uploaded/wave.flac"
     RECOGNITION_DIR='./app/recognition/'
     MAX_ACTIVE_TOKENS=1500

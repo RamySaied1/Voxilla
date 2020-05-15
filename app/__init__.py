@@ -6,10 +6,6 @@ def create_app(db_uri='any'):
 
     app = Flask(__name__)
     app.config.from_object('config.DevelopmentConfig')
-    ####### we will add here also urls of 
-    ### recognition
-    ### delete
-    ### insert
     app.register_blueprint(recognition, url_prefix='/recognition')
 
     return app

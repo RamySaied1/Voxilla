@@ -5,8 +5,11 @@ import matplotlib.pyplot as plt
 import htk_featio as htk
 import speech_sigproc as sp
 
-inv=np.array(htk.load_ascii_vector("app/recognition/FeatureExtraction/feat_invstddev.ascii"))
-m=np.array(htk.load_ascii_vector("app/recognition/FeatureExtraction/feat_mean.ascii"))
+from config import Config
+inv=np.array(htk.load_ascii_vector(Config.RECOGNITION_DIR+"FeatureExtraction/feat_invstddev.ascii"))
+m=np.array(htk.load_ascii_vector(Config.RECOGNITION_DIR+"FeatureExtraction/feat_mean.ascii"))
+
+
 
 def wav_to_feat(wav_file,samp_rate = 16000):
     x, s = sf.read(wav_file)
