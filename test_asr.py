@@ -13,7 +13,6 @@ from performance import *
 # runing command
 
 python3 test_asr.py -model_arch ./app/recognition/Classifier/model_cpu.json -model_weights ./app/recognition/Classifier/weights.h5 -model_priori_proba_file ./app/recognition/Classifier/priori.txt -fst_folder ./app/recognition/Decoder/Graphs/200k-vocab/ -acoustic_model_labels_file ./app/recognition/Decoder/Graphs/200k-vocab/labels.ciphones -srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
-
 """
 
 def write_ref_output(wav_file,ref_file="ref_transcript.txt"):
