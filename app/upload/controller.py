@@ -10,13 +10,13 @@ def upload_file_gui():
    return render_template('upload.html')
 	
 
-@upload.route('/', methods = ['GET', 'POST'])
+@upload.route('/', methods = ['POST'])
 def upload_file():
-   if request.method == 'POST':
+   try:
       f = request.files['file']
       f.save(current_app.config["UPLOAD_FILE"])
       return jsonify({ "message": "file uploaded sussessfully" }) ,200
-   else:
-      return jsonify({ "message": "method must be post" }) ,404
+   except Exception as e:
+      return jsonify({ "message": e.message }) ,404
 
 
