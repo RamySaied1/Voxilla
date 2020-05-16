@@ -7,6 +7,11 @@ class Config(object):
     MAX_ACTIVE_TOKENS=1500
     BEAM_WIDTH=12
     ACOUSTIC_MODEL_WEIGHT=10
+
+    SAMP_RATE=16000 
+    FRAME_DURATION=0.025
+    FRAME_SHIFT=0.010
+    
     
     
 

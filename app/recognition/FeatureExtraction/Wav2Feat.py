@@ -8,15 +8,17 @@ import speech_sigproc as sp
 from config import Config
 inv=np.array(htk.load_ascii_vector(Config.RECOGNITION_DIR+"FeatureExtraction/feat_invstddev.ascii"))
 m=np.array(htk.load_ascii_vector(Config.RECOGNITION_DIR+"FeatureExtraction/feat_mean.ascii"))
+SAMP_RATE= Config.SAMP_RATE
+FRAME_DURATION= Config.FRAME_DURATION
+FRAME_SHIFT= Config.FRAME_SHIFT
 
 
-
-def wav_to_feat(wav_file,samp_rate = 16000):
+def wav_to_feat(wav_file,samp_rate = SAMP_RATE,frame_duration=FRAME_DURATION,frame_shift=FRAME_SHIFT):
     x, s = sf.read(wav_file)
     if (s != samp_rate):
-        raise RuntimeError("LibriSpeech files are 16000 Hz, found {0}".format(s))
+        raise RuntimeError("Our dataset files have sampling rate "+str(SAMP_RATE)+"Hz, found {0}".format(s))
 
-    fe = sp.FrontEnd(samp_rate=samp_rate,mean_norm_feat=True)
+    fe = sp.FrontEnd(samp_rate=samp_rate,mean_norm_feat=True, frame_duration=frame_duration, frame_shift=frame_shift)
     feat=fe.process_utterance(x)
 
     m_seq=np.repeat(m[:,np.newaxis],feat.shape[1],axis=1)
