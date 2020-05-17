@@ -36,13 +36,13 @@ Decoder::Path Decoder::decode(vector<vector<double>>& activations, uint maxActiv
     beamSearch.intiate(intialArc.get(), 0., 0., maxActiveTokens, beamWidth);
 
     for (size_t i = 0; i < activations.size(); i++) {
-        beamSearch.startNewExpantions(); // start new time step
-        beamSearch.doForward(fst.getGraph(), inpIdToActivationsIndx, activations[i], true); // expand the frontier
-        beamSearch.createExpandedTokens(); // create the expanded tokens from frontier
-        beamSearch.beamPrune(); // prune and only keep bet tokens
-        expandEpsStates(); // expand epslions
-        beamSearch.moveExpandedToActive(); // move expaned tokens to actve to be ready for new timestep
-        beamSearch.finishExpantions(); // end time step
+        beamSearch.startNewExpantions();                                                     // start new time step
+        beamSearch.doForward(fst.getGraph(), inpIdToActivationsIndx, activations[i], true);  // expand the frontier
+        beamSearch.createExpandedTokens();                                                   // create the expanded tokens from frontier
+        beamSearch.beamPrune();                                                              // prune and only keep bet tokens
+        expandEpsStates();                                                                   // expand epslions
+        beamSearch.moveExpandedToActive();                                                   // move expaned tokens to actve to be ready for new timestep
+        beamSearch.finishExpantions();                                                       // end time step
     }
 
     beamSearch.applyFinalState(fst.getFinalStates());
@@ -85,7 +85,6 @@ void Decoder::expandEpsStates() {
         beamSearch.createExpandedTokens();
     }
 }
-
 
 Decoder::Path Decoder::getBestPath() {
     Token finalToken = Token();

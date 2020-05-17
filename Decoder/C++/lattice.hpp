@@ -45,22 +45,19 @@ class Lattice {
     unordered_map<const Arc*, shared_ptr<Token>> arcToToken;
     uint tokenId;
     uint latticeBeam;
+    double bestExpantionCost;
 
    public:
-    Lattice(uint latticeBeam);
+    Lattice(uint latticeBeam = 1);
     ~Lattice(){};
 
     void startNewExpantions();
     void expand(const shared_ptr<Token>& parent, const Arc*& arc, double lmCost, double amCost);
-    void createExpandedTokens(vector<shared_ptr<Token>>& newTokens);
+    void createExpandedTokens(vector<shared_ptr<Token>>& newTokens, double expantionCostBeam);
     void finishExpantions();
 
-    void pruneChildLess(shared_ptr<Token> token);
+    void removeToken(shared_ptr<Token> token);
     vector<const Arc*> getBestPath(shared_ptr<Token> token);
-    void getAllPathes(shared_ptr<Token> token, vector<vector<const Arc*>>& pathes);
-    void finishExpantions();
-
-    // void finalize();
-    // bool isFinalNode(const LatticeNode* node) const { return node == &finalNode; };
-    // const LatticeNode* getRoot() const { return &root; };
+    void writeAsFst(string filename, const vector<shared_ptr<Token>>& finalTokens, const unordered_map<uint, double>& finalStates) const;
+    // void printAllHyps(shared_ptr<Token> token, const unordered_map<uint, string>& outSymTable);
 };
