@@ -2,7 +2,7 @@
 
 ex='./searchParams.sh New_notrans_noself BLSTM1_activations files_dev.txt 7000 13 2 2 1 5 ref_orig_19.txt true'
 
-if [ ! $1 ] || [ ! $2 ] || [ ! $3 ] || [ ! $4 ] || [ ! $5 ] || [ ! !6 ] || [ ! $7 ] || [ ! $8 ] || [ ! $9 ] || [ ! $10 ]
+if [ ! $1 ] || [ ! $2 ] || [ ! $3 ] || [ ! $4 ] || [ ! $5 ] || [ ! !6 ] || [ ! $7 ] || [ ! $8 ] || [ ! $9 ] || [ ! ${10} ]
 then
     echo Wrong num of params
     echo Usage: $ex
@@ -27,7 +27,7 @@ echo maxActiveTokens is $maxActiveTokens ,beam is $beam ,amwStart $amwStart ,amw
 echo ReferencePath fie is $refFilePath, lattice beam is $latticeBeam, showPerfMeasureOutput is $showPerfMeasureOutput
 
 
-params=$graphFolder\ $activationsFolder\ $filesFile\ $maxActiveTokens\ $beam\ $amwStart\ $amwEnd\ $amwStep
+params=$graphFolder\ $activationsFolder\ $filesFile\ $maxActiveTokens\ $beam\ $amwStart\ $amwEnd\ $amwStep\ $latticeBeam
 params_=$1\_$2\_$3\_$4\_$5\_$6\_$7\_$8\_$9\_on_$refFileLen\_examples
 outFilePath=./PredTrans/out_$params_.txt
 
@@ -49,7 +49,7 @@ g++ -g ./C++/*.cpp
 /bin/rm a.out
 
 sed -i "s/^\s*$/---/g" $outFilePath
-sed  "/Token/d;/^\s*$/d;" $outFilePath > tmp.txt
+sed  "/Total Path Cost:/d;/^\s*$/d;" $outFilePath > tmp.txt
 cat tmp.txt | head -n 1 >> reports.txt
 sed -i "/Parsing/d" tmp.txt
 
