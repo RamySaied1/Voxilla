@@ -1,5 +1,6 @@
 #pragma once
 #include <math.h>
+
 #include <algorithm>
 #include <cassert>
 #include <exception>
@@ -42,6 +43,15 @@ class Exception : public exception {
     Exception(string msg) : msg(msg) {}
     const char* what() const throw() {
         return msg.c_str();
+    }
+};
+
+struct HashPair {
+    template <class T1, class T2>
+    size_t operator()(const pair<T1, T2>& p) const {
+        auto hash1 = hash<T1>{}(p.first);
+        auto hash2 = hash<T2>{}(p.second);
+        return (hash1 >> 1) ^ hash2;
     }
 };
 

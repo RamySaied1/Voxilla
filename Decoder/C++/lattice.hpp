@@ -8,11 +8,12 @@ struct Token {
     uint tokId;
     const Arc* arc;
     double lmCost, amCost;
+    double arcAmCost;
 
-    Token(uint tokId, const Arc* arc, double lmCost, double amCost) : tokId(tokId), arc(arc), lmCost(lmCost), amCost(amCost) {}
-    Token() : tokId(0), arc(0), lmCost(0), amCost(0) {}
+    Token(uint tokId, const Arc* arc, double lmCost, double amCost, double arcAmCost) : tokId(tokId), arc(arc), lmCost(lmCost), amCost(amCost), arcAmCost(arcAmCost) {}
+    Token() : tokId(0), arc(0), lmCost(0), amCost(0), arcAmCost(0) {}
 
-    void print(ostream& out) const { out << "Token id: " << tokId << " lmCost: " << lmCost << " amCost: " << amCost << endl; }
+    void print(ostream& out) const { out << "Token id: " << tokId << " lmCost: " << lmCost << " amCost: " << amCost << " TotalCost: " << lmCost + amCost << endl; }
     // bool operator==(const Token& other) const { return tokId == other.tokId && node == other.node; }
 };
 
@@ -27,11 +28,12 @@ class Lattice {
     struct Expantion {
         shared_ptr<Token> parentToken;
         double lmCost, amCost;
-        Expantion(shared_ptr<Token> parentToken, double lmCost, double amCost) : parentToken(parentToken) {
+        double arcAmCost;
+        Expantion(shared_ptr<Token> parentToken, double lmCost, double amCost) : parentToken(parentToken), arcAmCost(amCost) {
             this->lmCost = lmCost + (parentToken ? parentToken->lmCost : 0);
             this->amCost = amCost + (parentToken ? parentToken->amCost : 0);
         }
-        Expantion() : parentToken(NULL), lmCost(0.), amCost(0.) {}
+        Expantion() : parentToken(nullptr), lmCost(0.), amCost(0.), arcAmCost(0.) {}
     };
 
     struct ExpantionsComparator {
@@ -41,23 +43,28 @@ class Lattice {
     };
 
     unordered_map<const Arc*, set<Expantion, ExpantionsComparator>> expantions;
-    unordered_map<shared_ptr<Token>, Topology> tokenToplogy;
+    unordered_map<shared_ptr<Token>, Topology> tokenTopology;
     unordered_map<const Arc*, shared_ptr<Token>> arcToToken;
     uint tokenId;
     uint latticeBeam;
     double bestExpantionCost;
 
+    void putSelfLoopFirst();
+    void createFstArc(set<Arc, ArcComparator>& arcs, const shared_ptr<Token>& token, const shared_ptr<Token>& prevToken, bool isPrevTokenConnectWithMe, double accumCost, unordered_map<const Token*, uint>& tokenToSrcState, unordered_map<const Token*, uint>& tokenToDstState, uint& id);
+
    public:
-    Lattice(uint latticeBeam = 1);
+    Lattice(uint latticeBeam, shared_ptr<Token> intialToken);
+    Lattice(){};
     ~Lattice(){};
 
     void startNewExpantions();
     void expand(const shared_ptr<Token>& parent, const Arc*& arc, double lmCost, double amCost);
     void createExpandedTokens(vector<shared_ptr<Token>>& newTokens, double expantionCostBeam);
-    void finishExpantions();
+    void finishExpantions(double expantionCostBeam);
 
     void removeToken(shared_ptr<Token> token);
     vector<const Arc*> getBestPath(shared_ptr<Token> token);
-    void writeAsFst(string filename, const vector<shared_ptr<Token>>& finalTokens, const unordered_map<uint, double>& finalStates) const;
+    void constructFst(const vector<shared_ptr<Token>>& finalTokens, const vector<double>& finalTokensCost, vector<Arc>& arcs, unordered_map<uint, double>& finalStates);
+    void writeAsFst(string filename, const vector<shared_ptr<Token>>& finalTokens, const vector<double>& finalTokensCost);
     // void printAllHyps(shared_ptr<Token> token, const unordered_map<uint, string>& outSymTable);
 };

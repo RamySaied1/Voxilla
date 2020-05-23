@@ -14,15 +14,14 @@ class BeamSearch {
     void moveExpandedToActive();
     void beamPrune();
     void expandEpsStates();
-    void applyFinalState(const unordered_map<uint, double>& finalStates);
-    vector<const Arc*> getBestPath(Token& bestToken);
-    
+    void finalize();
+    vector<const Arc*> getBestPath(double& pathCost);
+
     // lattice functions
     void startNewExpantions() { lattice.startNewExpantions(); }
     void createExpandedTokens() { lattice.createExpandedTokens(expandedTokens, beamWidth); }
     void finishExpantions() { lattice.finishExpantions(beamWidth); }
-    
-    
+
     // basic class functions
     void setActiveTokens(const vector<shared_ptr<Token>>& tokens);
     Lattice* getLattice() { return &lattice; }

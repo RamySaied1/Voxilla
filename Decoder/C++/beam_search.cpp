@@ -9,13 +9,11 @@ void BeamSearch::intiate(const Arc* arc, double lmCost, double amCost, uint maxA
     this->beamWidth = beamWidth;
     this->fst = fst;
 
-    expandedTokens.clear();
     activeTokens.clear();
-    lattice = Lattice(latticeBeam);
+    expandedTokens = {shared_ptr<Token>(new Token{0, arc, 0., 0., 0.})};  // set with intial token
+    lattice = Lattice(latticeBeam, expandedTokens.back());
 
     lattice.startNewExpantions();
-    lattice.expand(shared_ptr<Token>(nullptr), arc, lmCost, amCost);
-    lattice.createExpandedTokens(expandedTokens, beamWidth);
     expandEpsStates();
     lattice.finishExpantions(beamWidth);
     moveExpandedToActive();
@@ -95,25 +93,22 @@ void BeamSearch::beamPrune() {
     }
 }
 
-vector<const Arc*> BeamSearch::getBestPath(Token& finalToken) {
+vector<const Arc*> BeamSearch::getBestPath(double& pathCost) {
     if (activeTokens.size() <= 0) return vector<const Arc*>();
-
+    const unordered_map<uint, double>& finalStates = fst->getFinalStates();
     auto bestToken = *max_element(begin(activeTokens), end(activeTokens), [&](const auto& t1, const auto& t2) {
-        return t1->amCost + t1->lmCost < t2->amCost + t2->lmCost;
+        return t1->amCost + t1->lmCost + finalStates.find(t1->arc->dstState)->second <
+               t2->amCost + t2->lmCost + finalStates.find(t2->arc->dstState)->second;
     });
-    finalToken = *(bestToken);
-
+    pathCost = bestToken->amCost + bestToken->lmCost + finalStates.find(bestToken->arc->dstState)->second;
     return lattice.getBestPath(bestToken);
 }
 
-void BeamSearch::applyFinalState(const unordered_map<uint, double>& finalStates) {
+void BeamSearch::finalize() {
+    const unordered_map<uint, double>& finalStates = fst->getFinalStates();
     auto iend = remove_if(begin(activeTokens), end(activeTokens), [&](const auto& t) {
         return finalStates.find(t->arc->dstState) == finalStates.end();  // remove if it's not a final state
     });
-
-    for (auto i = begin(activeTokens); i != iend; ++i) {
-        (*i)->lmCost += finalStates.find((*i)->arc->dstState)->second;  // add final state cost
-    }
 
     uint newSize = iend - begin(activeTokens);
     for (uint i = newSize; i < expandedTokens.size(); ++i) {
