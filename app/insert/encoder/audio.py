@@ -10,6 +10,109 @@ import struct
 int16_max = (2 ** 15) - 1
 
 
+class MelSpectogram:
+    def __init__(self,samp_rate=16000 ,frame_duration=0.025, frame_shift=0.010,
+                 num_mel=40, power=2 ,lo_freq=0, hi_freq=None):
+        self.samp_rate = samp_rate
+        self.win_size = int(np.floor(frame_duration * samp_rate))
+        self.win_shift = int(np.floor(frame_shift * samp_rate))
+        self.lo_freq = lo_freq
+        if (hi_freq == None):
+            self.hi_freq = samp_rate//2
+        else:
+            self.hi_freq = hi_freq
+
+        self.frame_shift=frame_shift
+        self.num_mel = num_mel
+        self.fft_size= self.win_size
+        self.hamwin = np.hamming(self.win_size)
+        self.make_mel_filterbank()
+        self.power=power
+
+
+    def mel2f(self,mels):
+
+        # Fill in the linear scale
+        f_min = 0.0
+        f_sp = 200.0 / 3
+        freqs = f_min + f_sp * mels
+
+        # And now the nonlinear scale
+        min_log_hz = 1000.0                         # beginning of log region (Hz)
+        min_log_mel = (min_log_hz - f_min) / f_sp   # same (Mels)
+        logstep = np.log(6.4) / 27.0                # step size for log region
+
+        log_t = (mels >= min_log_mel)
+        freqs[log_t] = min_log_hz * np.exp(logstep * (mels[log_t] - min_log_mel))
+
+        return freqs
+
+
+    def lin2mel(self,frequencies):
+        f_min = 0.0
+        f_sp = 200.0 / 3
+
+
+        min_log_hz = 1000.0                         # beginning of log region (Hz)
+        min_log_mel = (min_log_hz - f_min) / f_sp   # same (Mels)
+        logstep = np.log(6.4) / 27.0                # step size for log region
+
+        print(min_log_hz,min_log_mel,logstep)
+
+        mels=0
+        if frequencies >= min_log_hz:
+          mels = min_log_mel + np.log(frequencies / min_log_hz) / logstep
+
+
+        return mels
+
+
+    def make_mel_filterbank(self):
+
+        filter_bank = np.zeros((self.num_mel, int(1 + self.fft_size // 2)), dtype=np.float32)
+
+        min_mel = self.lin2mel(self.lo_freq)
+        max_mel = self.lin2mel(self.hi_freq)
+        mel_f = np.linspace(min_mel, max_mel, self.num_mel + 2)
+        mel_f=self.mel2f(mel_f)
+
+        fftfreqs = [((i*self.samp_rate)/self.fft_size) for i in range(0,int(1+self.fft_size/2))]
+        fftfreqs = np.array(fftfreqs)
+
+        fdiff = np.diff(mel_f)
+        ramps = np.subtract.outer(mel_f, fftfreqs)
+
+        for i in range(self.num_mel):
+            lower_value = -ramps[i] / fdiff[i]
+            upper_value = ramps[i+2] / fdiff[i+1]
+            filter_bank[i] = np.maximum(0, np.minimum(lower_value, upper_value))
+
+        enorm = 2.0 / (mel_f[2:self.num_mel+2] - mel_f[:self.num_mel])
+        filter_bank *= enorm[:, np.newaxis]
+
+        self.mel_filterbank=filter_bank
+        return filter_bank
+
+
+    # for each frame (column of 2D array 'frames'), compute the magnitude spectrum using the fft
+    def frames_to_magspec(self, frames):
+        hop_length=int(self.samp_rate * self.frame_shift)
+        magspec = np.abs(librosa.stft(frames, n_fft=self.fft_size, hop_length=hop_length,))**self.power
+        return magspec
+
+    # for each frame(column of 2D array 'magspec'), compute the log mel spectrum, by applying the mel filterbank to the magnitude spectrum
+    def magspec_to_fbank(self, magspec):
+        fbank=self.mel_filterbank.dot(magspec)
+        return fbank
+   
+    def process_utterance(self, wav):
+        magspec = self.frames_to_magspec(wav)
+        fbank   = self.magspec_to_fbank(magspec)
+        return fbank
+
+
+
+
 def preprocess_wav(fpath_or_wav: Union[str, Path, np.ndarray],
                    source_sr: Optional[int] = None):
     """
@@ -45,14 +148,8 @@ def wav_to_mel_spectrogram(wav):
     Derives a mel spectrogram ready to be used by the encoder from a preprocessed audio waveform.
     Note: this not a log-mel spectrogram.
     """
-    frames = librosa.feature.melspectrogram(
-        wav,
-        sampling_rate,
-        n_fft=int(sampling_rate * mel_window_length / 1000),
-        hop_length=int(sampling_rate * mel_window_step / 1000),
-        n_mels=mel_n_channels
-    )
-    return frames.astype(np.float32).T
+    fe=MelSpectogram(samp_rate=sampling_rate,frame_duration=(mel_window_length / 1000.0),frame_shift=(mel_window_step / 1000.0),num_mel=mel_n_channels)
+    return fe.process_utterance(wav).T
 
 
 def trim_long_silences(wav):
