@@ -1,9 +1,10 @@
 from flask import Blueprint, jsonify, request, current_app,render_template
-
+import librosa
+import numpy as np
+from app.insert import insert_object
 insert = Blueprint('insert', __name__)
 
 
-############## maded only for test purposes it will be removed after integration with front end
 @insert.route('/getfile')
 def upload_file_gui():
    return render_template('insert.html')
@@ -13,6 +14,12 @@ def upload_file_gui():
 def generate_word():
    try:
       text=request.form.get('text')
+      #text=text.split()
+      
+      generated_wav,samplingRate=insert_object.getWav(current_app.config["UPLOAD_FILE"],[text])
+      print(samplingRate)
+      librosa.output.write_wav("out.wav", generated_wav.astype(np.float32), 
+                                       samplingRate)
       return jsonify({ "text": 'route accessed successfly' }) ,200
    except Exception as e:
-      return jsonify({ "text": 'bad request shape' }) ,400
+      return jsonify({ "text": str(e) }) ,400

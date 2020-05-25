@@ -4,6 +4,7 @@ class Config(object):
 
     UPLOAD_FILE="./uploaded/wave.flac"
     RECOGNITION_DIR='./app/recognition/'
+    INSERT_DIR='./app/insert/'
     MAX_ACTIVE_TOKENS=1500
     BEAM_WIDTH=12
     ACOUSTIC_MODEL_WEIGHT=10

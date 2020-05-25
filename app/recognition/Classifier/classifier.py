@@ -4,7 +4,8 @@ import os.path
 import re
 import sys
 from keras.models import model_from_json
-
+import tensorflow as tf 
+import keras
 class Classifier_cntk:
     def __init__(self,model_filename: str):
         import cntk
@@ -15,6 +16,8 @@ class Classifier_cntk:
             raise Exception("Model didn't load successfully")
 
     def load_model(self,model_filename):
+        
+        
         self.model_filename = model_filename
 
         cntk_model = cntk.load_model(model_filename)
@@ -59,29 +62,35 @@ class Classifier_keras:
   def __init__(self,model_arch: str,model_weight: str, prior_file: str):
     self.model = None
     self.priori_logproba = None
+    self.session=tf.Session()
     try:
-        with open(model_arch, 'r') as json_file:
-            json_savedModel= json_file.read()
-            self.model = model_from_json(json_savedModel)
-            print(self.model.summary())
-        self.model.compile(loss='categorical_crossentropy',
-                optimizer='adam',metrics=["categorical_accuracy"])
-        self.model.load_weights(model_weight)
-        self.model._make_predict_function()
-        print("Model Loadded successfully")
+        with self.session.as_default():
+            with self.session.graph.as_default():
 
-        with open(prior_file,"r") as f:
-            priori = [line.split()[1] for line in f.readlines()]
-            self.priori_logproba = np.log(np.array(list(map(float,priori))))
+                with open(model_arch, 'r') as json_file:
+                    json_savedModel= json_file.read()
+                    self.model = model_from_json(json_savedModel)
+                    print(self.model.summary())
+                self.model.compile(loss='categorical_crossentropy',
+                        optimizer='adam',metrics=["categorical_accuracy"])
+                self.model.load_weights(model_weight)
+                self.model._make_predict_function()
+                print("Model Loadded successfully")
+
+                with open(prior_file,"r") as f:
+                    priori = [line.split()[1] for line in f.readlines()]
+                    self.priori_logproba = np.log(np.array(list(map(float,priori))))
     except:
         raise Exception("Model didn't load successfully")
 
   def eval(self, features):
     if(self.model):
-        sample=features.reshape(1,features.shape[0],features.shape[1])
-        print(sample.shape)
-        pred=self.model.predict(sample)
-        
-        return np.log(pred[0]) - self.priori_logproba
+        with self.session.as_default():
+            with self.session.graph.as_default():
+                sample=features.reshape(1,features.shape[0],features.shape[1])
+                print(sample.shape)
+                pred=self.model.predict(sample)
+
+                return np.log(pred[0]) - self.priori_logproba
     else:
-        raise  Exception("Model isn't loaded yet")
+            raise  Exception("Model isn't loaded yet")
