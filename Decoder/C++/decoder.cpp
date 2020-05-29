@@ -49,15 +49,12 @@ Decoder::Path Decoder::decode(vector<vector<double>>& activations, uint maxActiv
 
     beamSearch.finalize();
 
-    // static uint uniqueNum = 0;
-    // uniqueNum++;
-    // string filename = "lat" + to_string(uniqueNum) + ".txt";
-    // string folder = "./C++/Lattices/";
-    // const unordered_map<uint, double>& finalStates = fst.getFinalStates();
-    // const vector<shared_ptr<Token>>& finalTokens = beamSearch.getActiveTokens();
-    // vector<double> finalTokensCost(finalTokens.size());
-    // transform(begin(finalTokens), end(finalTokens), begin(finalTokensCost), [&](auto& token) { return finalStates.find(token->arc->dstState)->second; });
-    // beamSearch.getLattice()->writeAsFst(folder + filename, beamSearch.getActiveTokens(), finalTokensCost);
+    static uint uniqueNum = 0;
+    uniqueNum++;
+    string filename = "lat" + to_string(uniqueNum) + ".txt";
+    string folder = "./C++/Lattices/";
+    const unordered_map<uint, double>& finalStates = fst.getFinalStates();
+    beamSearch.getLattice()->writeAsFst(folder + filename, beamSearch.getActiveTokens(), finalStates);
 
     return getBestPath();
 }

@@ -10,7 +10,7 @@ int main(int argc, char const* argv[]) {
 
     time_t t1, t2;
     time(&t1);
-    // Decoder decoder(graphFolder, graphFolder + "labels.ciphones");
+    Decoder decoder(graphFolder, graphFolder + "labels.ciphones");
     time(&t2);
     cout << "Parsing is Done in: " << t2 - t1 << " seconds \n";
 
@@ -39,12 +39,12 @@ int main(int argc, char const* argv[]) {
             totalFramesNum += activations.size();
             read2d(activationsFile, activations);
 
-            string filename = "composed_lat" + to_string(filesCount) + ".txt";
-            string folder = "./C++/Lattices/";
-            Decoder decoder(folder, folder + "labels.ciphones", filename);
-            vector<vector<string>> path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw, 1);
+            // string filename = "composed_lat" + to_string(filesCount) + ".txt";
+            // string folder = "./C++/Lattices/";
+            // Decoder decoder(folder, folder + "labels.ciphones", filename);
+            // vector<vector<string>> path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw, 1);
 
-            // vector<vector<string>> path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw, latticeBeam);
+            vector<vector<string>> path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw, latticeBeam);
 
             for (int i = 0; i < path.size(); ++i) {
                 if (i && path[i].back() == path[i - 1].back()) {

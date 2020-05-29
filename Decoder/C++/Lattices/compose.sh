@@ -1,9 +1,9 @@
 for file in `ls lat*.txt`; do
     echo compiling $file
     newFileName=`echo $file | cut -f 1 -d '.'`.fst
-    fstcompile  --arc_type="log" $file | fstmap --map_type=rmweight | fstarcsort --sort_type="olabel" > $newFileName
+    fstcompile  $file | fstmap --map_type=rmweight | fstarcsort --sort_type="olabel" > $newFileName
     # echo composing 
-    # fstcompose $newFileName G3_comp_ready_log.fst | fstprint  > composed_$file
+    # fstcompose $newFileName G3_comp_ready.fst | fstprint  > composed_$file
     # echo pushing weights
     # fstpush --push_weights --push_labels temp.fst | fstprint  > composed_$file
 done
@@ -11,11 +11,10 @@ done
 
 g++ -std=c++11 -I /usr/local/include compose.cpp  -lfst -lpthread
 
-g3="G3_comp_ready_log.fst"
+g3="G3_comp_ready.fst"
 lats=`ls lat*.fst`
 input=$g3$'\n'$lats
 echo "$input" | ./a.out
-
 
 # for file in `ls composed_lat*.fst`; do
 #     echo optimizing $file
@@ -28,7 +27,7 @@ echo "$input" | ./a.out
 
 for file in `ls composed_lat*.fst`; do
     echo printing $file
-    fstprint $file  > `echo $file | cut -f 1 -d '.'`.txt 
+    cat $file | fstprint  > `echo $file | cut -f 1 -d '.'`.txt 
 done
 
 /bin/rm lat*.fst

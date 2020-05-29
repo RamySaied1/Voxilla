@@ -64,7 +64,6 @@ class Lattice {
 
     void removeToken(shared_ptr<Token> token);
     vector<const Arc*> getBestPath(shared_ptr<Token> token);
-    void constructFst(const vector<shared_ptr<Token>>& finalTokens, const vector<double>& finalTokensCost, vector<Arc>& arcs, unordered_map<uint, double>& finalStates);
-    void writeAsFst(string filename, const vector<shared_ptr<Token>>& finalTokens, const vector<double>& finalTokensCost);
+    void writeAsFst(string filename, const vector<shared_ptr<Token>>& finalTokens, const unordered_map<uint, double>& finalStates);
     // void printAllHyps(shared_ptr<Token> token, const unordered_map<uint, string>& outSymTable);
 };

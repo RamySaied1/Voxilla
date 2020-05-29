@@ -10,12 +10,12 @@ int main(int argc, char const* argv[]) {
     string latFile, gFile;
     cin >> gFile;
 
-    VectorFst<LogArc>* gFst = VectorFst<LogArc>::Read(gFile);
+    StdVectorFst* gFst = StdVectorFst::Read(gFile);
     string newFileName;
-    VectorFst<LogArc>* latFst;
+    StdVectorFst* latFst;
     while (cin >> latFile) {
-        latFst = VectorFst<LogArc>::Read(latFile);
-        VectorFst<LogArc> result;
+        latFst = StdVectorFst::Read(latFile);
+        StdVectorFst result;
         Compose(*latFst, *gFst, &result);
         newFileName = "composed_" + latFile;
         result.Write(newFileName);
