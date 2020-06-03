@@ -9,7 +9,6 @@ insert = Blueprint('insert', __name__)
 def upload_file_gui():
    return render_template('insert.html')
 	
-
 @insert.route('/', methods = ['POST'])
 def generate_word():
    try:
@@ -18,7 +17,7 @@ def generate_word():
       
       generated_wav,samplingRate=insert_object.getWav(current_app.config["UPLOAD_FILE"],[text])
       print(samplingRate)
-      librosa.output.write_wav("out.wav", generated_wav.astype(np.float32), 
+      librosa.output.write_wav(current_app.config["DOWNLOAD_FILE"], generated_wav.astype(np.float32), 
                                        samplingRate)
       return jsonify({ "text": 'route accessed successfly' }) ,200
    except Exception as e:

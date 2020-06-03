@@ -5,6 +5,7 @@ from encoder.params_model import model_embedding_size as speaker_embedding_size
 from lib.synthesizer.inference import Synthesizer
 from encoder import inference as encoder
 from lib.vocoder import inference as vocoder
+from encoder.audio import trim_long_silences
 from pathlib import Path
 import numpy as np
 import librosa
@@ -25,4 +26,5 @@ class Insert():
         spec = specs[0]
         generated_wav = vocoder.infer_waveform(spec)
         generated_wav = np.pad(generated_wav, (0, self.synthesizer.sample_rate), mode="constant")
+        generated_wav=trim_long_silences(generated_wav)
         return generated_wav,self.synthesizer.sample_rate

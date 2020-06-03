@@ -4,4 +4,5 @@ __pycache__
 waves_test.txt
 pred_transcript.txt
 ref_transcript.txt
-
+*.flac
+*.wav
