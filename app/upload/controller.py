@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request, current_app,render_template, request
-from werkzeug import secure_filename
 
 upload = Blueprint('upload', __name__)
 

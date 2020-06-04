@@ -3,6 +3,7 @@ import os
 class Config(object):
     DEVELOPMENT = False
     DEBUG = False
+    MOCK = False
     print(os.path.realpath("."),"++++++++++++++++++++++++++++++++++++++++++++++")
     DOWNLOAD_FILE=os.path.join(os.path.realpath("."),"downloaded","out.wav")
     UPLOAD_FILE="./uploaded/wave.flac"

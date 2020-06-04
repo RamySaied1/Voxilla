@@ -20,4 +20,4 @@ Unidecode
 inflect
 multiprocess
 numba
-
+Flask-Cors==3.0.8

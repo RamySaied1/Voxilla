@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request, current_app,render_template, request,send_file
-from werkzeug import secure_filename
 
 
 download = Blueprint('download', __name__)

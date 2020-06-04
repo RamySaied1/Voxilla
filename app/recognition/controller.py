@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request, current_app,render_template, request
-from werkzeug import secure_filename
 
 from app.recognition import asr_object
 from app.recognition.common.common import frames_to_seconds

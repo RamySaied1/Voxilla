@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, current_app,render_template
-import librosa
+import librosa # TODO: use light library instead of librosa
 import numpy as np
 from app.insert import insert_object
 insert = Blueprint('insert', __name__)
