@@ -18,12 +18,14 @@ def generate_word():
       text=request.json['text']["word"]
       #text=text.split()
       
+      fname = str(uuid4())+".wav"
+      print(fname)
+      p=os.path.join(current_app.config["DOWNLOAD_FILE"], fname)
+      print(p)
       generated_wav,samplingRate=insert_object.getWav(current_app.config["UPLOAD_FILE"],[text])
       #print(samplingRate)
       # librosa.output.write_wav(current_app.config["DOWNLOAD_FILE"], generated_wav.astype(np.float32), samplingRate)
-      fname = uuid4()
-      os.path.join(current_app.config["DOWNLOAD_FILE"], fname)
-      librosa.output.write_wav(current_app.config["DOWNLOAD_FILE"], generated_wav.astype(np.float32), samplingRate)
+      librosa.output.write_wav(p, generated_wav.astype(np.float32), samplingRate)
       return jsonify({ "fname": fname, "text": 'route accessed successfly' }) ,200
    except Exception as e:
       return jsonify({ "text": str(e) }) ,400

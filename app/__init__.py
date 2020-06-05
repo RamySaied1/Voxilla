@@ -9,7 +9,7 @@ def create_app(db_uri='any'):
     app = Flask(__name__)
     app.config.from_object('config.DevelopmentConfig')
     app.route('/insert', methods = ['POST'])(generate_word)
-    app.route('/download', methods = ['GET','POST'])(download_file)
+    app.route('/download/<fname>', methods = ['GET','POST'])(download_file)
     app.route('/recognition/gettranscript', methods=['GET'])(getTranscript)
     app.route('/recognition/getalignment', methods=['GET'])(getAlignment)
     app.route('/upload', methods=['POST'])(upload_file)
