@@ -5,7 +5,8 @@ class Config(object):
     DEBUG = False
     MOCK = False
     print(os.path.realpath("."),"++++++++++++++++++++++++++++++++++++++++++++++")
-    DOWNLOAD_FILE=os.path.join(os.path.realpath("."),"downloaded","out.wav")
+    # DOWNLOAD_FILE=os.path.join(os.path.realpath("."),"downloaded","out.wav")
+    DOWNLOAD_FILE=os.path.join(os.path.realpath("."),"downloaded")
     UPLOAD_FILE="./uploaded/wave.flac"
     RECOGNITION_DIR='./app/recognition/'
     INSERT_DIR='./app/insert/'

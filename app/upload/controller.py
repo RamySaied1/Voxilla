@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, current_app,render_template, request
 from flask_cors import cross_origin,CORS
+# from uuid import uuid4
 upload = Blueprint('upload', __name__)
 #CORS(upload)
 
@@ -14,7 +15,7 @@ def upload_file():
    try:
       f = request.files['file']
       f.save(current_app.config["UPLOAD_FILE"])
-      return jsonify({ "message": "file uploaded sussessfully" }) ,200
+      return jsonify({ "message": "file uploaded sussessfully" }), 200
    except Exception as e:
       return jsonify({ "message": e.message }) ,404
 
