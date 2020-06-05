@@ -1,12 +1,14 @@
 from flask import Blueprint, jsonify, request, current_app,render_template, request
+from flask_cors import cross_origin,CORS
 
 from app.recognition import asr_object
 from app.recognition.common.common import frames_to_seconds
 
 
 recognition = Blueprint('recognition', __name__)
+#CORS(recognition)
 
-@recognition.route('gettranscript/', methods=['GET'])
+#@recognition.route('gettranscript/', methods=['GET'])
 def getTranscript():
    wav_file=current_app.config["UPLOAD_FILE"]
    max_active_tokens=current_app.config["MAX_ACTIVE_TOKENS"]
@@ -19,7 +21,7 @@ def getTranscript():
    except  Exception as ex:
       return jsonify({ "Error": ex.message }) ,404
    
-@recognition.route('getalignment/', methods=['GET'])
+#@recognition.route('getalignment/', methods=['GET'])
 def getAlignment():
    wav_file=current_app.config["UPLOAD_FILE"]
    max_active_tokens=current_app.config["MAX_ACTIVE_TOKENS"]

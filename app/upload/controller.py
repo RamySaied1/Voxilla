@@ -1,15 +1,15 @@
 from flask import Blueprint, jsonify, request, current_app,render_template, request
-
+from flask_cors import cross_origin,CORS
 upload = Blueprint('upload', __name__)
-
+#CORS(upload)
 
 ############## maded only for test purposes it will removed after integration with front end
-@upload.route('/getfile')
+#@upload.route('/getfile')
 def upload_file_gui():
    return render_template('upload.html')
 	
 
-@upload.route('/', methods = ['POST'])
+#@upload.route('/', methods = ['POST'])
 def upload_file():
    try:
       f = request.files['file']
