@@ -47,6 +47,10 @@ class ForcedAlignment():
         maskRows = np.apply_along_axis(lambda inoutid: not(inoutid[0]=="<eps>"),axis=1,arr=decoderOutPath)
         inpLabels = decoderOutPath[maskRows][:,0]
 
+        #replace <unk> from with <eps>
+        replaceUnk = np.vectorize(lambda x: "<eps>" if x=="<unk>" else x,otypes=[str])
+        decoderOutPath[:,1] = replaceUnk(decoderOutPath[:,1])
+
         #map sil phones to sil words
         for i in range(len(decoderOutPath)):
             if(self.is_sil_subphone(decoderOutPath[i][0]) and decoderOutPath[i][1] in ["<eps>"]): # second check is meant if silence is part of a word

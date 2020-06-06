@@ -6,7 +6,7 @@ from libcpp cimport bool
 cdef extern from "../decoder.hpp":
     cdef cppclass Decoder:
         Decoder(string ,string)
-        vector[vector[string]] decode(vector[vector[double]]& activations, unsigned int maxActiveTokens, double beamWidth, double amw)
+        vector[vector[string]] decode(vector[vector[double]]& activations, unsigned int maxActiveTokens, double beamWidth, double amw, unsigned int latticeBeam)
         bool isSpecialSym(string sym)
 
 cdef class PyDecoder:
@@ -18,7 +18,7 @@ cdef class PyDecoder:
     def __dealloc__(self):
         del self.thisptr
 
-    def decode(self, pyMat, maxActiveTokens, beamWidth, amw):
+    def decode(self, pyMat, maxActiveTokens, beamWidth, amw, latticeBeam=1):
         #prepare input
         cdef vector[vector[double]] cMat = vector[vector[double]](len(pyMat),vector[double](len(pyMat[0])))
         for r in range(len(pyMat)):
@@ -26,7 +26,7 @@ cdef class PyDecoder:
                 cMat[r][c] = pyMat[r][c]
 
         #call function
-        cdef vector[vector[string]] cVec = self.thisptr.decode(cMat, maxActiveTokens, beamWidth, amw)
+        cdef vector[vector[string]] cVec = self.thisptr.decode(cMat, maxActiveTokens, beamWidth, amw, latticeBeam)
 
         # prepare output
         cdef vector[vector[string]].iterator it = cVec.begin()

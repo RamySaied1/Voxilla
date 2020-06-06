@@ -15,6 +15,7 @@ from Wav2Feat import wav_to_feat
 # from decoder_wrapper import PyDecoder as Decoder
 
 def write_ref_output(wav_file,ref_file="ref_transcript.txt"):
+    return
     transFilePath = wav_file[::-1].split('-',1)[1][::-1] + ".trans.txt"
     with open(transFilePath,"r") as f:
         lines = f.read().splitlines()
@@ -28,9 +29,7 @@ def write_ref_output(wav_file,ref_file="ref_transcript.txt"):
 """
 # runing command
 
-python3 test_decoder.py -model_arch ../Classifier/BLSTM/model_cpu.json -model_weights ../Classifier/BLSTM/weights.h5 -model_priori_proba_file ../Classifier/BLSTM/priori.txt \
--fst_folder ../Decoder/Graphs/200k-vocab/ -acoustic_model_labels_file ../Decoder/Graphs/200k-vocab/labels.ciphones \
--srcfile waves_test_train.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
+python3 test_decoder.py -model_arch ../Classifier/BLSTM_91/model_cpu.json -model_weights ../Classifier/BLSTM/weights.h5 -model_priori_proba_file ../Classifier/BLSTM/priori.txt -fst_folder ../Decoder/Graphs/200k-vocab/ -acoustic_model_labels_file ../Decoder/Graphs/200k-vocab/labels.ciphones -srcfile new.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
 
 """
 

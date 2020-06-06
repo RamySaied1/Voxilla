@@ -18,9 +18,9 @@ class ASR:
         self.classifier = Classifier(model_arch, model_weight, model_priori_proba_file)
         self.trans = Transcript(words_lexicon_file, phones_lexicon_file)
 
-    def speech_to_text(self, wav_file, max_active_tokens, beam_width, acoustic_model_weigh, include_alignment = False):
+    def speech_to_text(self, wav_file, max_active_tokens, beam_width, acoustic_model_weigh, latticeBeam=1, include_alignment = False):
         features = np.transpose(np.array(self._get_features(wav_file)))
-        states_seq = self._decode(features, max_active_tokens,beam_width, acoustic_model_weigh)
+        states_seq = self._decode(features, max_active_tokens,beam_width, acoustic_model_weigh,latticeBeam)
         if(not include_alignment):
            states_seq = self._remove_selfloops(states_seq)
            return ' '.join(self._get_words_from_states_seq(states_seq))
@@ -28,11 +28,9 @@ class ASR:
            frames_count = len(features)
            return self.trans.get_transcript(states_seq,frames_count)
 
-    def _decode(self, features, max_active_tokens, beam_width, acoustic_model_weight):
+    def _decode(self, features, max_active_tokens, beam_width, acoustic_model_weight,latticeBeam):
         activations = self.classifier.eval(features)
-        # print(activations.shape)
-        # np.savetxt("ramy.txt",activations)
-        return self.decoder.decode(activations, max_active_tokens, beam_width, 1/acoustic_model_weight)
+        return self.decoder.decode(activations, max_active_tokens, beam_width, 1/acoustic_model_weight,latticeBeam)
     
     def _remove_selfloops(self,states_seq):
         return [state for i,state in enumerate(states_seq) if not i or states_seq[i][-1] != states_seq[i-1][-1]] # remove self loops

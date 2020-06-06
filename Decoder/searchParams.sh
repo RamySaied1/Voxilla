@@ -44,7 +44,7 @@ echo graphFolder: $graphFolder ,activationsFolder: $activationsFolder ,filesFile
 echo maxActiveTokens is $maxActiveTokens ,beam is $beam ,amwStart $amwStart ,amwEnd $amwEnd ,amwStep $amwStep >> reports.txt
 echo ReferencePath fie is $refFilePath >> reports.txt
 
-g++ -g ./C++/*.cpp
+g++ -g -I /usr/local/include ./C++/*.cpp -lfst -lpthread
 ./a.out  $params >> $outFilePath
 /bin/rm a.out
 

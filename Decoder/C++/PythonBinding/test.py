@@ -4,4 +4,4 @@ import numpy as np
 decoder = Decoder("../../Graphs/200k-vocab/","../../Graphs/200k-vocab/labels.ciphones")
 
 activations = np.loadtxt("./activations.txt")
-print(decoder.decode(activations,1000,12.,1./9))
+print(decoder.decode(activations,1000,10.,1./10,4))
