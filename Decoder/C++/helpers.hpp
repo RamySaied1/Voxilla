@@ -1,6 +1,6 @@
 #pragma once
 #include <math.h>
-
+#include <fst/fstlib.h>
 #include <algorithm>
 #include <cassert>
 #include <exception>
@@ -34,6 +34,7 @@ uint moveRelevantFisrt(vector<T>& items, std::function<bool(T&)> isRelevantPred,
 }
 
 void strtolower(string& s);
+void writeFst(fst::StdVectorFst& fst,string filename);
 
 class Exception : public exception {
    private:

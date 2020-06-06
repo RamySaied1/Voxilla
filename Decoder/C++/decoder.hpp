@@ -10,21 +10,25 @@ class Decoder {
         string startSymbol, endSymbol, epsSymbol;
     };
 
-    Decoder(string graphFolder, string inputLabelsFile, string fstFileName = "HCLG.txt", SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
-    Path decode(vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw, uint latticeBeam);
+    Decoder(string graphFolder, string inputLabelsFile, string fstFileName = "HCLG.txt", string grammerFileName = "G.fst", SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
+    Path decode(const vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw, uint latticeBeam = 1);
     bool isSpecialSym(string sym) { return sym == espSyms.epsSymbol || sym == espSyms.startSymbol || sym == espSyms.endSymbol; }
     ~Decoder(){};
 
    private:
-    Fst fst;
+    unique_ptr<Fst> fst;
     BeamSearch beamSearch;
     unordered_map<string, uint> inpLabelToIndx;
     unordered_map<uint, uint> inpIdToActivationsIndx;
     SpecialSymbols espSyms;
+    string graphFolder, inputLabelsFile;
+    unique_ptr<fst::StdVectorFst> grammerFst;
 
     void parseInputLabels(const string& filename);
     void mapInpIdToActivationsIndx();
     void preprocessActivations(vector<vector<double>>& activations, double weight);
+    void search(const vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw, uint latticeBeam, const Fst* fst);
     void applyFinalState();
-    Path getBestPath();
+    void writeLatticeAsFst(string filename);
+    Path getBestPath(const Fst* fst);
 };

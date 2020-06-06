@@ -1,9 +1,10 @@
 #include "decoder.hpp"
 
-Decoder::Decoder(string graphFolder, string inputLabelsFile, string fstFileName, SpecialSymbols espSyms) : beamSearch(), fst(graphFolder + fstFileName, graphFolder + "input.syms", graphFolder + "output.syms", espSyms.epsSymbol), espSyms(espSyms) {
+Decoder::Decoder(string graphFolder, string inputLabelsFile, string fstFileName, string grammerFileName, SpecialSymbols espSyms) : beamSearch(), fst(new Fst(graphFolder + fstFileName, graphFolder + "input.syms", graphFolder + "output.syms", espSyms.epsSymbol)), graphFolder(graphFolder), inputLabelsFile(inputLabelsFile), espSyms(espSyms), grammerFst(nullptr) {
     inpIdToActivationsIndx = unordered_map<uint, uint>();
     parseInputLabels(inputLabelsFile);
     mapInpIdToActivationsIndx();
+    grammerFst = grammerFileName != "" ? unique_ptr<fst::StdVectorFst>(fst::StdVectorFst::Read(graphFolder + grammerFileName)) : nullptr;
 }
 
 void Decoder::parseInputLabels(const string& filename) {
@@ -25,17 +26,41 @@ void Decoder::parseInputLabels(const string& filename) {
 }
 
 void Decoder::mapInpIdToActivationsIndx() {
-    for (const auto& elem : fst.getInpSymsTable()) {
-        if (elem.second != fst.getEpsSymbol()) {
+    for (const auto& elem : fst->getInpSymsTable()) {
+        if (elem.second != fst->getEpsSymbol()) {
             inpIdToActivationsIndx[elem.first] = inpLabelToIndx[elem.second];
         }
     }
 }
 
-Decoder::Path Decoder::decode(vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw, uint latticeBeam) {
-    preprocessActivations(activations, amw);
+Decoder::Path Decoder::decode(const vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw, uint latticeBeam) {
+    vector<vector<double>> normalizedActivations = activations;
+    preprocessActivations(normalizedActivations, amw);
+
+    search(normalizedActivations, maxActiveTokens, beamWidth, amw, latticeBeam, fst.get());
+
+    if (latticeBeam > 1) {
+        writeLatticeAsFst(graphFolder + "lat.txt");
+        unique_ptr<Fst> newFst(new Fst(graphFolder + "lat.txt", graphFolder + "input.syms", graphFolder + "output.syms", espSyms.epsSymbol));
+        search(normalizedActivations, 1000, 25, amw, 1, newFst.get());
+        return getBestPath(newFst.get());
+    }
+
+    return getBestPath(fst.get());
+}
+
+void Decoder::preprocessActivations(vector<vector<double>>& activations, double weight) {
+    for (auto& exLogProbas : activations) {
+        double maxVal = *max_element(begin(exLogProbas), end(exLogProbas));
+        for (auto& elem : exLogProbas) {
+            elem = (elem - maxVal) * weight;
+        }
+    }
+}
+
+void Decoder::search(const vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw, uint latticeBeam, const Fst* fst) {
     static unique_ptr<Arc> intialArc(new Arc{0, 0, 0, 0, 0.});  // dummy arc connected to intial state 0
-    beamSearch.intiate(intialArc.get(), 0., 0., maxActiveTokens, beamWidth, latticeBeam, &fst);
+    beamSearch.intiate(intialArc.get(), 0., 0., maxActiveTokens, beamWidth, latticeBeam, fst);
 
     for (size_t i = 0; i < activations.size(); i++) {
         beamSearch.startNewExpantions();                                     // start new time step
@@ -48,32 +73,24 @@ Decoder::Path Decoder::decode(vector<vector<double>>& activations, uint maxActiv
     }
 
     beamSearch.finalize();
-
-    static uint uniqueNum = 0;
-    uniqueNum++;
-    string filename = "lat" + to_string(uniqueNum) + ".txt";
-    string folder = "./C++/Lattices/";
-    const unordered_map<uint, double>& finalStates = fst.getFinalStates();
-    beamSearch.getLattice()->writeAsFst(folder + filename, beamSearch.getActiveTokens(), finalStates);
-
-    return getBestPath();
 }
 
-void Decoder::preprocessActivations(vector<vector<double>>& activations, double weight) {
-    for (auto& exLogProbas : activations) {
-        double maxVal = *max_element(begin(exLogProbas), end(exLogProbas));
-        for (auto& elem : exLogProbas) {
-            elem = (elem - maxVal) * weight;
-        }
-    }
+void Decoder::writeLatticeAsFst(string filename) {
+    unique_ptr<fst::StdVectorFst> latFst(new fst::StdVectorFst());
+    beamSearch.getLattice()->latticToFst(beamSearch.getActiveTokens(), fst->getFinalStates(), latFst.get());
+    fst::ArcMap(latFst.get(), fst::RmWeightMapper<fst::StdArc>());
+    fst::ArcSort(latFst.get(), fst::StdOLabelCompare());
+    fst::StdVectorFst result;
+    fst::Compose(*latFst, *grammerFst, &result);
+    writeFst(result, filename);
 }
 
-Decoder::Path Decoder::getBestPath() {
+Decoder::Path Decoder::getBestPath(const Fst* fst) {
     double pathCost;
     auto path = beamSearch.getBestPath(pathCost);
-    cout<<"Total Path Cost: "<<pathCost<<endl;
-    auto inpSymsTable = fst.getInpSymsTable();
-    auto outSymsTable = fst.getOutSymsTable();
+    cout << "Total Path Cost: " << pathCost << endl;
+    auto inpSymsTable = fst->getInpSymsTable();
+    auto outSymsTable = fst->getOutSymsTable();
     Path inOutID(path.size(), vector<string>(3, ""));
     for (uint i = 0; i < path.size(); ++i) {
         const auto& arc = path[i];

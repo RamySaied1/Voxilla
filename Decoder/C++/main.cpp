@@ -39,11 +39,6 @@ int main(int argc, char const* argv[]) {
             totalFramesNum += activations.size();
             read2d(activationsFile, activations);
 
-            // string filename = "composed_lat" + to_string(filesCount) + ".txt";
-            // string folder = "./C++/Lattices/";
-            // Decoder decoder(folder, folder + "labels.ciphones", filename);
-            // vector<vector<string>> path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw, 1);
-
             vector<vector<string>> path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw, latticeBeam);
 
             for (int i = 0; i < path.size(); ++i) {

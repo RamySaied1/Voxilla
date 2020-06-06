@@ -8,12 +8,13 @@ class BeamSearch {
     BeamSearch(uint maxActiveTokens = 500, double beamWidth = 0.);
     ~BeamSearch();
 
-    // core algoirthm functions
+    // core algorithm functions
     void intiate(const Arc* arc, double lmCost, double modelScre, uint maxActiveTokens, double beamWidth, uint latticeBeam, const Fst* fst);
     void doForward(const unordered_map<uint, uint>& inpIdsToIndx, const vector<double>& activations, bool useSelfLoops);
     void moveExpandedToActive();
     void beamPrune();
     void expandEpsStates();
+    void keepOnlyBestExpandedTokens();
     void finalize();
     vector<const Arc*> getBestPath(double& pathCost);
 

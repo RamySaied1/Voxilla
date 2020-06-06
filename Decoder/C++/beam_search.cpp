@@ -62,6 +62,12 @@ void BeamSearch::expandEpsStates() {
         doForward({{0, 0}}, vector<double>(1, 0.), false);  // eps symbol is assumed to have id 0
         createExpandedTokens();
     }
+    keepOnlyBestExpandedTokens();
+}
+
+void BeamSearch::keepOnlyBestExpandedTokens() {
+    const unordered_map<const Arc*, shared_ptr<Token>>& arcToBestToken = lattice.getArcToToken();
+    expandedTokens.erase(remove_if(begin(expandedTokens), end(expandedTokens), [&](const auto& token) { return arcToBestToken.find(token->arc) != arcToBestToken.end() && arcToBestToken.find(token->arc)->second != token; }), end(expandedTokens));
 }
 
 void BeamSearch::setActiveTokens(const vector<shared_ptr<Token>>& tokens) {

@@ -58,12 +58,12 @@ class Lattice {
     ~Lattice(){};
 
     void startNewExpantions();
-    void expand(const shared_ptr<Token>& parent, const Arc*& arc, double lmCost, double amCost);
+    void expand(const shared_ptr<Token>& parentToken, const Arc*& arc, double lmCost, double amCost);
     void createExpandedTokens(vector<shared_ptr<Token>>& newTokens, double expantionCostBeam);
     void finishExpantions(double expantionCostBeam);
 
     void removeToken(shared_ptr<Token> token);
     vector<const Arc*> getBestPath(shared_ptr<Token> token);
-    void writeAsFst(string filename, const vector<shared_ptr<Token>>& finalTokens, const unordered_map<uint, double>& finalStates);
-    // void printAllHyps(shared_ptr<Token> token, const unordered_map<uint, string>& outSymTable);
+    void latticToFst(const vector<shared_ptr<Token>>& finalTokens, const unordered_map<uint, double>& finalStates, fst::StdVectorFst* fst);
+    const unordered_map<const Arc*, shared_ptr<Token>>& getArcToToken() { return arcToToken; };
 };
