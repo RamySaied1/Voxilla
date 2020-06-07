@@ -1,10 +1,10 @@
 #include "decoder.hpp"
 
-Decoder::Decoder(string graphFolder, string inputLabelsFile, string fstFileName, string grammerFileName, SpecialSymbols espSyms) : beamSearch(), fst(new Fst(graphFolder + fstFileName, graphFolder + "input.syms", graphFolder + "output.syms", espSyms.epsSymbol)), graphFolder(graphFolder), inputLabelsFile(inputLabelsFile), espSyms(espSyms), grammerFst(nullptr) {
+Decoder::Decoder(string graphFolder, string inputLabelsFile, string grammerFileName, string fstFileName, SpecialSymbols espSyms) : beamSearch(), fst(new Fst(graphFolder + fstFileName, graphFolder + "input.syms", graphFolder + "output.syms", espSyms.epsSymbol)), graphFolder(graphFolder), inputLabelsFile(inputLabelsFile), espSyms(espSyms), grammerFst(nullptr) {
     inpIdToActivationsIndx = unordered_map<uint, uint>();
     parseInputLabels(inputLabelsFile);
     mapInpIdToActivationsIndx();
-    grammerFst = grammerFileName != "" ? unique_ptr<fst::StdVectorFst>(fst::StdVectorFst::Read(graphFolder + grammerFileName)) : nullptr;
+    grammerFst = grammerFileName != "" ? unique_ptr<fst::StdVectorFst>(fst::StdVectorFst::Read(graphFolder + grammerFileName)) : unique_ptr<fst::StdVectorFst>(nullptr);
 }
 
 void Decoder::parseInputLabels(const string& filename) {
@@ -39,7 +39,7 @@ Decoder::Path Decoder::decode(const vector<vector<double>>& activations, uint ma
 
     search(normalizedActivations, maxActiveTokens, beamWidth, amw, latticeBeam, fst.get());
 
-    if (latticeBeam > 1) {
+    if (latticeBeam > 1 && grammerFst.get() != nullptr) {
         writeLatticeAsFst(graphFolder + "lat.txt");
         unique_ptr<Fst> newFst(new Fst(graphFolder + "lat.txt", graphFolder + "input.syms", graphFolder + "output.syms", espSyms.epsSymbol));
         search(normalizedActivations, 1000, 25, amw, 1, newFst.get());

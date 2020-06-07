@@ -10,7 +10,7 @@ class Decoder {
         string startSymbol, endSymbol, epsSymbol;
     };
 
-    Decoder(string graphFolder, string inputLabelsFile, string fstFileName = "HCLG.txt", string grammerFileName = "G.fst", SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
+    Decoder(string graphFolder, string inputLabelsFile, string grammerFileName = "G.fst", string fstFileName = "HCLG.txt", SpecialSymbols espSyms = {"<s>", "</s>", "<eps>"});
     Path decode(const vector<vector<double>>& activations, uint maxActiveTokens, double beamWidth, double amw, uint latticeBeam = 1);
     bool isSpecialSym(string sym) { return sym == espSyms.epsSymbol || sym == espSyms.startSymbol || sym == espSyms.endSymbol; }
     ~Decoder(){};

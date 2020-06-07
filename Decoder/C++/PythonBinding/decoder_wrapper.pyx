@@ -5,15 +5,15 @@ from libcpp cimport bool
 
 cdef extern from "../decoder.hpp":
     cdef cppclass Decoder:
-        Decoder(string ,string)
+        Decoder(string ,string, string)
         vector[vector[string]] decode(vector[vector[double]]& activations, unsigned int maxActiveTokens, double beamWidth, double amw, unsigned int latticeBeam)
         bool isSpecialSym(string sym)
 
 cdef class PyDecoder:
     cdef Decoder* thisptr      # hold a C++ instance which we're wrapping
 
-    def __cinit__(self, str graphFolder,str inputLabelsFile):
-        self.thisptr = new Decoder(graphFolder.encode("utf-8"),inputLabelsFile.encode("utf-8"))
+    def __cinit__(self, str graphFolder,str inputLabelsFile, str grammerFileName):
+        self.thisptr = new Decoder(graphFolder.encode("utf-8"),inputLabelsFile.encode("utf-8"), grammerFileName.encode("utf-8"))
 
     def __dealloc__(self):
         del self.thisptr
