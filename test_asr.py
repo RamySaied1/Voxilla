@@ -38,7 +38,7 @@ def main():
     parser.add_argument('-reffile', '--reffile', help='Filename to write ref hypotheses', required=True, default=None)
     parser.add_argument('-amw', '--amw', help='Relative weight of LM score', required=False, type=float, default=9)
     parser.add_argument('-max_active_tokens', '--max_active_tokens', help='Maximum token count per frame', required=False, type=int, default=1000)
-    parser.add_argument('-beam_width', '--beam_width', help='Maximum token count per frame', required=False, type=float, default=12.0)
+    parser.add_argument('-beam_width', '--beam_width', help='Maximum token count per frame', required=False, type=float, default=10.0)
     parser.add_argument('-latticeBeam', '--latticeBeam', help='Maximum token count per frame', required=False, type=int, default=1)
 
     args = parser.parse_args()
