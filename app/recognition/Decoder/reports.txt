@@ -761,4 +761,979 @@ amw: 3
 Decoding 20 files with 26910 frames is Done in: 76 seconds  Avg: 0.00282423 frame/sec
 total del: 2, total insert: 1, total sub: 6
 wer% 9/768 : 1.17, ser% 6/20 : 30.0
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 20 ,amwStart 11 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 582 seconds  Avg: 0.0507588 frame/sec
+total del: 1, total insert: 2, total sub: 27
+wer% 30/332 : 9.04, ser% 12/20 : 60.0
 -------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 25 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 608 seconds  Avg: 0.0530263 frame/sec
+total del: 1, total insert: 2, total sub: 26
+wer% 29/332 : 8.73, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 2000 ,beam is 15 ,amwStart 11 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 47 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 632 seconds  Avg: 0.0551195 frame/sec
+total del: 5, total insert: 1, total sub: 34
+wer% 40/332 : 12.05, ser% 13/20 : 65.0
+----------------------------------------------------------------------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 47 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 291 seconds  Avg: 0.00827175 frame/sec
+total del: 20, total insert: 8, total sub: 109
+wer% 137/997 : 13.74, ser% 38/50 : 76.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 20 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 283 seconds  Avg: 0.00804434 frame/sec
+total del: 14, total insert: 16, total sub: 95
+wer% 125/997 : 12.54, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 553 seconds  Avg: 0.0157192 frame/sec
+total del: 14, total insert: 16, total sub: 94
+wer% 124/997 : 12.44, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 5000 ,beam is 50 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 2090 seconds  Avg: 0.0594088 frame/sec
+total del: 14, total insert: 16, total sub: 94
+wer% 124/997 : 12.44, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 20 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 251 seconds  Avg: 0.00713474 frame/sec
+total del: 14, total insert: 16, total sub: 94
+wer% 124/997 : 12.44, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 15 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 47 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 811 seconds  Avg: 0.0230529 frame/sec
+total del: 19, total insert: 9, total sub: 110
+wer% 138/997 : 13.84, ser% 38/50 : 76.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 12 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 59 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 461 seconds  Avg: 0.013104 frame/sec
+total del: 19, total insert: 9, total sub: 110
+wer% 138/997 : 13.84, ser% 38/50 : 76.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 50 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 783 seconds  Avg: 0.022257 frame/sec
+total del: 10, total insert: 16, total sub: 97
+wer% 123/997 : 12.34, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 3000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 1256 seconds  Avg: 0.0357021 frame/sec
+total del: 12, total insert: 16, total sub: 96
+wer% 124/997 : 12.44, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 4000 ,beam is 100 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 2666 seconds  Avg: 0.0757817 frame/sec
+total del: 12, total insert: 16, total sub: 96
+wer% 124/997 : 12.44, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 13 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 46 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 548 seconds  Avg: 0.015577 frame/sec
+total del: 19, total insert: 9, total sub: 110
+wer% 138/997 : 13.84, ser% 38/50 : 76.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 3000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 1220 seconds  Avg: 0.0346788 frame/sec
+total del: 12, total insert: 16, total sub: 96
+wer% 124/997 : 12.44, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 3000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 1130 seconds  Avg: 0.0321205 frame/sec
+total del: 11, total insert: 18, total sub: 94
+wer% 123/997 : 12.34, ser% 36/50 : 72.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 11 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 46 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 322 seconds  Avg: 0.00915293 frame/sec
+total del: 18, total insert: 8, total sub: 111
+wer% 137/997 : 13.74, ser% 38/50 : 76.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 11 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 49 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 336 seconds  Avg: 0.00955088 frame/sec
+total del: 18, total insert: 8, total sub: 111
+wer% 137/997 : 13.74, ser% 38/50 : 76.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 11 ,amwStart 11 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 3000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 3000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 760 seconds  Avg: 0.0216032 frame/sec
+total del: 10, total insert: 16, total sub: 95
+wer% 121/997 : 12.14, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 3000 ,beam is 20 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 326 seconds  Avg: 0.00926663 frame/sec
+total del: 20, total insert: 16, total sub: 95
+wer% 131/997 : 13.14, ser% 38/50 : 76.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+---------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 30 ,amwStart 11 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 594 seconds  Avg: 0.0168846 frame/sec
+total del: 8, total insert: 16, total sub: 97
+wer% 121/997 : 12.14, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 50 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 50 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 553 seconds  Avg: 0.0157192 frame/sec
+total del: 8, total insert: 16, total sub: 98
+wer% 122/997 : 12.24, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 432 seconds  Avg: 0.0122797 frame/sec
+total del: 8, total insert: 16, total sub: 98
+wer% 122/997 : 12.24, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_train_48.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_train_48.txt
+Parsing is Done in: 45 seconds 
+amw: 10
+Decoding 48 files with 59203 frames is Done in: 369 seconds  Avg: 0.00623279 frame/sec
+total del: 11, total insert: 6, total sub: 63
+wer% 80/1546 : 5.17, ser% 29/48 : 60.42
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_train_48.txt
+maxActiveTokens is 1000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_train_48.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 48 files with 59203 frames is Done in: 584 seconds  Avg: 0.00986436 frame/sec
+total del: 4, total insert: 4, total sub: 35
+wer% 43/1546 : 2.78, ser% 22/48 : 45.83
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_train_48.txt
+maxActiveTokens is 2000 ,beam is 40 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_train_48.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 48 files with 59203 frames is Done in: 1264 seconds  Avg: 0.0213503 frame/sec
+total del: 4, total insert: 4, total sub: 34
+wer% 42/1546 : 2.72, ser% 21/48 : 43.75
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_train_48.txt
+maxActiveTokens is 1000 ,beam is 1000 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_train_48.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 48 files with 59203 frames is Done in: 915 seconds  Avg: 0.0154553 frame/sec
+total del: 4, total insert: 4, total sub: 35
+wer% 43/1546 : 2.78, ser% 22/48 : 45.83
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 51 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 279 seconds  Avg: 0.00793064 frame/sec
+total del: 20, total insert: 8, total sub: 109
+wer% 137/997 : 13.74, ser% 38/50 : 76.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 422 seconds  Avg: 0.0119955 frame/sec
+total del: 12, total insert: 16, total sub: 95
+wer% 123/997 : 12.34, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 14 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 52 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 220 seconds  Avg: 0.0191872 frame/sec
+total del: 6, total insert: 1, total sub: 37
+wer% 44/332 : 13.25, ser% 14/20 : 70.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 14 ,amwStart 10 ,amwEnd 10 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 20 seconds  Avg: 0.00174429 frame/sec
+total del: 6, total insert: 1, total sub: 37
+wer% 44/332 : 13.25, ser% 14/20 : 70.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 50 ,amwStart 10 ,amwEnd 10 ,amwStep 3
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 342 seconds  Avg: 0.0298273 frame/sec
+total del: 2, total insert: 3, total sub: 31
+wer% 36/332 : 10.84, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 2000 ,beam is 50 ,amwStart 10 ,amwEnd 10 ,amwStep 3
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 532 seconds  Avg: 0.046398 frame/sec
+total del: 2, total insert: 3, total sub: 31
+wer% 36/332 : 10.84, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 14 ,amwStart 10 ,amwEnd 10 ,amwStep 3
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 49 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 657 seconds  Avg: 0.0186754 frame/sec
+total del: 19, total insert: 9, total sub: 110
+wer% 138/997 : 13.84, ser% 38/50 : 76.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 14 ,amwStart 10 ,amwEnd 10 ,amwStep 5
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 52 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 737 seconds  Avg: 0.0209494 frame/sec
+total del: 160, total insert: 13, total sub: 100
+wer% 273/997 : 27.38, ser% 39/50 : 78.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 5
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 109 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 1237 seconds  Avg: 0.035162 frame/sec
+total del: 10, total insert: 16, total sub: 97
+wer% 123/997 : 12.34, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 30 ,amwStart 5 ,amwEnd 5 ,amwStep 5
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 5
+Decoding 50 files with 35180 frames is Done in: 60 seconds  Avg: 0.00170551 frame/sec
+total del: 11, total insert: 26, total sub: 119
+wer% 156/997 : 15.65, ser% 40/50 : 80.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 40 ,amwStart 10 ,amwEnd 10 ,amwStep 5
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 172 seconds  Avg: 0.00488914 frame/sec
+total del: 15, total insert: 19, total sub: 120
+wer% 154/997 : 15.45, ser% 42/50 : 84.0
+-------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 20 ,amwStart 5 ,amwEnd 5 ,amwStep 5
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 46 seconds 
+amw: 5
+Decoding 50 files with 35180 frames is Done in: 655 seconds  Avg: 0.0186185 frame/sec
+total del: 9, total insert: 16, total sub: 131
+wer% 156/997 : 15.65, ser% 40/50 : 80.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 40 ,amwStart 5 ,amwEnd 5 ,amwStep 5
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 5
+Decoding 50 files with 35180 frames is Done in: 651 seconds  Avg: 0.0185048 frame/sec
+total del: 4, total insert: 25, total sub: 109
+wer% 138/997 : 13.84, ser% 38/50 : 76.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 40 ,amwStart 10 ,amwEnd 10 ,amwStep 10
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 801 seconds  Avg: 0.0227686 frame/sec
+total del: 8, total insert: 15, total sub: 100
+wer% 123/997 : 12.34, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 30 ,amwStart 15 ,amwEnd 15 ,amwStep 5
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 15
+Decoding 50 files with 35180 frames is Done in: 961 seconds  Avg: 0.0273167 frame/sec
+total del: 13, total insert: 17, total sub: 105
+wer% 135/997 : 13.54, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 500 ,beam is 15 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 57 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 512 seconds  Avg: 0.0145537 frame/sec
+total del: 21, total insert: 9, total sub: 124
+wer% 154/997 : 15.45, ser% 39/50 : 78.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 630 seconds  Avg: 0.0179079 frame/sec
+total del: 11, total insert: 16, total sub: 110
+wer% 137/997 : 13.74, ser% 40/50 : 80.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 5000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 58 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 424 seconds  Avg: 0.0120523 frame/sec
+total del: 18, total insert: 8, total sub: 107
+wer% 133/997 : 13.34, ser% 38/50 : 76.0
+---------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 45 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 86 seconds  Avg: 0.00750044 frame/sec
+total del: 6, total insert: 1, total sub: 36
+wer% 43/332 : 12.95, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 43 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 453 seconds  Avg: 0.0395081 frame/sec
+total del: 6, total insert: 1, total sub: 36
+wer% 43/332 : 12.95, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 25 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 44 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 646 seconds  Avg: 0.0563405 frame/sec
+total del: 6, total insert: 1, total sub: 36
+wer% 43/332 : 12.95, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 44 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 86 seconds  Avg: 0.00750044 frame/sec
+total del: 6, total insert: 1, total sub: 36
+wer% 43/332 : 12.95, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 25 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 106 seconds  Avg: 0.00924472 frame/sec
+total del: 2, total insert: 4, total sub: 31
+wer% 37/332 : 11.14, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 40 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 188 seconds  Avg: 0.0163963 frame/sec
+total del: 2, total insert: 4, total sub: 31
+wer% 37/332 : 11.14, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 45 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 469 seconds  Avg: 0.0409035 frame/sec
+total del: 6, total insert: 1, total sub: 36
+wer% 43/332 : 12.95, ser% 13/20 : 65.0
+-------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 48 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 96 seconds  Avg: 0.00837258 frame/sec
+total del: 6, total insert: 1, total sub: 36
+wer% 43/332 : 12.95, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 25 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 176 seconds  Avg: 0.0153497 frame/sec
+total del: 2, total insert: 4, total sub: 31
+wer% 37/332 : 11.14, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 40 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 274 seconds  Avg: 0.0238967 frame/sec
+total del: 2, total insert: 4, total sub: 31
+wer% 37/332 : 11.14, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 49 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 89 seconds  Avg: 0.00776208 frame/sec
+total del: 5, total insert: 2, total sub: 37
+wer% 44/332 : 13.25, ser% 14/20 : 70.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 25 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 47 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 146 seconds  Avg: 0.0127333 frame/sec
+total del: 1, total insert: 4, total sub: 31
+wer% 36/332 : 10.84, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 50 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 47 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 285 seconds  Avg: 0.0248561 frame/sec
+total del: 2, total insert: 4, total sub: 33
+wer% 39/332 : 11.75, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 44 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 98 seconds  Avg: 0.00854701 frame/sec
+total del: 6, total insert: 1, total sub: 36
+wer% 43/332 : 12.95, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 25 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 179 seconds  Avg: 0.0156114 frame/sec
+total del: 2, total insert: 4, total sub: 31
+wer% 37/332 : 11.14, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 48 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 183 seconds  Avg: 0.0159602 frame/sec
+total del: 6, total insert: 1, total sub: 36
+wer% 43/332 : 12.95, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 25 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 206 seconds  Avg: 0.0179662 frame/sec
+total del: 2, total insert: 4, total sub: 31
+wer% 37/332 : 11.14, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 256 seconds  Avg: 0.0223269 frame/sec
+total del: 2, total insert: 4, total sub: 31
+wer% 37/332 : 11.14, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 15 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 47 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 338 seconds  Avg: 0.0294785 frame/sec
+total del: 6, total insert: 1, total sub: 36
+wer% 43/332 : 12.95, ser% 13/20 : 65.0
+-------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1500 ,beam is 15 ,amwStart 10 ,amwEnd 10 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 50 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 332 seconds  Avg: 0.0289552 frame/sec
+total del: 6, total insert: 1, total sub: 36
+wer% 43/332 : 12.95, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 2000 ,beam is 30 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 720 seconds  Avg: 0.0627943 frame/sec
+total del: 2, total insert: 4, total sub: 30
+wer% 36/332 : 10.84, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 2000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 49 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 105 seconds  Avg: 0.00915751 frame/sec
+total del: 5, total insert: 1, total sub: 34
+wer% 40/332 : 12.05, ser% 13/20 : 65.0
+--------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 4000 ,beam is 100 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 659 seconds  Avg: 0.0574743 frame/sec
+total del: 2, total insert: 2, total sub: 31
+wer% 35/332 : 10.54, ser% 12/20 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 4000 ,beam is 25 ,amwStart 10 ,amwEnd 10 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 123 seconds  Avg: 0.0107274 frame/sec
+total del: 2, total insert: 2, total sub: 31
+wer% 35/332 : 10.54, ser% 12/20 : 60.0
+
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 2000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 50 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 97 seconds  Avg: 0.00845979 frame/sec
+total del: 5, total insert: 1, total sub: 34
+wer% 40/332 : 12.05, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev.txt
+maxActiveTokens is 2000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_dev.txt
+Parsing is Done in: 44 seconds 
+amw: 10
+Decoding 2703 files with 1934785 frames is Done in: 16908 seconds  Avg: 0.00873896 frame/sec
+total del: 1321, total insert: 869, total sub: 6282
+wer% 8472/54402 : 15.57, ser% 2142/2703 : 79.25
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_10.txt
+maxActiveTokens is 2000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_ramy_dev_10.txt
+Parsing is Done in: 48 seconds 
+amw: 10
+Decoding 10 files with 6619 frames is Done in: 64 seconds  Avg: 0.00966913 frame/sec
+total del: 4, total insert: 1, total sub: 15
+wer% 20/186 : 10.75, ser% 6/10 : 60.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 2000 ,beam is 10 ,amwStart 10 ,amwEnd 10 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 51 seconds 
+amw: 10
+Decoding 20 files with 11466 frames is Done in: 104 seconds  Avg: 0.00907029 frame/sec
+total del: 5, total insert: 1, total sub: 34
+wer% 40/332 : 12.05, ser% 13/20 : 65.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1500 ,beam is 100 ,amwStart 18 ,amwEnd 16 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 112 seconds 
+amw: 4
+Decoding 50 files with 35180 frames is Done in: 1814 seconds  Avg: 0.0515634 frame/sec
+total del: 8, total insert: 21, total sub: 124
+wer% 153/997 : 15.35, ser% 40/50 : 80.0
+-------------------------------------------------------------
+amw: 6
+Decoding 50 files with 35180 frames is Done in: 1911 seconds  Avg: 0.0543206 frame/sec
+total del: 11, total insert: 18, total sub: 113
+wer% 142/997 : 14.24, ser% 40/50 : 80.0
+-------------------------------------------------------------
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 1908 seconds  Avg: 0.0542354 frame/sec
+total del: 14, total insert: 14, total sub: 102
+wer% 130/997 : 13.04, ser% 36/50 : 72.0
+-------------------------------------------------------------
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 1920 seconds  Avg: 0.0545765 frame/sec
+total del: 18, total insert: 13, total sub: 103
+wer% 134/997 : 13.44, ser% 37/50 : 74.0
+-------------------------------------------------------------
+amw: 12
+Decoding 50 files with 35180 frames is Done in: 1943 seconds  Avg: 0.0552302 frame/sec
+total del: 22, total insert: 12, total sub: 99
+wer% 133/997 : 13.34, ser% 36/50 : 72.0
+-------------------------------------------------------------
+amw: 14
+Decoding 50 files with 35180 frames is Done in: 1937 seconds  Avg: 0.0550597 frame/sec
+total del: 26, total insert: 12, total sub: 99
+wer% 137/997 : 13.74, ser% 36/50 : 72.0
+-------------------------------------------------------------
+amw: 16
+Decoding 50 files with 35180 frames is Done in: 1942 seconds  Avg: 0.0552018 frame/sec
+total del: 30, total insert: 10, total sub: 106
+wer% 146/997 : 14.64, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1500 ,beam is 15 ,amwStart 7 ,amwEnd 9 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 131 seconds 
+amw: 7
+Decoding 50 files with 35180 frames is Done in: 568 seconds  Avg: 0.0161455 frame/sec
+total del: 13, total insert: 17, total sub: 109
+wer% 139/997 : 13.94, ser% 37/50 : 74.0
+-------------------------------------------------------------
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 686 seconds  Avg: 0.0194997 frame/sec
+total del: 14, total insert: 14, total sub: 103
+wer% 131/997 : 13.14, ser% 36/50 : 72.0
+-------------------------------------------------------------
+amw: 9
+Decoding 50 files with 35180 frames is Done in: 798 seconds  Avg: 0.0226833 frame/sec
+total del: 15, total insert: 13, total sub: 108
+wer% 136/997 : 13.64, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 10 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 115 seconds 
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 192 seconds  Avg: 0.00545765 frame/sec
+total del: 13, total insert: 15, total sub: 102
+wer% 130/997 : 13.04, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 10 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 107 seconds 
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 202 seconds  Avg: 0.0057419 frame/sec
+total del: 13, total insert: 15, total sub: 102
+wer% 130/997 : 13.04, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 25 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 124 seconds  Avg: 0.00352473 frame/sec
+total del: 10, total insert: 18, total sub: 99
+wer% 127/997 : 12.74, ser% 36/50 : 72.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 40 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 227 seconds  Avg: 0.00645253 frame/sec
+total del: 10, total insert: 18, total sub: 99
+wer% 127/997 : 12.74, ser% 36/50 : 72.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 40 ,amwStart 9 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+he was in a mood for music was he not 
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 302 seconds  Avg: 0.00858442 frame/sec
+total del: 10, total insert: 18, total sub: 98
+wer% 126/997 : 12.64, ser% 36/50 : 72.0
+-------------------------------------------------------------
+--------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 10 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 111 seconds 
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 229 seconds  Avg: 0.00650938 frame/sec
+total del: 13, total insert: 15, total sub: 102
+wer% 130/997 : 13.04, ser% 37/50 : 74.0
+-------------------------------------------------------------
+-----------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 15 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 110 seconds 
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 1021 seconds  Avg: 0.0290222 frame/sec
+total del: 13, total insert: 14, total sub: 102
+wer% 129/997 : 12.94, ser% 36/50 : 72.0
+-------------------------------------------------------------
+------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 25 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 8
+Decoding 50 files with 0 frames is Done in: 727 seconds  Avg: inf frame/sec
+total del: 9, total insert: 18, total sub: 92
+wer% 119/997 : 11.94, ser% 35/50 : 70.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 20 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 113 seconds 
+amw: 8
+Decoding 50 files with 0 frames is Done in: 959 seconds  Avg: inf frame/sec
+total del: 14, total insert: 14, total sub: 104
+wer% 132/997 : 13.24, ser% 36/50 : 72.0
+-------------------------------------------------------------
+-----------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1000 ,beam is 25 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 460 seconds  Avg: 0.0130756 frame/sec
+total del: 10, total insert: 18, total sub: 97
+wer% 125/997 : 12.54, ser% 35/50 : 70.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 50 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 107 seconds 
+amw: 8
+Decoding 50 files with 35180 frames is Done in: 2788 seconds  Avg: 0.0792496 frame/sec
+total del: 13, total insert: 14, total sub: 101
+wer% 128/997 : 12.84, ser% 36/50 : 72.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 15 ,amwStart 6 ,amwEnd 4 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 109 seconds 
+amw: 4
+Decoding 50 files with 35180 frames is Done in: 257 seconds  Avg: 0.00730529 frame/sec
+total del: 8, total insert: 21, total sub: 125
+wer% 154/997 : 15.45, ser% 40/50 : 80.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 2000 ,beam is 20 ,amwStart 4 ,amwEnd 4 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 109 seconds 
+amw: 4
+Decoding 50 files with 35180 frames is Done in: 654 seconds  Avg: 0.0185901 frame/sec
+total del: 8, total insert: 21, total sub: 124
+wer% 153/997 : 15.35, ser% 40/50 : 80.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_50.txt
+maxActiveTokens is 1500 ,beam is 25 ,amwStart 10 ,amwEnd 10 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_ramy_dev_50.txt
+Parsing is Done in: 0 seconds 
+amw: 10
+Decoding 50 files with 35180 frames is Done in: 563 seconds  Avg: 0.0160034 frame/sec
+total del: 9, total insert: 17, total sub: 98
+wer% 124/997 : 12.44, ser% 37/50 : 74.0
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_1000.txt
+maxActiveTokens is 2000 ,beam is 12 ,amwStart 8 ,amwEnd 8 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_dev_1000.txt
+Parsing is Done in: 52 seconds 
+amw: 8
+Decoding 1000 files with 702222 frames is Done in: 7910 seconds  Avg: 0.0112642 frame/sec
+total del: 407, total insert: 377, total sub: 2230
+wer% 3014/19483 : 15.47, ser% 762/1000 : 76.2
+-------------------------------------------------------------
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab-M/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_1000.txt
+maxActiveTokens is 1500 ,beam is 25 ,amwStart 8 ,amwEnd 8 ,amwStep 2
+ReferencePath fie is ./RefTrans/ref_dev_1000.txt
+Parsing is Done in: 0 seconds 
+amw: 8
+Decoding 1000 files with 702222 frames is Done in: 8460 seconds  Avg: 0.0120475 frame/sec
+total del: 227, total insert: 428, total sub: 1852
+wer% 2507/19483 : 12.87, ser% 697/1000 : 69.7
+---------------------------------------------------------------
+graphFolder: ./Graphs/200k-vocab/ ,activationsFolder: ./Activations/Ramy_91_activations/ ,filesFile: files_dev_20.txt
+maxActiveTokens is 1000 ,beam is 10 ,amwStart 8 ,amwEnd 8 ,amwStep 1
+ReferencePath fie is ./RefTrans/ref_ramy_dev_20.txt
+Parsing is Done in: 65 seconds 
+amw: 8
+Decoding 20 files with 11466 frames is Done in: 58 seconds  Avg: 0.00505843 frame/sec
+total del: 4, total insert: 5, total sub: 43
+wer% 52/332 : 15.66, ser% 14/20 : 70.0
+---------------------------------------------------------

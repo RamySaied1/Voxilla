@@ -1,6 +1,2 @@
-.history
-.vscode
-__pycache__
-
 model_cpu.json
 weights.h5

@@ -9,9 +9,10 @@ from time import time
 from app.recognition.asr import ASR
 from performance import *
 
+
 """
 # runing command
-python3 test_asr.py -model_arch ./app/recognition/Classifier/model_cpu.json -model_weights ./app/recognition/Classifier/weights.h5 -model_priori_proba_file ./app/recognition/Classifier/priori.txt -fst_folder ./app/recognition/Decoder/Graphs/200k-vocab/ -acoustic_model_labels_file ./app/recognition/Decoder/Graphs/200k-vocab/labels.ciphones -srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
+python3 test_asr.py -model_arch ./app/recognition/Classifier/model_cpu.json -model_weights ./app/recognition/Classifier/weights.h5 -model_priori_proba_file ./app/recognition/Classifier/priori.txt -fst_folder ./app/recognition/Decoder/Graphs/200k-vocab/ -latticeBeam 4 -acoustic_model_labels_file ./app/recognition/Decoder/Graphs/200k-vocab/labels.ciphones -srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
 """
 
 def write_ref_output(wav_file,ref_file="ref_transcript.txt"):
@@ -35,9 +36,10 @@ def main():
     parser.add_argument('-srcfile', '--srcfile', help='file containing wave files pathes to test on', required=True, default=None)
     parser.add_argument('-outfile', '--outfile', help='Filename to write output hypotheses', required=True, default=None)
     parser.add_argument('-reffile', '--reffile', help='Filename to write ref hypotheses', required=True, default=None)
-    parser.add_argument('-amw', '--amw', help='Relative weight of LM score', required=False, type=float, default=10)
-    parser.add_argument('-max_active_tokens', '--max_active_tokens', help='Maximum token count per frame', required=False, type=int, default=1500)
-    parser.add_argument('-beam_width', '--beam_width', help='Maximum token count per frame', required=False, type=float, default=12.0)
+    parser.add_argument('-amw', '--amw', help='Relative weight of LM score', required=False, type=float, default=9)
+    parser.add_argument('-max_active_tokens', '--max_active_tokens', help='Maximum token count per frame', required=False, type=int, default=1000)
+    parser.add_argument('-beam_width', '--beam_width', help='Maximum token count per frame', required=False, type=float, default=10.0)
+    parser.add_argument('-latticeBeam', '--latticeBeam', help='Maximum token count per frame', required=False, type=int, default=1)
 
     args = parser.parse_args()
 
@@ -52,7 +54,7 @@ def main():
             with open(args.outfile, 'w', buffering=1) as fout:
                 all_time_start = time()
                 for line in ftest.read().split():
-                    text = asr.speech_to_text(line,args.max_active_tokens,args.beam_width,args.amw,include_alignment=False)
+                    text = asr.speech_to_text(line,args.max_active_tokens,args.beam_width,args.amw,args.latticeBeam,include_alignment=False)
                     predictedSents.append(text)
                     write_ref_output(line)
     except KeyboardInterrupt:

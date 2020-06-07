@@ -21,6 +21,7 @@ int main(int argc, char const* argv[]) {
     double amwStart = stod(argv[6]);
     double amwEnd = stod(argv[7]);
     double amwStep = stod(argv[8]);
+    uint latticeBeam = stoi(argv[9]);
     vector<vector<double>> activations;
     for (double amw = amwStart; amw <= amwEnd; amw += amwStep) {
         long long totalFramesNum = 0;
@@ -38,7 +39,8 @@ int main(int argc, char const* argv[]) {
             totalFramesNum += activations.size();
             read2d(activationsFile, activations);
 
-            vector<vector<string>> path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw);
+            vector<vector<string>> path = decoder.decode(activations, maxActiveTokens, beamWidth, 1 / amw, latticeBeam);
+
             for (int i = 0; i < path.size(); ++i) {
                 if (i && path[i].back() == path[i - 1].back()) {
                     continue;

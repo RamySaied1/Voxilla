@@ -1,95 +1,73 @@
 #include "beam_search.hpp"
-#include "fst.hpp"
 
-BeamSearch::BeamSearch(uint maxActiveTokens, double beamWidth) : maxActiveTokens(maxActiveTokens), beamWidth(beamWidth), activeTokens(vector<shared_ptr<Token>>()), predeccessor(unordered_map<shared_ptr<Token>, shared_ptr<Token>>()) {
+BeamSearch::BeamSearch(uint maxActiveTokens, double beamWidth) : maxActiveTokens(maxActiveTokens), beamWidth(beamWidth), activeTokens(vector<shared_ptr<Token>>()) {
     assert(maxActiveTokens != 0);
 }
 
-void BeamSearch::intiate(const Arc* arc, double lmCost, double amCost, uint maxActiveTokens, double beamWidth) {
+void BeamSearch::intiate(const Arc* arc, double lmCost, double amCost, uint maxActiveTokens, double beamWidth, uint latticeBeam, const Fst* fst) {
     this->maxActiveTokens = maxActiveTokens;
     this->beamWidth = beamWidth;
+    this->fst = fst;
 
-    expandedTokens.clear();
     activeTokens.clear();
-    predeccessor.clear();
-    expandNewToken(arc, lmCost, amCost);
-    predeccessor[expandedTokens.front()] = shared_ptr<Token>(NULL);
+    expandedTokens = {shared_ptr<Token>(new Token{0, arc, 0., 0., 0.})};  // set with intial token
+    lattice = Lattice(latticeBeam, expandedTokens.back());
+
+    lattice.startNewExpantions();
+    expandEpsStates();
+    lattice.finishExpantions(beamWidth);
     moveExpandedToActive();
 }
 
-void BeamSearch::keepOnlyBestExpandedTokens() {
-    unordered_map<const Arc*, shared_ptr<Token>> arcToBestToken;
-    for (const auto& token : expandedTokens) {
-        double tokenCost = token->amCost + token->lmCost;
-        auto iter = arcToBestToken.find(token->arc);
-        if (iter == arcToBestToken.end()) {
-            arcToBestToken[token->arc] = token;
-        } else {
-            if (tokenCost > iter->second->amCost + iter->second->lmCost) {
-                iter->second = token;
-            }
-        }
-    }
-
-    expandedTokens.erase(remove_if(begin(expandedTokens), end(expandedTokens), [&](const auto& t) { return arcToBestToken[t->arc] != t; }),
-                         end(expandedTokens));
-}
-
-void BeamSearch::doForward(const vector<vector<const Arc*>>& graph, const unordered_map<uint, uint>& inpIdsToIndx, const vector<double>& activations, bool useSelfLoops) {
-    unordered_map<const Arc*, Expantion> expantions;  // map expanded node to parent node and expantion cost
-    vector<double> logProbas = getNormalizeTokensLogProba(activeTokens);
+void BeamSearch::doForward(const unordered_map<uint, uint>& inpIdsToIndx, const vector<double>& activations, bool useSelfLoops) {
+    const vector<vector<const Arc*>>& graph = fst->getGraph();
     if (useSelfLoops) {
         for (uint i = 0; i < activeTokens.size(); ++i) {
             const auto& token = activeTokens[i];
             auto iter = inpIdsToIndx.find(token->arc->inpId);
             if (iter == inpIdsToIndx.end()) continue;
-            // double lmCost = token->arc->lmCost;
             double amCost = activations[iter->second];
-            // double specialCost = (token->arc->srcState == token->arc->dstState) ? log(2.) : 0;
-            double expantionCost = logProbas[i];
-            expantions[token->arc] = Expantion(token, 0., amCost, expantionCost);
+            lattice.expand(token, token->arc, 0., amCost);
         }
     }
 
     for (uint i = 0; i < activeTokens.size(); ++i) {
         const auto& token = activeTokens[i];
         for (const Arc* arc : graph[token->arc->dstState]) {
+            if (token->arc->dstState == arc->dstState) {
+                throw Exception("SELF LOOP DETECTED");  // graph should has no self loops
+            }
             auto iter = inpIdsToIndx.find(arc->inpId);
             if (iter == inpIdsToIndx.end()) continue;
             double lmCost = arc->lmCost;
             double amCost = activations[iter->second];
 
-            //Expand the frontier and add predecessors
-            double expantionCost = logProbas[i] + lmCost;
-            if (exp(expantionCost) > 0.) {
-                bool isNewArc = expantions.find(arc) == expantions.end();
-                if (isNewArc) {
-                    expantions[arc] = Expantion(token, lmCost, amCost, expantionCost);
-                } else {
-                    double oldCost = expantions[arc].expantionCost;
-                    if (expantionCost > oldCost) {
-                        expantions[arc] = Expantion(token, lmCost, amCost, expantionCost);
-                    }
-                }
-            }
+            //Expand the frontier
+            lattice.expand(token, arc, lmCost, amCost);
         }
     }
-
-    // create new tokens
-    createExpandedTokens(expantions);
 }
 
-void BeamSearch::createExpandedTokens(const unordered_map<const Arc*, Expantion>& expantions) {
-    for (const auto& keyVal : expantions) {
-        const auto& expantion = keyVal.second;
-        const Arc* arc = keyVal.first;
-
-        double amCost = expantion.parentToken->amCost + expantion.amCost;
-        double lmCost = expantion.parentToken->lmCost + expantion.lmCost;
-
-        expandNewToken(arc, lmCost, amCost);
-        predeccessor[expandedTokens.back()] = expantion.parentToken;
+void BeamSearch::expandEpsStates() {
+    uint i = 0;
+    while (i < expandedTokens.size()) {
+        vector<shared_ptr<Token>> epsTokens;
+        for (; i < expandedTokens.size(); ++i) {
+            const auto& token = expandedTokens[i];
+            if (fst->hasEpsArc(token->arc->dstState)) {
+                epsTokens.push_back(token);
+            }
+        }
+        setActiveTokens(epsTokens);
+        doForward({{0, 0}}, vector<double>(1, 0.), false);  // eps symbol is assumed to have id 0
+        createExpandedTokens();
     }
+    keepOnlyBestExpandedTokens();
+}
+
+void BeamSearch::keepOnlyBestExpandedTokens() {
+    const unordered_map<const Arc*, shared_ptr<Token>>& arcToBestToken = lattice.getArcToToken();
+    expandedTokens.erase(remove_if(begin(expandedTokens), end(expandedTokens), [&](const auto& token) { return arcToBestToken.find(token->arc) != arcToBestToken.end() && arcToBestToken.find(token->arc)->second != token; }), end(expandedTokens));
 }
 
 void BeamSearch::setActiveTokens(const vector<shared_ptr<Token>>& tokens) {
@@ -109,53 +87,40 @@ void BeamSearch::moveExpandedToActive() {
 }
 
 void BeamSearch::beamPrune() {
-    if (expandedTokens.size() > maxActiveTokens / 2) {
+    if (expandedTokens.size() > maxActiveTokens) {
         sort(begin(expandedTokens), end(expandedTokens), [&](const shared_ptr<Token>& a, const shared_ptr<Token>& b) {
             return a->amCost + a->lmCost > b->amCost + b->lmCost;
         });
-
-        double thresold = expandedTokens.front()->amCost + expandedTokens.front()->lmCost - beamWidth;
-        auto iter = lower_bound(rbegin(expandedTokens), rend(expandedTokens), thresold, [&](const shared_ptr<Token>& t, double val) {
-            return t->amCost + t->lmCost < val;
-        });
-        // cout<<"Original Size: "<<expandedTokens.size()<<endl;
-        uint newSize = rend(expandedTokens) - iter;
-        newSize = min(newSize, maxActiveTokens);
-        for (int i = newSize; i < expandedTokens.size(); ++i) {
-            predeccessor.erase(expandedTokens[i]);
+        // remove pruned tokens form lattice to reclaim memory
+        for (uint i = maxActiveTokens; i < expandedTokens.size(); ++i) {
+            lattice.removeToken(expandedTokens[i]);
         }
-        expandedTokens.resize(newSize);
-        // cout<<"New Size due to beam: "<<expandedTokens.size()<<endl;
+        expandedTokens.resize(maxActiveTokens);
     }
 }
 
-vector<const Arc*> BeamSearch::getPath(shared_ptr<Token> rootToken) {
-    vector<const Arc*> arcs = vector<const Arc*>();
-    if (activeTokens.size() <= 0) return arcs;
-
-    shared_ptr<Token> currToken = rootToken;
-    while (currToken) {
-        arcs.push_back(currToken->arc);
-        currToken = predeccessor[currToken];
-    }
-    reverse(begin(arcs), end(arcs));
-    return arcs;
-}
-
-
-vector<double> BeamSearch::getNormalizeTokensLogProba(const vector<shared_ptr<Token>>& tokens) {
-    if (tokens.size() <= 0) return vector<double>();
-    const auto& bestToken = *max_element(begin(tokens), end(tokens), [&](const auto& t1, const auto& t2) {
-        return t1->amCost + t1->lmCost < t2->amCost + t2->lmCost;
+vector<const Arc*> BeamSearch::getBestPath(double& pathCost) {
+    if (activeTokens.size() <= 0) return vector<const Arc*>();
+    const unordered_map<uint, double>& finalStates = fst->getFinalStates();
+    auto bestToken = *max_element(begin(activeTokens), end(activeTokens), [&](const auto& t1, const auto& t2) {
+        return t1->amCost + t1->lmCost + finalStates.find(t1->arc->dstState)->second <
+               t2->amCost + t2->lmCost + finalStates.find(t2->arc->dstState)->second;
     });
-    double bestCost = bestToken->amCost + bestToken->lmCost;
+    pathCost = bestToken->amCost + bestToken->lmCost + finalStates.find(bestToken->arc->dstState)->second;
+    return lattice.getBestPath(bestToken);
+}
 
-    vector<double> logProbas(tokens.size(), 0);
-    for (uint i = 0; i < tokens.size(); ++i) {
-        logProbas[i] = tokens[i]->amCost + tokens[i]->lmCost - bestCost;
+void BeamSearch::finalize() {
+    const unordered_map<uint, double>& finalStates = fst->getFinalStates();
+    auto iend = remove_if(begin(activeTokens), end(activeTokens), [&](const auto& t) {
+        return finalStates.find(t->arc->dstState) == finalStates.end();  // remove if it's not a final state
+    });
+
+    uint newSize = iend - begin(activeTokens);
+    for (uint i = newSize; i < expandedTokens.size(); ++i) {
+        lattice.removeToken(activeTokens[i]);
     }
-    return logProbas;
+    activeTokens.resize(newSize);  // remove non final states
 }
 
-BeamSearch::~BeamSearch() {
-}
+BeamSearch::~BeamSearch() {}

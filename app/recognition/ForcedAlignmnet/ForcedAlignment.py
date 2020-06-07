@@ -48,10 +48,10 @@ class ForcedAlignment():
         maskRows = np.apply_along_axis(lambda inoutid: not(inoutid[0]=="<eps>"),axis=1,arr=decoderOutPath)
         inpLabels = decoderOutPath[maskRows][:,0]
 
-        #map sil phones to sil words
-        for i in range(len(decoderOutPath)):
-            if(self.is_sil_subphone(decoderOutPath[i][0]) and decoderOutPath[i][1] in ["<eps>"]): # second check is meant if silence is part of a word
-                decoderOutPath[i][1] = self.silWords[self.sub_phone_to_phone (decoderOutPath[i][0])]
+        #replace <unk> from with <eps>
+        replaceUnk = np.vectorize(lambda x: "<eps>" if x=="<unk>" else x,otypes=[str])
+        decoderOutPath[:,1] = replaceUnk(decoderOutPath[:,1])
+
 
         predicate = lambda inoutid: not(inoutid[0]==inoutid[1]=="<eps>")
         maskRows = np.apply_along_axis(predicate,axis=1,arr=decoderOutPath)
@@ -66,14 +66,21 @@ class ForcedAlignment():
         return inpLabels,outLabels
 
     def _get_groupings(self,parents,childeren,associations,childerenGroupings,parentI=0,childI=0):
-        if(parentI >= len(parents)):
+        if(childI >= len(childeren)):
             return True
-        for assoc in associations[parents[parentI]]:
-            if(childI + len(assoc) <= len(childeren) and childeren[childI:childI+len(assoc)] == assoc):
-                childerenGroupings.append((len(assoc),parents[parentI]))
-                if(self._get_groupings(parents,childeren,associations,childerenGroupings,parentI+1,childI+len(assoc))):
-                    return True
-                childerenGroupings.pop()
+        
+        silWords = list(self.silWords.values())
+        possibleParents = silWords + [parents[parentI]] if parentI < len(parents) else silWords
+        for possibleParent in possibleParents: # always try silent as possible parent and insert it if it's right
+            for assoc in associations[possibleParent]:
+                if(childI + len(assoc) <= len(childeren) and childeren[childI:childI+len(assoc)] == assoc):
+                    childerenGroupings.append((len(assoc),possibleParent))
+                    nextParentI = parentI+1 if possibleParent not in silWords else parentI
+                    if(self._get_groupings(parents,childeren,associations,childerenGroupings,nextParentI,childI+len(assoc))):
+                        if(possibleParent in silWords):
+                            parents.insert(parentI, possibleParent)
+                        return True
+                    childerenGroupings.pop()
         return False
 
     def align(self,decoderOutPath,framesCount):
