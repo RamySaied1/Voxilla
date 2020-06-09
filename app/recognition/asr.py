@@ -16,7 +16,7 @@ import numpy as np
 class ASR:
     def __init__(self, model_arch, model_weight, model_priori_proba_file, fst_folder, acoustic_model_labels_file, grammerFileName = "",words_lexicon_file = Config.RECOGNITION_DIR+"ForcedAlignmnet/words_lexicon.txt", phones_lexicon_file = Config.RECOGNITION_DIR+"ForcedAlignmnet/phones_lexicon.txt"):
         if fst_folder and fst_folder[-1] != '/': fst_folder+="/"
-        self.decoder = Decoder(fst_folder, acoustic_model_labels_file, grammerFileName) 
+        self.decoder = Decoder(fst_folder, acoustic_model_labels_file) 
         self.classifier = Classifier(model_arch, model_weight, model_priori_proba_file)
         self.trans = Transcript(words_lexicon_file, phones_lexicon_file)
 
