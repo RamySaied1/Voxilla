@@ -132,6 +132,26 @@ class FrontEnd:
 
         return self.global_mean, 1.0/np.sqrt(self.global_var)
 
+    def delta(self,feature):
+      tm1=shift(feature,[0,1],mode='nearest')
+      tp1=shift(feature,[0,-1],mode='nearest')
+      tm2=shift(feature,[0,2],mode='nearest')
+      tp2=shift(feature,[0,-2],mode='nearest')
+      denomenator=10
+      result=((tp1-tm1)+2*(tp2-tm2))/denomenator
+      return result
+    
+    def energy(self,frames):
+      result = np.sum(frames**2,axis=0)
+      result= result.reshape((1,-1))
+      return result
+
+    def average(self,features):
+      result=np.sum(features,axis=0)/features.shape[0]
+      result= result.reshape((1,-1))
+      return result
+
+
     def process_utterance(self, utterance):
         wav     = self.dither(utterance)
         self.num_frames = int(np.floor((wav.shape[0] - self.win_size) / self.win_shift) + 1)
