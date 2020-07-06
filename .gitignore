@@ -2,6 +2,7 @@
 .vscode
 __pycache__
 waves_test.txt
+waves_train.txt
 pred_transcript.txt
 ref_transcript.txt
 LibriSpeech

@@ -3,4 +3,3 @@ decoder_wrapper.cpython-36m-x86_64-linux-gnu.so
 decoder_wrapper.cpp
 decoder_wrapper.cp36-win_amd64.pyd
 activations.txt
-decoder_wrapper.pyx
