@@ -6,6 +6,8 @@ import sys
 from keras.models import model_from_json
 import tensorflow as tf 
 import keras
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
 class Classifier_cntk:
     def __init__(self,model_filename: str):
         import cntk
@@ -70,7 +72,7 @@ class Classifier_keras:
                 with open(model_arch, 'r') as json_file:
                     json_savedModel= json_file.read()
                     self.model = model_from_json(json_savedModel)
-                    print(self.model.summary())
+                    # print(self.model.summary())
                 self.model.compile(loss='categorical_crossentropy',
                         optimizer='adam',metrics=["categorical_accuracy"])
                 self.model.load_weights(model_weight)
@@ -88,7 +90,7 @@ class Classifier_keras:
         with self.session.as_default():
             with self.session.graph.as_default():
                 sample=features.reshape(1,features.shape[0],features.shape[1])
-                print(sample.shape)
+                # print(sample.shape)
                 pred=self.model.predict(sample)
 
                 return np.log(pred[0]) - self.priori_logproba

@@ -19,9 +19,9 @@ def generate_word():
       #text=text.split()
       
       fname = str(uuid4())+".wav"
-      print(fname)
+    #   print(fname)
       p=os.path.join(current_app.config["DOWNLOAD_FILE"], fname)
-      print(p)
+    #   print(p)
       generated_wav,samplingRate=insert_object.getWav(current_app.config["UPLOAD_FILE"],[text])
       #print(samplingRate)
       # librosa.output.write_wav(current_app.config["DOWNLOAD_FILE"], generated_wav.astype(np.float32), samplingRate)
