@@ -20,7 +20,7 @@ vad_window_length = 30  # In milliseconds
 # The larger this value, the larger the VAD variations must be to not get smoothed out. 
 vad_moving_average_width = 8
 # Maximum number of consecutive silent frames a segment can have.
-vad_max_silence_length = 6
+vad_max_silence_length = 30
 
 
 ## Audio volume normalization

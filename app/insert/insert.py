@@ -11,7 +11,21 @@ import numpy as np
 import librosa
 import argparse
 import torch
-
+import soundfile as sf
+def amplifySound(generated_wav,audioDir):
+    print(audioDir)
+    audio,_ = sf.read(audioDir) 
+    print("H1")
+    origialAudioAverage=audio.mean()
+    print("H2")
+    newWordAverage=audio.mean()
+    print("H3")
+    amplificationFactor=newWordAverage/origialAudioAverage
+    print("H4")
+    generated_wav=amplificationFactor*generated_wav
+    print("222222222222222")
+    return generated_wav    
+  
 class Insert():
     def __init__(self,encoderModelPath,synthesizerModelPath,vocoderModelPath):
         encoder.load_model(encoderModelPath)
@@ -19,8 +33,11 @@ class Insert():
         vocoder.load_model(vocoderModelPath)
 
     def getWav(self,referenceVoiceWavPath,words):
+        print("Helloooo -->1")
         preprocessed_wav = encoder.preprocess_wav(referenceVoiceWavPath)
-        embed = encoder.embed_utterance(preprocessed_wav)
+        print("Helloooo->2")
+        embed = encoder.computeEmbedding(preprocessed_wav)
+        print("Helloooooo ->3")
         embeds=[embed]
         specs = self.synthesizer.synthesize_spectrograms(words, embeds)
         spec = specs[0]

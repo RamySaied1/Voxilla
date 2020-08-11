@@ -8,17 +8,30 @@ def normalize(v):
     return v/tf.sqrt(tf.reduce_sum(v**2, axis=-1, keep_dims=True)+1e-6)
 
 class Model():
-    def __init__(self,args,mode):
-        self.numHidden=args.LSTMHiddenUnits
-        self.numLayers=args.LSTMLayers
-        self.numProjection=args.ProjectionUnits
+    def __init__(self,args=None,mode="train"):
         self.mode=mode
-        if mode=='train':
-            self.speakersPerBatch=args.NumSpeakers
-            self.utterancesPerBatch=args.NumUtterances
-            #optimizer
-            self.optimizer=tf.train.GradientDescentOptimizer(args.learningRate)
-        self.prepareModel()
+        if args != None:
+            self.numHidden=args.LSTMHiddenUnits
+            self.numLayers=args.LSTMLayers
+            self.numProjection=args.ProjectionUnits
+        else:
+            self.numHidden=768
+            self.numLayers=3
+            self.numProjection=256
+
+        self.modelGraph=tf.Graph()
+        with self.modelGraph.as_default():
+
+            if mode=='train':
+                self.speakersPerBatch=args.NumSpeakers
+                self.utterancesPerBatch=args.NumUtterances
+                #optimizer
+                self.optimizer=tf.train.GradientDescentOptimizer(args.learningRate)
+            else:
+                self.speakersPerBatch=1
+                self.utterancesPerBatch=1
+            self.prepareModel()
+        
     def prepareModel(self):
         #The Architecture is 3 LSTM layers every layer consists on 768 hidden units every layer is followed
         #by a projection layer of size 256 units

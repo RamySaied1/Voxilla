@@ -19,7 +19,7 @@ def getTranscript():
       text=asr_object.speech_to_text(wav_file, max_active_tokens, beam_width, acoustic_model_weigh)
       return jsonify({ "text": text }) ,200
    except  Exception as ex:
-      return jsonify({ "Error": ex.message }) ,404
+      return jsonify({ "Error": ex }) ,404
    
 #@recognition.route('getalignment/', methods=['GET'])
 def getAlignment():
@@ -32,9 +32,9 @@ def getAlignment():
    frame_shift=current_app.config["FRAME_SHIFT"]
    alignments=[]
    try:
-      alignments=asr_object.speech_to_text(wav_file, max_active_tokens, beam_width, acoustic_model_weigh,include_alignment = True)
+      alignments=asr_object.speech_to_text(wav_file, max_active_tokens, beam_width, acoustic_model_weigh,latticeBeam=1,include_alignment = True)
       return jsonify({ "text": frames_to_seconds(alignments,frame_duration,frame_shift) }) ,200
    except  Exception as ex:
-      return jsonify({ "Error": ex.message }) ,404
+      return jsonify({ "Error": ex }) ,404
 
 
