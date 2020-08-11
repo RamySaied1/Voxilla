@@ -77,7 +77,6 @@ class Classifier_keras:
                         optimizer='adam',metrics=["categorical_accuracy"])
                 self.model.load_weights(model_weight)
                 self.model._make_predict_function()
-                print("Model Loadded successfully")
 
                 with open(prior_file,"r") as f:
                     priori = [line.split()[1] for line in f.readlines()]

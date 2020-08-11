@@ -43,7 +43,8 @@ def main():
 
     args = parser.parse_args()
 
-    asr = ASR(args.model_arch,args.model_weights, args.model_priori_proba_file, args.fst_folder, args.acoustic_model_labels_file)
+    grammerFileName="G.fst" if args.latticeBeam > 1 else ""
+    asr = ASR(args.model_arch,args.model_weights, args.model_priori_proba_file, args.fst_folder, args.acoustic_model_labels_file,grammerFileName=grammerFileName)
 
     all_time_start = time()
     predictedSents = []
