@@ -33,11 +33,10 @@ class Insert():
         vocoder.load_model(vocoderModelPath)
 
     def getWav(self,referenceVoiceWavPath,words):
-        print("Helloooo -->1")
+        print("getWav1")
         preprocessed_wav = encoder.preprocess_wav(referenceVoiceWavPath)
-        print("Helloooo->2")
         embed = encoder.computeEmbedding(preprocessed_wav)
-        print("Helloooooo ->3")
+        print("getWav2")
         embeds=[embed]
         specs = self.synthesizer.synthesize_spectrograms(words, embeds)
         spec = specs[0]

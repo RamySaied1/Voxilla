@@ -26,7 +26,7 @@ def load_model(weights_fpath: Path, device=None):
     _model =SpeakerEncoder(_device, torch.device("cpu"))
     checkpoint = torch.load(weights_fpath)
     _model.load_state_dict(checkpoint["model_state"])
-    print("Loaded encoder \"%s\" trained to step %d" % (weights_fpath, checkpoint["step"]))
+    _model.eval()
     
 
 
@@ -92,7 +92,6 @@ def computeEmbedding(wav, **kwargs):
     lastSliceStop = wSlices[-1].stop
     if lastSliceStop >= len(wav):
         wav = np.pad(wav, (0, lastSliceStop - len(wav)), "constant")
-    
     #compute the mel spectogram of the wav
     frames = audio.wav_to_mel_spectrogram(wav)
     #group every mslice into an array which will be fed to the network
@@ -102,7 +101,6 @@ def computeEmbedding(wav, **kwargs):
     # The embedding vector of the complete utterance will be the normalization of the averaged version
     averageEmbedding = np.mean(partialEmbeddings, axis=0)
     embed = averageEmbedding / np.linalg.norm(averageEmbedding, 2)
-    
     return embed
 
 
