@@ -2,8 +2,8 @@ import os
 import soundfile as sf
 import numpy as np
 import matplotlib.pyplot as plt
-import htk_featio as htk
-import speech_sigproc as sp
+import htk_io as htk
+from MfccFeatures import MFCC
 
 from config import Config
 inv=np.array(htk.load_ascii_vector(Config.RECOGNITION_DIR+"FeatureExtraction/feat_invstddev.ascii"))
@@ -18,8 +18,8 @@ def wav_to_feat(wav_file,samp_rate = SAMP_RATE,frame_duration=FRAME_DURATION,fra
     if (s != samp_rate):
         raise RuntimeError("Our dataset files have sampling rate "+str(SAMP_RATE)+"Hz, found {0}".format(s))
 
-    fe = sp.FrontEnd(samp_rate=samp_rate,mean_norm_feat=True, frame_duration=frame_duration, frame_shift=frame_shift)
-    feat=fe.process_utterance(x)
+    fe = MFCC(sampling_rate=samp_rate,normalize_feat=True, frame_duration=frame_duration, frame_shift=frame_shift)
+    feat=fe.calculate_features(x)
 
     m_seq=np.repeat(m[:,np.newaxis],feat.shape[1],axis=1)
     inv_seq=np.repeat(inv[:,np.newaxis],feat.shape[1],axis=1)
