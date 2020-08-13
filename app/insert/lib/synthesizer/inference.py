@@ -1,8 +1,8 @@
 import sys
 from   lib.synthesizer.tacotron2 import Tacotron2
 from lib.synthesizer.hparams import hparams
-from multiprocess.pool import Pool  # You're free to use either one
-#from multiprocessing import Pool   # 
+#from multiprocess.pool import Pool  # You're free to use either one
+from multiprocessing import Pool   # 
 import lib.synthesizer.audio
 from pathlib import Path
 from typing import Union, List
