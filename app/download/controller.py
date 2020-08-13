@@ -8,7 +8,7 @@ download = Blueprint('download', __name__)
 #@download.route('/', methods = ['GET','POST'])
 def download_file(fname):
    try:
-      print(current_app.config["DOWNLOAD_FILE"])
+      # print(current_app.config["DOWNLOAD_FILE"])
       # return send_file(current_app.config["DOWNLOAD_FILE"], as_attachment=True)
       path = os.path.join(current_app.config["DOWNLOAD_FILE"], fname)
       return send_file(path, as_attachment=True)

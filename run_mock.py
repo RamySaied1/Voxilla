@@ -22,9 +22,9 @@ if __name__ == '__main__':
     def myupload():
         try:
             f = request.files
-            print(f)
+            # print(f)
             f = f['file']
-            print(os.path.abspath(os.curdir))
+            # print(os.path.abspath(os.curdir))
             f.save(current_app.config["UPLOAD_FILE"])
             return jsonify({ "message": "file uploaded sussessfully" }), 200
         except Exception as e:
@@ -34,14 +34,14 @@ if __name__ == '__main__':
     @app.route('/insert$', methods = ['POST'])
     def myinsert():
         body = request.json
-        print(body)
-        print("save to", current_app.config["DOWNLOAD_FILE"])
+        # print(body)
+        # print("save to", current_app.config["DOWNLOAD_FILE"])
         return jsonify({ "text": 'route accessed successfly' }), 200
     
     @app.route('/download$',methods = ['GET','POST'])
     def mydownload():
         try:
-            print(current_app.config["DOWNLOAD_FILE"])
+            # print(current_app.config["DOWNLOAD_FILE"])
             return send_file(current_app.config["DOWNLOAD_FILE"], as_attachment=True)
         except Exception as e:
             return jsonify({ "message": e.message }), 404

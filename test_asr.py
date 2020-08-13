@@ -12,7 +12,7 @@ from performance import *
 
 """
 # runing command
-python3 test_asr.py -model_arch ./app/recognition/Classifier/model_cpu.json -model_weights ./app/recognition/Classifier/weights.h5 -model_priori_proba_file ./app/recognition/Classifier/priori.txt -fst_folder ./app/recognition/Decoder/Graphs/200k-vocab/ -latticeBeam 4 -acoustic_model_labels_file ./app/recognition/Decoder/Graphs/200k-vocab/labels.ciphones -srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
+python3 test_asr.py -model_arch ./app/recognition/Classifier/model_cpu.json -model_weights ./app/recognition/Classifier/weights.h5 -model_priori_proba_file ./app/recognition/Classifier/priori.txt -fst_folder ./app/recognition/Decoder/Graphs/200k-vocab/ -latticeBeam 1 -acoustic_model_labels_file ./app/recognition/Decoder/Graphs/200k-vocab/labels.ciphones -srcfile waves_test.txt -outfile pred_transcript.txt -reffile ref_transcript.txt
 """
 
 def write_ref_output(wav_file,ref_file="ref_transcript.txt"):
@@ -37,13 +37,14 @@ def main():
     parser.add_argument('-outfile', '--outfile', help='Filename to write output hypotheses', required=True, default=None)
     parser.add_argument('-reffile', '--reffile', help='Filename to write ref hypotheses', required=True, default=None)
     parser.add_argument('-amw', '--amw', help='Relative weight of LM score', required=False, type=float, default=9)
-    parser.add_argument('-max_active_tokens', '--max_active_tokens', help='Maximum token count per frame', required=False, type=int, default=1000)
-    parser.add_argument('-beam_width', '--beam_width', help='Maximum token count per frame', required=False, type=float, default=10.0)
+    parser.add_argument('-max_active_tokens', '--max_active_tokens', help='Maximum token count per frame', required=False, type=int, default=2000)
+    parser.add_argument('-beam_width', '--beam_width', help='Maximum token count per frame', required=False, type=float, default=8.0)
     parser.add_argument('-latticeBeam', '--latticeBeam', help='Maximum token count per frame', required=False, type=int, default=1)
 
     args = parser.parse_args()
 
-    asr = ASR(args.model_arch,args.model_weights, args.model_priori_proba_file, args.fst_folder, args.acoustic_model_labels_file)
+    grammerFileName="G.fst" if args.latticeBeam > 1 else ""
+    asr = ASR(args.model_arch,args.model_weights, args.model_priori_proba_file, args.fst_folder, args.acoustic_model_labels_file,grammerFileName=grammerFileName)
 
     all_time_start = time()
     predictedSents = []
