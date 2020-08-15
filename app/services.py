@@ -33,7 +33,7 @@ def recognizeWords(user, clipId): # speech recognition
     frame_duration = app.config["FRAME_DURATION"]
     frame_shift = app.config["FRAME_SHIFT"]
     try:
-        alignments = asr_object.speech_to_text(clip.fileUri, max_active_tokens, beam_width, acoustic_model_weigh, latticeBeam=1, include_alignment = True)
+        alignments = asr_object.speech_to_text(clip.fileUri, max_active_tokens, beam_width, acoustic_model_weigh, latticeBeam=4, include_alignment = True)
         return jsonify({ "text": frames_to_seconds(alignments, frame_duration, frame_shift) }), 200
     except  Exception as ex:
         return jsonify({ "Error": ex }), 400
