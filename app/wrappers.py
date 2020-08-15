@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from jwt import decode as jwtDecode
 from functools import wraps
-from config import Config
+from .config import Config
 app_secret_key = Config.SECRET_KEY
 
 def user_token_available(role='any'):
