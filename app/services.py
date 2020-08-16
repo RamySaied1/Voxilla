@@ -38,7 +38,7 @@ def recognizeWords(user, clipId): # speech recognition
     except  Exception as ex:
         return jsonify({ "Error": ex }), 400
 
-@app.route('/clips/<int:clipId>/synthesize', methods=['GET'])
+@app.route('/clips/<int:clipId>/synthesize', methods=['POST'])
 @userRequiredJson()
 def synthesizeWords(user, clipId): # speech recognition
     userId = user["id"]
