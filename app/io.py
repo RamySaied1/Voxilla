@@ -35,3 +35,13 @@ def downloadClipInfo(user, clipId):
         return jsonify({"err": "can't download others clips"}), 401
     
     return send_file(f"..\\audios\\{userId}\\{clip.id}.flac", as_attachment=True)
+
+@app.route('/clips/<int:clipId>/download/synthesized')
+@userRequiredJson()
+def downloadClipInfo(user, clipId):
+    userId = user["id"]
+    clip = Clip.query.filter_by(id=clipId).first()
+    if clip.project.user_id != userId:
+        return jsonify({"err": "can't download others clips"}), 401
+    path = request.args["path"]
+    return send_file(f"..\\{path}", as_attachment=True)
