@@ -34,4 +34,4 @@ def downloadClipInfo(user, clipId):
     if clip.project.user_id != userId:
         return jsonify({"err": "can't download others clips"}), 401
     
-    return send_file(f"audios/{userId}/{clip.id}.flac", as_attachment=True)
+    return send_file(f"..\\audios\\{userId}\\{clip.id}.flac", as_attachment=True)

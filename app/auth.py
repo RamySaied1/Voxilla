@@ -23,7 +23,7 @@ def signup():
         'email': newUser.email,
         'exp': datetime.utcnow() + timedelta(hours=48)
     }, app.config['SECRET_KEY']).decode('UTF-8')
-    return jsonify({'token': token}), 200
+    return jsonify({'token': token, 'username': newUser.username, 'email':newUser.email}), 200
 
 @app.route('/login')
 def login():
@@ -46,4 +46,4 @@ def login():
         'email': user['email'],
         'exp': datetime.utcnow() + timedelta(hours=48)
     }, app.config['SECRET_KEY']).decode('UTF-8')
-    return jsonify({'token': token}), 200
+    return jsonify({'token': token, 'username': user['username'], 'email':user['email'] }), 200

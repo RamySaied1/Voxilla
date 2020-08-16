@@ -2,10 +2,8 @@ import os
 
 class Config(object):
     DEVELOPMENT = False
-    DEBUG = False
-    MOCK = False
-    print(os.path.realpath("."),"++++++++++++++++++++++++++++++++++++++++++++++")
-    # DOWNLOAD_FILE=os.path.join(os.path.realpath("."),"downloaded","out.wav")
+    DEBUG = True
+    SERVICES_MOCK = False
     DOWNLOAD_FILE=os.path.join(os.path.realpath("."),"downloaded")
     UPLOAD_FILE="./uploaded/wave.flac"
     RECOGNITION_DIR='./app/recognition/'
@@ -19,7 +17,7 @@ class Config(object):
     FRAME_SHIFT=0.010
     
     
-    SECRET_KEY = '__easyMatchSecretKey(HEO5)__'
+    SECRET_KEY = '__voxilla is the best__'
     SQLALCHEMY_DATABASE_URI = 'mssql+pyodbc://LAPTOP-UTJ2F2N1\SQLEXPRESS/voxilla?driver=ODBC+Driver+11+for+SQL+Server'
 
 
@@ -29,5 +27,5 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEVELOPMENT = True
-    DEBUG = True
+    debug = True
 

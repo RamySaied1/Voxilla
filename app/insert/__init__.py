@@ -1,12 +1,10 @@
 from config import Config
-if Config.MOCK:
-	insert_object = None
-else:
-	from pathlib import Path
-	from app.insert.insert import Insert
 
-	encoderPath=Config.INSERT_DIR+"encoder/saved_models/pretrained.pt"
-	synthesizerPath=Path(Config.INSERT_DIR+"lib/synthesizer/saved_models/logs-pretrained")
-	vocoderPath=Config.INSERT_DIR+"lib/vocoder/saved_models/pretrained/pretrained.pt"
+from pathlib import Path
+from app.insert.insert import Insert
 
-	insert_object=Insert(encoderModelPath=encoderPath,synthesizerModelPath=synthesizerPath,vocoderModelPath=vocoderPath)
+encoderPath=Config.INSERT_DIR+"encoder/saved_models/pretrained.pt"
+synthesizerPath=Path(Config.INSERT_DIR+"lib/synthesizer/saved_models/logs-pretrained")
+vocoderPath=Config.INSERT_DIR+"lib/vocoder/saved_models/pretrained/pretrained.pt"
+
+insert_object=Insert(encoderModelPath=encoderPath,synthesizerModelPath=synthesizerPath,vocoderModelPath=vocoderPath)
